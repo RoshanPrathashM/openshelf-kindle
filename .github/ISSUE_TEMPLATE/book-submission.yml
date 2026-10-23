@@ -1,0 +1,74 @@
+name: Suggest an open book
+description: Suggest an authoritative source that may legally be listed or redistributed by OpenShelf.
+title: "[Book submission]: "
+labels: ["book-review", "needs-rights-check"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggest a title or authoritative source. Do not attach copyrighted files. A moderator must review the source and rights basis before publication.
+  - type: input
+    id: title
+    attributes:
+      label: Exact book title and edition
+    validations:
+      required: true
+  - type: input
+    id: author
+    attributes:
+      label: Author or rightsholder
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Official or authorized source URL
+      description: Prefer the author, publisher, institutional repository, or recognized open collection.
+      placeholder: https://...
+    validations:
+      required: true
+  - type: dropdown
+    id: rights_basis
+    attributes:
+      label: Rights basis
+      options:
+        - I am the author/rightsholder
+        - I have written permission
+        - Open licence (provide exact URL below)
+        - Public domain (provide evidence below)
+        - Unsure — needs review
+    validations:
+      required: true
+  - type: input
+    id: licence
+    attributes:
+      label: Exact licence URL or permission evidence
+      placeholder: https://creativecommons.org/licenses/by/4.0/
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Primary language
+      options: [English, Tamil, Hindi, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Format shown by the source
+      options: [EPUB, Kindle/AZW3, PDF, HTML/web, Multiple formats, Unknown]
+    validations:
+      required: true
+  - type: textarea
+    id: quality
+    attributes:
+      label: Format and quality notes
+      description: Table of contents, OCR quality, diagrams, accessibility, edition details, known errors.
+  - type: checkboxes
+    id: declaration
+    attributes:
+      label: Confirmation
+      options:
+        - label: I believe these details are accurate and understand this is a suggestion, not automatic approval.
+          required: true
