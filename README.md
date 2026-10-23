@@ -56,6 +56,14 @@ Open `index.html` in a modern browser. No build step is required. Catalogue sear
 
 For GitHub Pages settings, see [DEPLOYMENT.md](DEPLOYMENT.md). Recommended settings: **Settings → Pages → Deploy from a branch → `main` → `/(root)`**.
 
+
+### Search indexing and SEO
+
+- The root page has a canonical URL, title/description metadata, social-preview metadata and `WebSite` structured data.
+- The 20 featured classic-book guides have stable URLs, source-linked cover images, unique descriptions, canonical URLs and `Book`/breadcrumb structured data. The sitemap lists the home page, collection indexes and guide pages.
+- After deployment, add the GitHub Pages URL-prefix property in [Google Search Console](https://search.google.com/search-console/about), complete the verification method it gives you, then submit `https://roshanprathashm.github.io/openshelf-kindle/sitemap.xml`. Add the same site to [Bing Webmaster Tools](https://www.bing.com/webmasters/) if desired.
+- A sitemap improves discovery but cannot guarantee indexing, immediate ranking or a particular search position. Review Search Console coverage and API health as the catalogue grows.
+
 ## Privacy and copyright
 
 Read [PRIVACY.md](PRIVACY.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [RIGHTS_POLICY.md](RIGHTS_POLICY.md). The current version links out to source sites; it does not accept public uploads or host visitor-submitted book files. The MIT licence in [LICENSE](LICENSE) applies to OpenShelf software only and grants no rights in third-party books, images, or metadata.
