@@ -1,7 +1,6 @@
 name: Suggest an open book
 description: Suggest an authoritative source that may legally be listed or redistributed by OpenShelf.
 title: "[Book submission]: "
-labels: ["book-review", "needs-rights-check"]
 body:
   - type: markdown
     attributes:
