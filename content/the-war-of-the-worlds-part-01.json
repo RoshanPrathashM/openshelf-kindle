@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "title": "The War of the Worlds",
+  "author": "H. G. Wells",
+  "slug": "the-war-of-the-worlds",
+  "language": "en",
+  "year": 1898,
+  "text_license": "Underlying novel is public domain in India (H. G. Wells died in 1946; Indian literary copyright generally life plus 60 years). Standard Ebooks source contributions are dedicated via CC0 1.0; verify source licence for provenance.",
+  "provenance": {
+    "source_repository": "https://github.com/standardebooks/h-g-wells_the-war-of-the-worlds",
+    "source_license": "https://github.com/standardebooks/h-g-wells_the-war-of-the-worlds/blob/master/LICENSE.md",
+    "license_excerpt": "The source text and artwork in this ebook are believed to be in the United States public domain; that is, they are believed to be free of copyright restrictions in the United States. They may still be copyrighted in other countries, so users located outside of the United States must check their local laws before using this ebook. The creators of, and contributors to, this ebook dedicate their contributions to the worldwide public domain via the terms in the [CC0 1.0 Universal Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/).\n",
+    "checked_on": "2026-10-23",
+    "part": "1 of 2"
+  },
+  "chapters": []
+}
