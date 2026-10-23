@@ -12,6 +12,109 @@
 @media(max-width:980px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.controls{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr 0.8fr}}
 @media(max-width:740px){.hero{grid-template-columns:1fr;padding-top:32px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.roadmap{grid-template-columns:1fr}.modalbody{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}.readeraside{border-left:0;border-top:1px solid var(--line);max-height:250px}.modalbox{height:98vh}}
 @media(max-width:530px){.wrap{padding:0 14px}.nav{align-items:flex-start;flex-direction:column}.navlinks{gap:12px}.grid,.twocol,.footgrid,.row{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.book{min-height:0}.hero-card{padding:20px}.cover{height:80px;width:57px;flex-basis:57px}.modal{padding:0}.modalbox{height:100vh;border-radius:0}.result{flex-direction:column}}
+
+/* v0.3 Kindle-inspired reading workspace */
+body{background:#f8f7f3;color:#222c27}
+header.wrap{position:fixed;z-index:50;left:0;top:0;bottom:0;width:232px;max-width:none;margin:0;padding:22px 15px;background:#153d33;color:#fff;overflow-y:auto;border-right:1px solid #31554a}
+header.wrap .nav{height:100%;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:31px;padding:0;border:0}
+header.wrap .brand{color:#fff;font-size:1.35rem;padding:2px 8px}
+header.wrap .mark{background:#e1f0c4;color:#1a4d3d}
+header.wrap .navlinks{display:flex;flex-direction:column;gap:5px}
+header.wrap .navlinks a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;color:#d9e7df;font-size:.92rem;font-weight:780}
+header.wrap .navlinks a::before{width:20px;display:inline-grid;place-items:center;font-size:1.05rem}
+header.wrap .navlinks a:nth-child(1)::before{content:"▦"}
+header.wrap .navlinks a:nth-child(2)::before{content:"✎"}
+header.wrap .navlinks a:nth-child(3)::before{content:"文"}
+header.wrap .navlinks a:nth-child(4)::before{content:"▤"}
+header.wrap .navlinks a:nth-child(5)::before{content:"↗"}
+header.wrap .navlinks a:nth-child(6)::before{content:"⌘"}
+header.wrap .navlinks a:hover,header.wrap .navlinks a:focus-visible{background:#ffffff18;color:white}
+main.wrap{margin:0 0 0 232px;max-width:1600px;padding:0 clamp(18px,3vw,44px)}
+footer.footer{margin-left:232px}
+footer.footer .wrap{max-width:none;padding:0 clamp(18px,3vw,44px)}
+.hero{padding:35px 0 21px;grid-template-columns:1.3fr .7fr;gap:20px}
+.hero h1{font-size:clamp(2.25rem,4.1vw,3.8rem);line-height:1.02;letter-spacing:-.065em;margin:8px 0 12px}
+.hero .lead{font-size:1rem;max-width:660px}
+.hero .actions{margin:15px 0}
+.hero-card{background:#ece8de;color:#263b32;border:1px solid #e3ded2;box-shadow:none;padding:21px}
+.hero-card strong{font-size:1.7rem}
+.hero-card p,.hero-card li{color:#5d6b62;font-size:.91rem}
+.hero-card ul{margin-bottom:0}
+.hero .pills{margin:10px 0 0}
+.section{padding:25px 0 32px}
+.head{margin-bottom:13px}
+.head h2{font-size:clamp(1.55rem,2.5vw,2rem)}
+#library .head{align-items:center}
+#library .head>div{max-width:740px}
+#api-badge{white-space:nowrap;background:#e7eee6;color:#235c48}
+.controls{background:#eeece5;border:1px solid #e5e1d8;padding:9px;margin:15px 0 8px;grid-template-columns:minmax(180px,1.5fr) minmax(120px,.65fr) minmax(130px,.7fr) auto}
+.field{border-color:#d9d6cb;background:#fff}
+.result{margin-bottom:12px}
+.grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:15px}
+.book{position:relative;min-width:0;min-height:0;padding:11px;background:#fff;border-color:#e5e1d8;border-radius:12px;box-shadow:0 4px 15px #2c302610;transition:transform .16s ease,box-shadow .16s ease;cursor:pointer}
+.book:hover{transform:translateY(-3px);box-shadow:0 10px 28px #2c30261d}
+.book .booktop{min-height:0;margin-bottom:10px;align-items:flex-start}
+.book .tag{font-size:.64rem}
+.book .status{font-size:.62rem}
+.book .cover{display:block;width:100%;height:auto;max-height:none;aspect-ratio:0.69;object-fit:cover;flex:initial;border-radius:4px;box-shadow:0 6px 10px #172c2625;background:#ddd}
+.coverart{display:flex;position:relative;align-items:stretch;justify-content:space-between;flex-direction:column;width:100%;aspect-ratio:.69;min-height:145px;padding:13px 11px;border-radius:4px;color:#fff;overflow:hidden;box-shadow:0 6px 10px #172c2625;background:linear-gradient(145deg,#274f48,#152c2e)}
+.coverart::before{content:"";position:absolute;width:150%;height:70%;left:-25%;bottom:-36%;border:1px solid #ffffff30;border-radius:50%;transform:rotate(-18deg);box-shadow:0 0 0 12px #ffffff0c,0 0 0 25px #ffffff0a}
+.coverart .cover-kicker{position:relative;z-index:1;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;font-weight:850;opacity:.84}
+.coverart .cover-title{position:relative;z-index:1;font-family:Georgia,"Times New Roman",serif;font-weight:700;line-height:1.08;font-size:clamp(.95rem,1.2vw,1.2rem);overflow-wrap:anywhere}
+.coverart .cover-author{position:relative;z-index:1;font-size:.66rem;line-height:1.2;opacity:.9}
+.book h3{font-size:.94rem;line-height:1.23;margin:0 0 4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.32em}
+.book .author{font-size:.76rem;margin:0 0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.book .desc{font-size:.78rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 8px;min-height:2.2em}
+.book .meta{font-size:.7rem;line-height:1.35;padding-top:7px}
+.book .linkrow{margin-top:9px;gap:6px}
+.book .linkrow .small{padding:6px 8px;font-size:.75rem}
+.book .linkrow .small.primary{flex:1}
+.book:not(.shelf-card) .booktop{display:block}
+.book:not(.shelf-card) .booktop .tag{display:inline-block;margin-bottom:7px}
+#book-grid .book .booktop .cover{margin:0 auto 10px}
+.notice{font-size:.86rem}
+.drawer-overlay{position:fixed;inset:0;background:#17241e50;z-index:900;display:none;justify-content:flex-end}
+.drawer-overlay.open{display:flex}
+.book-drawer{width:min(455px,94vw);height:100%;background:#faf9f5;border-left:1px solid #d6d2c6;box-shadow:-18px 0 60px #0002;overflow-y:auto;padding:0 20px 26px;animation:drawer-in .18s ease-out}
+@keyframes drawer-in{from{transform:translateX(24px);opacity:.65}to{transform:translateX(0);opacity:1}}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 0;border-bottom:1px solid #e7e2d8;position:sticky;top:0;background:#faf9f5;z-index:3}
+.drawer-head strong{font-size:1rem}
+.drawer-close{border:1px solid #ddd6c7;border-radius:9px;background:#fff;padding:7px 10px;color:#30453b;font-weight:800}
+.drawer-book-top{display:grid;grid-template-columns:115px 1fr;gap:17px;padding:22px 0 14px}
+.drawer-cover{width:115px;aspect-ratio:.69;object-fit:cover;border-radius:5px;box-shadow:0 8px 18px #172c2630}
+.drawer-cover-fallback{width:115px;min-height:160px;font-size:1.15rem}
+.drawer-title{font-size:1.35rem;line-height:1.15;letter-spacing:-.04em;margin:4px 0 7px}
+.drawer-author{color:#667469;font-size:.88rem;margin:0 0 10px}
+.drawer-meta{color:#657269;font-size:.76rem;line-height:1.5}
+.drawer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:13px 0 19px}
+.drawer-actions .btn{width:100%;padding:10px 8px;border-radius:9px;font-size:.84rem}
+.drawer-actions .btn.alt{border-color:#d7ded4}
+.drawer-section{border-top:1px solid #e6e2d9;padding:16px 0}
+.drawer-section h3{font-size:1rem;margin:0 0 8px}
+.drawer-section p{font-size:.88rem;color:#56655b;margin:4px 0}
+.formatlist{display:flex;gap:7px;flex-wrap:wrap}
+.format-pill{border:1px solid #d8ded7;border-radius:8px;background:#fff;color:#205b47;font-size:.79rem;font-weight:800;padding:8px 10px;text-decoration:none}
+.format-pill:hover{background:#e4f1e8}
+.tool-tile{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e1ddd3;border-radius:10px;padding:11px;width:100%;text-align:left;margin:7px 0;color:#283b32}
+.tool-tile strong{display:block;font-size:.88rem}
+.tool-tile span{display:block;color:#66746c;font-size:.76rem}
+.tool-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:#e7f1e8;color:#185c46;font-weight:900;flex:0 0 34px}
+.modal{z-index:1200}
+.modalbox{background:#f6f4ee}
+.modalhead{background:#173e33;flex-wrap:wrap}
+.modalhead .reader-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.modalhead .reader-toolbar button{border:1px solid #ffffff40;background:#ffffff15;color:#fff;border-radius:8px;padding:7px 9px;font-weight:750;font-size:.8rem}
+.modalbody{grid-template-columns:minmax(0,1fr) 295px}
+.readeraside{background:#f9f8f3;border-left:1px solid #dedacf;padding:16px}
+.readeraside h4{font-size:1rem}
+.reader-tools{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0}
+.reader-tools button{background:#fff;border:1px solid #d8ddd4;border-radius:9px;padding:8px 6px;color:#255745;font-size:.79rem;font-weight:800}
+.reader-tip{background:#eeece3;border-radius:9px;padding:10px;font-size:.77rem;color:#657168}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:980px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{grid-template-columns:1fr .8fr}.controls{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){header.wrap{position:sticky;top:0;bottom:auto;width:100%;padding:10px 14px;height:auto;overflow:visible;border-right:0;border-bottom:1px solid #31554a}header.wrap .nav{height:auto;flex-direction:row;align-items:center;justify-content:space-between;gap:12px}header.wrap .brand{font-size:1.1rem}header.wrap .mark{width:34px;height:34px}header.wrap .navlinks{flex-direction:row;gap:4px;overflow-x:auto;padding-bottom:2px}header.wrap .navlinks a{padding:8px 9px;font-size:.79rem;white-space:nowrap}header.wrap .navlinks a::before{display:none}main.wrap{margin-left:0;padding:0 20px}footer.footer{margin-left:0}.hero{grid-template-columns:1fr;padding-top:25px}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.roadmap{grid-template-columns:1fr}.modalbody{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}.readeraside{border-left:0;border-top:1px solid var(--line);max-height:270px}}
+@media(max-width:580px){main.wrap{padding:0 13px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.book{padding:9px}.coverart{min-height:130px;padding:10px}.book .linkrow .small{padding:6px 6px;font-size:.7rem}.controls{grid-template-columns:1fr}.drawer-book-top{grid-template-columns:96px 1fr}.drawer-cover,.drawer-cover-fallback{width:96px;min-height:135px}.drawer-title{font-size:1.1rem}.book-drawer{padding:0 15px 20px}.modal{padding:0}.modalbox{height:100vh;border-radius:0}.modalbody{grid-template-rows:minmax(0,1fr) auto}.result{flex-direction:column}.hero-card{padding:17px}.hero-card strong{font-size:1.45rem}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -27,10 +130,10 @@
 <p class="lead">Discover thousands of public-domain titles, open supported books inside OpenShelf, keep private reading notes, translate excerpts, and inspect an EPUB file on your own device.</p>
 <div class="actions"><a class="btn" href="#library">Explore books ↓</a><a class="btn alt" href="#studio">Check an EPUB</a></div>
 <div class="pills"><span class="pill">No account required</span><span class="pill">Local notes</span><span class="pill">English + more languages</span><span class="pill">Kindle 10th Gen guidance</span></div>
-</div><aside class="hero-card"><strong>A library should help you read—not just send you elsewhere.</strong><p>Use the integrated catalogue for supported public-domain books. A source link remains available when the source needs to handle the book itself.</p><ul><li>In-page reading panel where supported</li><li>Private notes saved in this browser</li><li>Local EPUB inspection, never uploaded to our server</li></ul></aside></section>
+</div><aside class="hero-card"><strong>Your personal reading shelf.</strong><p>Use the integrated catalogue for supported public-domain books. A source link remains available when the source needs to handle the book itself.</p><ul><li>In-page reading panel where supported</li><li>Private notes saved in this browser</li><li>Local EPUB inspection, never uploaded to our server</li></ul></aside></section>
 
 <section id="library" class="section"><div class="head"><div><div class="eyebrow">Live catalogue</div><h2>Find your next book</h2><p>Search the Project Gutenberg catalogue through Gutendex. Results are loaded live and open in an OpenShelf reading panel when an HTML edition is available.</p></div><span class="countpill" id="api-badge">Live catalogue</span></div>
-<div class="controls"><input id="search" class="field" type="search" placeholder="Search title, author, or topic…" aria-label="Search books"><select id="language" class="field" aria-label="Filter by language"><option value="">Any language</option><option value="en" selected>English</option><option value="ta">Tamil</option><option value="hi">Hindi</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="nl">Dutch</option><option value="el">Greek</option></select><select id="sort" class="field" aria-label="Sort books"><option value="popular">Most downloaded</option><option value="title">Title A–Z (this page)</option><option value="author">Author A–Z (this page)</option></select><button id="searchbtn" class="btn" type="button">Search</button></div>
+<div class="controls"><input id="search" class="field" type="search" placeholder="Search title, author, or topic…" aria-label="Search books"><select id="language" class="field" aria-label="Filter by language"><option value="" selected>Any language</option><option value="en">English</option><option value="ta">Tamil</option><option value="hi">Hindi</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="nl">Dutch</option><option value="el">Greek</option></select><select id="sort" class="field" aria-label="Sort books"><option value="popular">Most downloaded</option><option value="title">Title A–Z (this page)</option><option value="author">Author A–Z (this page)</option></select><button id="searchbtn" class="btn" type="button">Search</button></div>
 <div class="result"><span id="resultcount" aria-live="polite">Loading books…</span><span>Only source-supported editions appear as readable here.</span></div><div class="progress" id="loadprogress"><span></span></div>
 <div id="book-grid" class="grid" aria-live="polite"></div><p id="catalog-empty" class="empty hide">No books matched this search. Try a broader query or another language.</p>
 <div class="toolbar"><button id="prevpage" class="btn alt" disabled type="button">← Previous</button><button id="nextpage" class="btn alt" type="button">Next 32 books →</button></div>
