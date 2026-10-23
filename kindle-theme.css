@@ -1,0 +1,41 @@
+/* OpenShelf Kindle-style presentation layer. Loaded by the deployment workflow. */
+:root{--os-green:#0f3d32;--os-green2:#174f40;--os-paper:#f7f5ef;--os-ink:#252a27;--os-muted:#68736d;--os-line:#dddcd4;--os-card:#fffdf8;--os-accent:#d8e8c1}
+body{background:var(--os-paper)!important;color:var(--os-ink)!important;font-family:Georgia,"Times New Roman",serif!important}
+header.wrap{background:var(--os-green)!important;border-right:1px solid #31574c!important;box-shadow:8px 0 28px #102e2418!important}
+header.wrap .brand{font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
+header.wrap .navlinks a{font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;border-radius:9px!important}
+header.wrap .navlinks a:hover{background:#ffffff14!important}
+main.wrap{max-width:none!important;margin-left:232px!important;padding-left:clamp(26px,4vw,64px)!important;padding-right:clamp(26px,5vw,76px)!important}
+.hero{min-height:330px!important;padding:65px 0 42px!important;grid-template-columns:minmax(0,1fr) 310px!important}
+.hero h1{font-family:Georgia,"Times New Roman",serif!important;font-weight:500!important;letter-spacing:-.055em!important}
+.hero .lead{font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
+.hero-card{background:#e9eee5!important;color:var(--os-ink)!important;border:1px solid var(--os-line)!important;box-shadow:none!important;border-radius:12px!important}
+.hero-card p,.hero-card li{color:#59665f!important}
+.section{padding:38px 0 44px!important}
+.head h2{font-weight:500!important;font-family:Georgia,"Times New Roman",serif!important}
+.controls{background:#eceae2!important;border:1px solid var(--os-line)!important;border-radius:10px!important;padding:9px!important}
+.field{background:#fffefa!important;border-color:#cbc9c0!important;border-radius:7px!important}
+.grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:22px!important}
+.book{border:0!important;border-radius:4px!important;background:transparent!important;box-shadow:none!important;padding:8px!important;min-height:350px!important;transition:transform .16s ease,background .16s ease!important}
+.book:hover{transform:translateY(-3px)!important;background:#ffffff88!important}
+.cover{width:126px!important;height:184px!important;flex-basis:126px!important;border-radius:2px!important;box-shadow:0 5px 14px #1d292320!important;margin:auto!important;display:block!important}
+.booktop{display:block!important;margin-bottom:12px!important}
+.booktop .tag,.booktop .status{display:inline-block!important;margin-top:10px!important}
+.book h3{font-size:1.02rem!important;font-weight:600!important;margin-top:8px!important}
+.author,.meta,.desc{font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
+.desc{color:#5d655f!important;display:-webkit-box!important;-webkit-line-clamp:3!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
+.linkrow{font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
+.small{border-color:#b8bbb3!important;background:#fffefa!important;border-radius:6px!important}
+.small.primary{background:var(--os-green)!important;border-color:var(--os-green)!important}
+/* Hide utility sections until the user opens the Tools drawer. */
+.os-tool-hidden{display:none!important}
+.os-tools-button{position:fixed;right:22px;bottom:22px;z-index:80;border:1px solid #31584d;border-radius:999px;background:var(--os-green);color:#fff;padding:12px 17px;font:800 14px system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 8px 26px #173d322e;cursor:pointer}
+.os-tools-panel{position:fixed;right:20px;bottom:76px;z-index:81;width:min(330px,calc(100vw - 40px));background:#fffefa;border:1px solid var(--os-line);border-radius:13px;padding:15px;box-shadow:0 18px 55px #172c2630;display:none;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.os-tools-panel.open{display:block}
+.os-tools-panel h3{margin:0 0 10px;font-size:1rem}
+.os-tools-panel button{display:block;width:100%;text-align:left;border:1px solid var(--os-line);background:#f6f4ed;border-radius:8px;padding:10px;margin:7px 0;font-weight:750;color:var(--os-ink)}
+.os-tools-panel button:hover{background:#e9eee5}
+.os-tools-panel .os-close{background:var(--os-green);color:#fff}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media(max-width:850px){header.wrap{width:76px!important;padding:18px 8px!important}header.wrap .brand{font-size:0;justify-content:center}header.wrap .brand .mark{font-size:1rem}header.wrap .navlinks a{font-size:0;justify-content:center;padding:12px 5px}header.wrap .navlinks a::before{font-size:1.05rem}main.wrap{margin-left:76px!important;padding-left:20px!important;padding-right:20px!important}.hero{grid-template-columns:1fr!important}.grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:600px){main.wrap{margin-left:0!important;padding-left:14px!important;padding-right:14px!important}header.wrap{position:sticky!important;top:0!important;bottom:auto!important;width:100%!important;height:auto!important;padding:8px 12px!important}header.wrap .nav{height:auto!important;flex-direction:row!important;align-items:center!important;gap:10px!important}header.wrap .navlinks{flex-direction:row!important;overflow:auto!important}header.wrap .navlinks a{font-size:.78rem!important;white-space:nowrap!important;padding:8px!important}header.wrap .navlinks a::before{display:none!important}.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.cover{width:105px!important;height:155px!important;flex-basis:105px!important}.os-tools-button{right:14px;bottom:14px}}
