@@ -1,7 +1,6 @@
 name: Rights or takedown request
 description: Report a potentially incorrect or infringing OpenShelf catalogue entry.
 title: "[Rights review]: "
-labels: ["rights-review"]
 body:
   - type: markdown
     attributes:
