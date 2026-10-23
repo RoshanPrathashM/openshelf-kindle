@@ -10,7 +10,7 @@ OpenShelf is an open-source prototype. This initial release links to original so
 - Search by title, author, subject, or language; filter by category and format guidance.
 - Starter references for classics, STEM textbooks, Tamil texts, and discovery catalogues.
 - Step-by-step Send to Kindle and USB transfer guidance.
-- GitHub Pages deployment workflow.
+- Simple branch-based GitHub Pages publishing (no GitHub Actions workflow required).
 - Book recommendation and rights/takedown issue forms.
 - No claim of a full Kindle Unlimited replacement or automatic Kindle delivery.
 
@@ -20,14 +20,7 @@ Open `index.html` in a modern browser. No installation is needed. Test the searc
 
 ## Publish with GitHub Pages
 
-1. In this repository, open **Settings → Pages**.
-2. Set the build and deployment source to **GitHub Actions**.
-3. Ensure the workflow file `.github/workflows/pages.yml` is present on the `main` branch.
-4. Open the **Actions** tab and inspect the **Deploy OpenShelf to GitHub Pages** run.
-5. After it succeeds, GitHub Pages will show the published URL. It normally resembles `https://RoshanPrathashM.github.io/openshelf-kindle/`.
-6. Test on laptop and phone first, then on the Kindle 10th Generation browser. Older e-reader browsers may not support every modern layout feature; a laptop is often easier for downloading and sending books.
-
-GitHub Pages is static hosting. It cannot process uploads or provide a secure backend for user submissions. If the branch name differs from `main`, update the workflow trigger.
+Open [DEPLOYMENT.md](DEPLOYMENT.md) and follow the **Deploy from a branch** steps. This is the simplest publishing route for this plain HTML website; the project does not need a custom workflow to build or deploy.
 
 ## Contributing a book/source
 
