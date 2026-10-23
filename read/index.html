@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Read The Time Machine by H. G. Wells inside OpenShelf, with a calm ebook reader, chapter navigation, typography controls, progress and private notes.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://roshanprathashm.github.io/openshelf-kindle/read/">
+<meta name="theme-color" content="#f5f2e9">
+<title>OpenShelf Reader — Read in your library</title>
+<style>
+:root{--bg:#f5f2e9;--paper:#fffdf8;--ink:#272b27;--muted:#6f746b;--line:#e4dfd3;--green:#244f40;--green2:#17382f;--accent:#d5e6c8;--shadow:0 12px 35px #20291e10}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button,a,select{cursor:pointer}a{color:var(--green);text-underline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #c78e35;outline-offset:2px}.topbar{height:68px;position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 clamp(14px,3vw,34px)}.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:950;letter-spacing:-.04em}.brandmark{width:34px;height:34px;background:var(--green);color:#fff;border-radius:10px;display:grid;place-items:center}.topmeta{min-width:0;display:flex;flex-direction:column;line-height:1.25}.topmeta strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.94rem}.topmeta span{color:var(--muted);font-size:.76rem}.topactions{display:flex;gap:7px;align-items:center;flex-shrink:0}.iconbtn{min-width:39px;height:39px;padding:0 11px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);font-weight:850}.iconbtn.active{background:var(--green);color:#fff;border-color:var(--green)}.layout{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);min-height:calc(100vh - 68px)}.rail{padding:24px 14px;border-right:1px solid var(--line);background:#eeeadf}.railhead{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;font-weight:900;color:var(--muted);padding:8px 10px}.toclist{display:flex;flex-direction:column;gap:4px}.tocitem{display:flex;text-align:left;gap:10px;align-items:center;width:100%;padding:10px;border:0;border-radius:10px;background:transparent;color:#4e554d;font-size:.87rem;font-weight:750}.tocitem:hover{background:#fff8}.tocitem.selected{background:#fffdf8;color:var(--green);box-shadow:0 1px 4px #20291e0a}.tocnum{flex:0 0 27px;height:27px;border-radius:8px;display:grid;place-items:center;background:#e1ddcf;font-size:.72rem}.tocitem.selected .tocnum{background:var(--accent)}.railfoot{position:sticky;top:80vh;margin-top:28px;padding:13px 10px;color:var(--muted);font-size:.75rem;border-top:1px solid #dad4c5}.contentarea{min-width:0;padding:clamp(22px,4vw,52px) clamp(18px,5vw,76px) 80px}.bookintro{max-width:760px;margin:0 auto 28px;border-bottom:1px solid var(--line);padding:0 0 22px}.eyebrow{text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-size:.7rem;font-weight:900}.bookintro h1{font:600 clamp(2rem,4vw,3.5rem)/1.06 Georgia,"Times New Roman",serif;letter-spacing:-.04em;margin:10px 0}.bookintro p{color:var(--muted);margin:8px 0 0}.bookstatus{display:inline-flex;align-items:center;gap:7px;border:1px solid #d1dfc7;background:#e8f0df;border-radius:999px;padding:5px 10px;color:#36543a;font-size:.72rem;font-weight:850;margin-top:12px}.reading{max-width:760px;margin:auto;font-family:Georgia,"Times New Roman",serif;font-size:21px;line-height:1.85;letter-spacing:.006em;overflow-wrap:anywhere}.reading h1,.reading h2,.reading h3{font-weight:500;line-height:1.25;margin:0 0 1.3em;text-align:center}.reading h1{font-size:1.45em}.reading h2{font-size:1.25em;margin-top:2em}.reading h3{font-size:1.08em;margin-top:2em}.reading p{margin:0 0 1.15em;text-indent:1.3em}.reading h1+p,.reading h2+p,.reading h3+p,.reading p.noindent,.reading blockquote p{ text-indent:0}.reading blockquote{margin:1.3em 1.4em;color:var(--muted);font-style:italic}.reading hr{border:0;border-top:1px solid var(--line);margin:3em auto;width:35%}.reading a{color:inherit}.readerfooter{display:flex;justify-content:space-between;align-items:center;gap:10px;max-width:760px;margin:34px auto 0;padding-top:18px;border-top:1px solid var(--line)}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--green);border-radius:12px;background:var(--green);color:#fff;padding:10px 15px;text-decoration:none;font-weight:850;font-size:.87rem}.btn.alt{background:transparent;color:var(--green)}.btn:disabled{opacity:.35;cursor:not-allowed}.status{font-size:.78rem;color:var(--muted);text-align:center;flex:1}.pop{position:fixed;z-index:30;top:78px;right:clamp(10px,3vw,32px);width:min(360px,calc(100vw - 20px));background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:18px;box-shadow:0 22px 70px #10190f2a;display:none}.pop.open{display:block}.pop h2{font-size:1rem;margin:0 0 13px}.pop label{font-size:.83rem;display:block;font-weight:800;margin:12px 0 5px}.pop input[type=range],.pop select,.pop input[type=search],.pop textarea{width:100%}.pop select,.pop input[type=search],.pop textarea{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:9px;color:var(--ink)}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.noteentry{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.notelist{max-height:220px;overflow:auto}.noteitem{padding:10px;border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--bg);font-size:.82rem;white-space:pre-wrap}.empty{color:var(--muted);font-size:.82rem}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:50;background:var(--green2);color:#fff;border-radius:999px;padding:10px 16px;font-size:.82rem;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s}.toast.show{opacity:1}.loading{padding:35px;text-align:center;border:1px dashed var(--line);border-radius:15px;color:var(--muted)}body.theme-dark{--bg:#1c211e;--paper:#242b26;--ink:#e8e6db;--muted:#afb5aa;--line:#3d473f;--green:#a9d4b4;--green2:#17382f;--accent:#304d3b}body.theme-dark .rail{background:#202722}body.theme-dark .tocitem{color:#c8cec5}body.theme-dark .tocitem.selected{background:#2d3730;color:#e0f0e1}body.theme-sepia{--bg:#f0e3ca;--paper:#f8edd9;--ink:#4c382a;--muted:#846d55;--line:#dfcdb0;--green:#5a6540;--green2:#34422d;--accent:#dedeb9}body.theme-sepia .rail{background:#e8dac0}body.font-sans .reading{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}body.font-book .reading{font-family:Georgia,"Times New Roman",serif}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.rail{display:none}.contentarea{padding:25px 18px 65px}.topbar{height:60px}.topmeta span{display:none}.reading{font-size:20px}.topactions .labelbtn{display:none}.bookintro h1{font-size:2.25rem}.readerfooter{flex-wrap:wrap}.status{flex-basis:100%;order:3}.pop{top:68px}.layout{min-height:calc(100vh - 60px)}}
+@media(max-width:420px){.topbar{padding:0 10px;gap:7px}.brand{gap:6px}.brandmark{width:30px;height:30px}.topmeta strong{max-width:110px;font-size:.82rem}.iconbtn{min-width:34px;height:35px;padding:0 8px}.reading{font-size:19px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+<a class="brand" href="../index.html" aria-label="Back to OpenShelf library"><span class="brandmark">O</span></a>
+<div class="topmeta"><strong id="top-title">OpenShelf Reader</strong><span id="top-author">Your personal reading space</span></div>
+<div class="topactions">
+<button id="toc-toggle" class="iconbtn" type="button" aria-label="Table of contents" title="Contents">☷</button>
+<button id="settings-toggle" class="iconbtn" type="button" aria-label="Reading appearance" title="Text settings">Aa</button>
+<button id="notes-toggle" class="iconbtn" type="button" aria-label="Notes and highlights" title="Notes">✎</button>
+<button id="download-toggle" class="iconbtn" type="button" aria-label="Export readable text" title="Export text">↓</button>
+<a href="../index.html" class="iconbtn" style="display:inline-grid;place-items:center;text-decoration:none" aria-label="Back to library">⌂</a>
+</div>
+</header>
+<div class="layout">
+<aside class="rail" id="toc-rail">
+<div class="railhead">In this book</div><div id="toc-list" class="toclist"><p class="empty">Loading contents…</p></div>
+<div class="railfoot">Your reading progress and notes are stored in this browser only.</div>
+</aside>
+<main class="contentarea">
+<header class="bookintro"><div class="eyebrow">OpenShelf · Local reader</div><h1 id="book-title">Loading your book…</h1><p id="book-byline"></p><span id="book-status" class="bookstatus">Preparing the reading edition</span></header>
+<article id="reading" class="reading"><div class="loading">Loading the local text…</div></article>
+<div class="readerfooter"><button class="btn alt" id="prev" type="button" disabled>← Previous</button><div class="status" id="progress-label">Ready to read</div><button class="btn" id="next" type="button" disabled>Next →</button></div>
+</main>
+</div>
+
+<section class="pop" id="settings-pop" aria-label="Reading settings">
+<h2>Reading appearance</h2>
+<label for="font-size">Text size <output id="font-size-label">21 px</output></label><input id="font-size" type="range" min="16" max="32" step="1" value="21">
+<label for="line-height">Line spacing <output id="line-height-label">1.85</output></label><input id="line-height" type="range" min="14" max="24" step="1" value="18.5">
+<div class="row"><div><label for="font-family">Typeface</label><select id="font-family"><option value="book">Book serif</option><option value="sans">Sans serif</option></select></div><div><label for="theme">Page colour</label><select id="theme"><option value="paper">Warm paper</option><option value="sepia">Sepia</option><option value="dark">Dark</option></select></div></div>
+<p class="empty">Changes apply instantly and are remembered on this device.</p>
+</section>
+
+<section class="pop" id="notes-pop" aria-label="Notes and highlights">
+<h2>Notes & highlights</h2>
+<label for="note-input">Add a private note</label><textarea id="note-input" rows="3" placeholder="What do you want to remember?"></textarea>
+<div class="row" style="margin-top:8px"><button class="btn" id="save-note" type="button">Save note</button><button class="btn alt" id="save-highlight" type="button">Save selected text</button></div>
+<div class="notelist" id="notes-list"></div>
+<p class="empty">Notes stay in this browser. Export or keep a backup before clearing browser data.</p>
+</section>
+
+<section class="pop" id="toc-pop" aria-label="Table of contents">
+<h2>Table of contents</h2><div id="toc-list-small" class="toclist"></div>
+</section>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var params=new URLSearchParams(location.search),slug=params.get("book")||"the-time-machine";
+var books={"the-time-machine":{path:"../content/the-time-machine.json",title:"The Time Machine",author:"H. G. Wells",year:"1895",source:"https://github.com/standardebooks/h-g-wells_the-time-machine",license:"CC0 1.0 for Standard Ebooks contributions; underlying literary text is public domain in India, subject to local rights review."}};
+var book=books[slug]||null,chapters=[],chapterIndex=0;
+var settingsKey="openshelf.reader.settings.v1",progressKey="openshelf.reader.progress.v1",notesKey="openshelf.reader.notes.v1";
+function getStore(key,fallback){try{var x=localStorage.getItem(key);return x?JSON.parse(x):fallback;}catch(e){return fallback;}}
+function setStore(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(e){return false;}}
+function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function toast(message){$("toast").textContent=message;$("toast").classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(function(){$("toast").classList.remove("show");},2400);}
+function togglePop(id){var el=$(id),willOpen=!el.classList.contains("open");document.querySelectorAll(".pop").forEach(function(p){p.classList.remove("open");});el.classList.toggle("open",willOpen);document.querySelectorAll(".topactions .iconbtn").forEach(function(b){b.classList.remove("active");});if(willOpen){var map={"settings-pop":"settings-toggle","notes-pop":"notes-toggle","toc-pop":"toc-toggle"};$((map[id]||"")).classList.add("active");}}
+function applySettings(){var st=getStore(settingsKey,{});document.body.classList.remove("theme-paper","theme-sepia","theme-dark","font-book","font-sans");document.body.classList.add("theme-"+(st.theme||"paper"),"font-"+(st.font||"book"));$("reading").style.fontSize=(st.size||21)+"px";$("reading").style.lineHeight=(Number(st.spacing||18.5)/10).toFixed(2);$("font-size").value=st.size||21;$("font-size-label").textContent=(st.size||21)+" px";$("line-height").value=st.spacing||18.5;$("line-height-label").textContent=(Number(st.spacing||18.5)/10).toFixed(2);$("font-family").value=st.font||"book";$("theme").value=st.theme||"paper";}
+function saveSettings(){setStore(settingsKey,{size:Number($("font-size").value),spacing:Number($("line-height").value),font:$("font-family").value,theme:$("theme").value});applySettings();}
+function stripTags(text){var tmp=document.createElement("div");tmp.innerHTML=text||"";return (tmp.textContent||tmp.innerText||"").replace(/\s+/g," ").trim();}
+function renderToc(){var html="";chapters.forEach(function(ch,i){html+='<button type="button" class="tocitem '+(i===chapterIndex?"selected":"")+'" data-chapter="'+i+'"><span class="tocnum">'+(i+1)+'</span><span>'+escapeHtml(ch.title||("Chapter "+(i+1)))+'</span></button>';});$("toc-list").innerHTML=html;$("toc-list-small").innerHTML=html;document.querySelectorAll("[data-chapter]").forEach(function(button){button.addEventListener("click",function(){showChapter(Number(this.getAttribute("data-chapter")));togglePop("toc-pop");});});}
+function progressMap(){return getStore(progressKey,{});}
+function saveProgress(){if(!book)return;var map=progressMap();map[slug]={chapter:chapterIndex,scroll:window.scrollY,at:Date.now()};setStore(progressKey,map);}
+function renderChapter(){if(!chapters.length)return;$("reading").innerHTML=chapters[chapterIndex].html||"<p>Chapter text unavailable.</p>";chapterIndex=Math.max(0,Math.min(chapterIndex,chapters.length-1));renderToc();$("prev").disabled=chapterIndex===0;$("next").disabled=chapterIndex===chapters.length-1;$("progress-label").textContent="Chapter "+(chapterIndex+1)+" of "+chapters.length+" · "+Math.round((chapterIndex+1)/chapters.length*100)+"%";saveProgress();window.scrollTo({top:0,behavior:"smooth"});}
+function showChapter(i){chapterIndex=Math.max(0,Math.min(i,chapters.length-1));renderChapter();}
+function getNotes(){var all=getStore(notesKey,{});return all[slug]||[];}
+function saveNotes(items){var all=getStore(notesKey,{});all[slug]=items;setStore(notesKey,all);renderNotes();}
+function renderNotes(){var notes=getNotes();var html="";if(!notes.length)html='<p class="empty">No notes yet. Select some text or write a note above.</p>';notes.slice().reverse().forEach(function(n){html+='<div class="noteitem"><strong>'+escapeHtml(n.kind==="highlight"?"Selected text":"Note")+' · chapter '+(n.chapter+1)+'</strong><div>'+escapeHtml(n.text)+'</div>'+(n.kind==="note"&&n.body?'<div style="margin-top:6px">'+escapeHtml(n.body)+'</div>':"")+'</div>';});$("notes-list").innerHTML=html;}
+function saveNote(kind,text,body){if(!text.trim()){toast("Write a note or select some text first.");return;}var items=getNotes();items.push({kind:kind,text:text.slice(0,5000),body:body||"",chapter:chapterIndex,at:Date.now()});saveNotes(items);toast(kind==="highlight"?"Selection saved to highlights.":"Note saved on this device.");}
+function downloadText(){if(!chapters.length)return;var text=book.title+"\n"+book.author+"\n\n"+chapters.map(function(c){return (c.title||"")+"\n\n"+stripTags(c.html);}).join("\n\n\n");var blob=new Blob([text],{type:"text/plain;charset=utf-8"});var a=document.createElement("a"),u=URL.createObjectURL(blob);a.href=u;a.download=slug+".txt";a.click();setTimeout(function(){URL.revokeObjectURL(u);},1200);toast("Text copy downloaded.");}
+function updateScrollProgress(){if(!chapters.length)return;var total=document.documentElement.scrollHeight-window.innerHeight;var percent=total>0?Math.round(window.scrollY/total*100):100;$("progress-label").textContent="Chapter "+(chapterIndex+1)+" of "+chapters.length+" · page progress "+percent+"%";var map=progressMap();if(map[slug]){map[slug].scroll=window.scrollY;map[slug].chapter=chapterIndex;map[slug].at=Date.now();setStore(progressKey,map);}}
+$("settings-toggle").addEventListener("click",function(){togglePop("settings-pop");});
+$("notes-toggle").addEventListener("click",function(){togglePop("notes-pop");renderNotes();});
+$("toc-toggle").addEventListener("click",function(){togglePop("toc-pop");renderToc();});
+$("download-toggle").addEventListener("click",downloadText);
+$("prev").addEventListener("click",function(){if(chapterIndex>0)showChapter(chapterIndex-1);});
+$("next").addEventListener("click",function(){if(chapterIndex<chapters.length-1)showChapter(chapterIndex+1);});
+$("font-size").addEventListener("input",saveSettings);$("line-height").addEventListener("input",saveSettings);$("font-family").addEventListener("change",saveSettings);$("theme").addEventListener("change",saveSettings);
+$("save-note").addEventListener("click",function(){var t=$("note-input").value.trim();if(!t)return toast("Write a note first.");saveNote("note","Reader note",t);$("note-input").value="";});
+$("save-highlight").addEventListener("click",function(){var sel=window.getSelection?String(window.getSelection()).trim():"";saveNote("highlight",sel,"");});
+document.addEventListener("click",function(e){if(!e.target.closest(".pop")&&!e.target.closest(".topactions")){document.querySelectorAll(".pop").forEach(function(p){p.classList.remove("open");});document.querySelectorAll(".topactions .iconbtn").forEach(function(b){b.classList.remove("active");});}});
+window.addEventListener("scroll",function(){window.requestAnimationFrame(updateScrollProgress);},{passive:true});
+window.addEventListener("beforeunload",saveProgress);
+document.addEventListener("keydown",function(e){if(e.key==="Escape")document.querySelectorAll(".pop").forEach(function(p){p.classList.remove("open");});if(e.key==="ArrowRight"&&chapterIndex<chapters.length-1&&!/input|textarea|select/i.test(e.target.tagName))showChapter(chapterIndex+1);if(e.key==="ArrowLeft"&&chapterIndex>0&&!/input|textarea|select/i.test(e.target.tagName))showChapter(chapterIndex-1);});
+applySettings();
+if(!book){$("book-title").textContent="This book is not hosted in the local reader yet";$("book-byline").textContent="You can return to the catalogue and choose another locally readable title."; $("book-status").textContent="External-source reading is still available from the book details."; $("reading").innerHTML='<div class="loading"><p>OpenShelf is adding local reading editions in small, rights-checked batches.</p><p><a class="btn" href="../index.html">Back to library</a></p></div>';$("toc-list").innerHTML="";$("toc-list-small").innerHTML="";return;}
+$("top-title").textContent=book.title;$("top-author").textContent=book.author;$("book-title").textContent=book.title;$("book-byline").textContent=book.author+" · "+book.year;$("book-status").textContent="Local reading edition · "+book.license;
+fetch(book.path).then(function(res){if(!res.ok)throw new Error("Local book content could not be loaded ("+res.status+").");return res.json();}).then(function(data){chapters=data.chapters||[];if(!chapters.length)throw new Error("This book has no chapter text.");var progress=progressMap()[slug];chapterIndex=progress?Math.max(0,Math.min(progress.chapter||0,chapters.length-1)):0;renderToc();renderChapter();renderNotes();if(progress&&progress.scroll)setTimeout(function(){window.scrollTo(0,progress.scroll);},120);$("book-status").textContent=chapters.length+" chapters · local full text · saved on this device";}).catch(function(e){$("book-title").textContent="Could not load the reading edition";$("book-status").textContent="Please retry or use the source link";$("reading").innerHTML='<div class="loading">'+escapeHtml(e.message)+'<p><a class="btn" href="https://www.gutenberg.org/ebooks/35" target="_blank" rel="noopener noreferrer">Open source book page ↗</a></p><a href="../index.html">Back to OpenShelf</a></div>';});
+})();
+</script>
+</body>
+</html>
