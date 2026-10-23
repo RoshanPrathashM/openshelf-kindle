@@ -5,7 +5,7 @@ OpenShelf v0.4 is a static website and has no OpenShelf user accounts or server-
 ## What stays in your browser
 
 - Search/filter state is handled in the browser.
-- Notes and saved books are stored in your browser's local storage.
+- Notes, saved books and reading-history signals for local recommendations are stored in your browser's local storage. They are not uploaded to an OpenShelf account or synced between devices.
 - EPUB and text files selected in Book Studio are processed locally by JavaScript; this version does not upload these files to an OpenShelf server.
 - API keys entered in the translation form are not saved by OpenShelf to local storage. Avoid leaving them in the password field on a shared device.
 
