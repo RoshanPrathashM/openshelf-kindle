@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "purpose": "OpenShelf legal catalogue registry. Sources are discovery/read/download providers; OpenShelf must not assume that every record is public domain.",
+  "sources": [
+    {"id":"gutenberg","name":"Project Gutenberg","languages":["en","many"],"kind":"public-domain","rights":"public-domain-focused","api":"https://gutendex.com/","enabled":true},
+    {"id":"standardebooks","name":"Standard Ebooks","languages":["en"],"kind":"public-domain","rights":"public-domain source texts; verify edition assets","api":"https://standardebooks.org/","enabled":true},
+    {"id":"openstax","name":"OpenStax","languages":["en"],"kind":"open-textbook","rights":"openly licensed; verify individual work licence","api":"https://openstax.org/","enabled":true},
+    {"id":"open_textbook_library","name":"Open Textbook Library","languages":["en"],"kind":"open-textbook","rights":"openly licensed textbooks; verify individual licence","api":"https://open.umn.edu/opentextbooks/","enabled":true},
+    {"id":"doab","name":"Directory of Open Access Books","languages":["many"],"kind":"open-access","rights":"open-access scholarly books; verify individual licence","api":"https://www.doabooks.org/","enabled":true},
+    {"id":"openlibrary","name":"Open Library","languages":["many"],"kind":"catalogue","rights":"catalogue is not itself a blanket licence; only ingest legally accessible editions","api":"https://openlibrary.org/","enabled":true},
+    {"id":"project_madurai","name":"Project Madurai","languages":["ta"],"kind":"tamil-digital-library","rights":"use only texts and editions permitted by the project's stated terms","api":"https://www.projectmadurai.org/","enabled":true},
+    {"id":"tamil_virtual_academy","name":"Tamil Virtual Academy","languages":["ta"],"kind":"educational","rights":"verify rights for each work before mirroring or redistributing","api":"https://www.tamilvu.org/","enabled":true}
+  ],
+  "ingestion_policy": {
+    "allow": ["public-domain", "openly-licensed", "open-access-with-redistribution-rights", "author-authorized-free"],
+    "require_license_metadata": true,
+    "require_source_url": true,
+    "require_rights_evidence_for_mirroring": true,
+    "default_action_when_rights_are_unclear": "link-only",
+    "never_treat_openlibrary_catalogue_as_a_blanket_distribution_license": true
+  }
+}
