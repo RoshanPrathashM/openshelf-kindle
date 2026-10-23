@@ -1,6 +1,6 @@
 # Privacy
 
-OpenShelf v0.2 is a static website and has no OpenShelf user accounts or server-side book uploads.
+OpenShelf v0.4 is a static website and has no OpenShelf user accounts or server-side book uploads.
 
 ## What stays in your browser
 
@@ -13,8 +13,9 @@ Local browser data is not encrypted by this project and does not sync across dev
 
 ## What is sent externally
 
-- Book catalogue searches are sent to the public Gutendex API to retrieve Project Gutenberg metadata.
-- Opening a book in the reading panel loads its page from the original source in an embedded frame where the source permits it.
+- Book catalogue searches are sent to the selected catalogue provider: Gutendex, Open Textbook Library, DOAB or Open Library. Search terms can therefore be visible to that provider.
+- Book-cover images may load directly from Project Gutenberg or Open Library’s cover service. Opening a book in the reading panel loads its page from the original source in an embedded frame where the source permits it.
+- Static book-guide pages contain book metadata and a summary, plus links to original sources; the full text remains source-hosted.
 - When you press Translate, the text in the translation box and the selected languages are sent to the endpoint URL you configure. If a key is supplied, it is sent with the translation request to that endpoint. Use only a server you trust; don't paste sensitive personal or confidential text into a public translation service.
 - Loading EPUB inspection may fetch the JSZip library from cdnjs. This happens only after you request the EPUB tool.
 
