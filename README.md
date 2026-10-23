@@ -2,24 +2,30 @@
 
 **A Kindle-inspired reading workspace for discovering open books, preparing your own ebook files, translating excerpts, and keeping private reading notes.**
 
-OpenShelf v0.3 is a static open-source prototype. Its live catalogue searches Project Gutenberg metadata through Gutendex. Public descriptions of this catalogue report **75,000+ ebook records**, but the exact count changes with the source catalog and your selected language/search filters. The website displays the current API count on load. OpenShelf itself does not store the entire catalogue or book files.
+OpenShelf v0.4 is a static open-source discovery and reading prototype. It federates live search across Project Gutenberg via Gutendex, Open Textbook Library, DOAB, and Open Library public-access records. Catalogue totals belong to the selected source and current filters; the site shows the count returned by each source at runtime. OpenShelf does not have a single master index of all books on the internet and does not store the entire catalogues or full book files.
 
-## What's new in v0.3
+## What's new in v0.4
 
 - Kindle-inspired desktop sidebar, cover shelf, responsive layout, and right-hand book details/tools panel.
 - Covers use the original source cover when available, or a generated typographic placeholder that does not copy external artwork.
 - Clicking a book opens a side panel with book details, subjects, format links, Read here, Save to shelf, notes, translation, and Send to Kindle guidance.
 - The reader has a top toolbar and a side note/tools panel where the original source permits embedding.
-- All-language catalogue by default; exact catalogue count is returned by the API at runtime.
+- Multi-collection selector for Project Gutenberg, Open Textbook Library, DOAB and Open Library public-access records.
+- Source-aware cover/format links, public-access filters where the source exposes them, and local reading-history recommendations ranked by matching authors, subjects and languages.
+- Twenty crawlable classic-book title pages with source-linked cover images, book summaries, canonical URLs, Open Graph metadata, Book/Breadcrumb structured data and a generated XML sitemap.
+- Stable book guide index, source directory, engineering textbook page, Tamil book page and public-domain guide.
+- Book guide deep links open the matching Project Gutenberg book detail panel directly inside OpenShelf.
 
 ## Current features
 
 ### Live catalogue and book reading
 
-- Queries Gutendex, which serves Project Gutenberg metadata, and supports title/author search, language filtering, and pagination.
+- Queries Gutendex for Project Gutenberg books, Open Textbook Library’s public JSON API for textbooks, DOAB’s REST API for open-access scholarly records, and Open Library’s Search API for public-access editions. Availability and response formats depend on each provider’s live API and CORS settings.
+- Supports title/author/topic search, language filtering where supported, pagination, source-format links and title/author/recommendation sorting (recommendations are local and heuristic, not AI).
 - The API is paginated; the first page contains at most 32 records. The count badge is the total matches for the current search/language filter, not the number downloaded into this repository.
 - Supported source editions open in the OpenShelf reader panel. Some source sites prevent embedding; in that case, use the **Open source** option.
-- OpenStax, DOAB, Open Textbook Library, Tamil Wikisource, and other collection catalogues remain external links where that is the appropriate source experience.
+- OpenStax, Standard Ebooks, Tamil Wikisource, Project Madurai and other collections are linked in the source directory where the best experience is still the publisher/archive page.
+- SEO pages are maintained at [`/books/`](books/index.html), [`/sources/`](sources/index.html), and [`/sitemap.xml`](sitemap.xml). Search engines decide when and whether they index these pages; a sitemap helps discovery but does not guarantee ranking.
 - The library is not a list of every book in the world. Check rights and source conditions before downloading or redistributing an edition.
 
 ### OpenShelf Book Studio
@@ -55,6 +61,8 @@ For GitHub Pages settings, see [DEPLOYMENT.md](DEPLOYMENT.md). Recommended setti
 Read [PRIVACY.md](PRIVACY.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [RIGHTS_POLICY.md](RIGHTS_POLICY.md). The current version links out to source sites; it does not accept public uploads or host visitor-submitted book files. The MIT licence in [LICENSE](LICENSE) applies to OpenShelf software only and grants no rights in third-party books, images, or metadata.
 
 ## Not implemented yet
+
+- Bulk mirroring of all catalogues, hosting the full text and binaries for every book, per-title licence evidence collection, crawl monitoring/Search Console submission, server-side index/sitemap generation, or guaranteed search-engine ranking.
 
 - Server-side uploads, user accounts, moderated contributor submissions with file storage, malware scanning, OCR, conversion jobs, synchronized notes, or hosted AI/LLM translation.
 - Full EPUBCheck integration, PDF/OCR repair, or guaranteed in-page embedding for every source.
