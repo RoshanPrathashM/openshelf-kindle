@@ -1,21 +1,26 @@
 # OpenShelf
 
-**A Kindle-first reading workspace for discovering open books, preparing your own ebook files, translating excerpts, and keeping private reading notes.**
+**A Kindle-inspired reading workspace for discovering open books, preparing your own ebook files, translating excerpts, and keeping private reading notes.**
 
-OpenShelf v0.2 is a static open-source prototype. It now has a live public-domain discovery catalogue, a reader panel for supported Gutenberg HTML editions, private local notes and saved books, an optional translation connector, and local ebook utilities.
+OpenShelf v0.3 is a static open-source prototype. Its live catalogue searches Project Gutenberg metadata through Gutendex. Public descriptions of this catalogue report **75,000+ ebook records**, but the exact count changes with the source catalog and your selected language/search filters. The website displays the current API count on load. OpenShelf itself does not store the entire catalogue or book files.
 
-## Use the website
+## What's new in v0.3
 
-Open the deployed site (when GitHub Pages publication has finished):  
-https://roshanprathashm.github.io/openshelf-kindle/
+- Kindle-inspired desktop sidebar, cover shelf, responsive layout, and right-hand book details/tools panel.
+- Covers use the original source cover when available, or a generated typographic placeholder that does not copy external artwork.
+- Clicking a book opens a side panel with book details, subjects, format links, Read here, Save to shelf, notes, translation, and Send to Kindle guidance.
+- The reader has a top toolbar and a side note/tools panel where the original source permits embedding.
+- All-language catalogue by default; exact catalogue count is returned by the API at runtime.
 
-### Live book catalogue and reading panel
+## Current features
 
-- Queries the Gutendex API for Project Gutenberg metadata, supporting title/author search and language filtering. The API returns paginated entries with metadata and format URLs.
-- Loads results inside the OpenShelf page; **Read here** opens a reading panel rather than immediately navigating away.
-- The embedded view depends on the source's HTML edition and whether its website permits framing. If a source blocks embedding, use **Open source** as a fallback.
-- Source catalogues such as OpenStax, DOAB, Open Textbook Library, and Tamil Wikisource remain external links because their catalogues and rights/format rules differ.
-- This is not an archive of every book on the internet. Verify the copyright status of each work in your country before downloading or redistributing it.
+### Live catalogue and book reading
+
+- Queries Gutendex, which serves Project Gutenberg metadata, and supports title/author search, language filtering, and pagination.
+- The API is paginated; the first page contains at most 32 records. The count badge is the total matches for the current search/language filter, not the number downloaded into this repository.
+- Supported source editions open in the OpenShelf reader panel. Some source sites prevent embedding; in that case, use the **Open source** option.
+- OpenStax, DOAB, Open Textbook Library, Tamil Wikisource, and other collection catalogues remain external links where that is the appropriate source experience.
+- The library is not a list of every book in the world. Check rights and source conditions before downloading or redistributing an edition.
 
 ### OpenShelf Book Studio
 
@@ -24,41 +29,39 @@ https://roshanprathashm.github.io/openshelf-kindle/
 - Preview an extracted chapter as plain text.
 - Clean line endings and whitespace in TXT/Markdown files you choose locally.
 
-The EPUB tool runs in the browser and does not upload your selected file to OpenShelf. It is a **quick structural review**, not full EPUB conformance testing and not a guarantee of clean OCR, correct rendering, or Kindle compatibility. Use the official [W3C/DAISY EPUBCheck project](https://github.com/w3c/epubcheck) for full format validation. Re-inspect any rebuilt file and test it on a real reader.
+Book Studio processes the selected file in the browser; it does not upload the file to an OpenShelf server. It is a **quick structural review**, not complete EPUB conformance testing and not a guarantee of clean OCR, correct rendering, or Kindle compatibility. Use the official [W3C/DAISY EPUBCheck project](https://github.com/w3c/epubcheck) for full format validation. Re-inspect any rebuilt file and test it on an actual reader.
 
 ### Translation
 
-- The translation form works with a user-selected LibreTranslate-compatible endpoint.
-- By default it points to the community mirror `https://translate.fedilab.app` listed in LibreTranslate's public mirrors. Public mirrors can be rate-limited, change, or go offline; click **Check languages** before translating. For local/private use, change the endpoint to `http://localhost:5000` after setting up a local service.
-- A managed server may require an API key. The key is entered for a single session and is not written to local storage; the text you translate is sent to whichever endpoint you select.
-- Public API quotas, CORS policy, supported languages, and translation quality are controlled by that service. This prototype has no built-in offline LLM and does not provide a translation endpoint itself.
+- Works with a user-selected LibreTranslate-compatible endpoint.
+- The default is a community mirror, which may be rate-limited, change, or go offline. Use **Check languages** first.
+- A managed server may require an API key. The key is entered for a session and is not written to local storage; text is sent to the endpoint you select.
+- This prototype has no built-in offline LLM and does not provide a translation server itself.
 
 ### Notes and bookshelf
 
-- Notes, translations saved as notes, and saved book IDs are stored in your browser's local storage.
+- Notes and saved book IDs are stored in the browser's local storage.
 - Export notes as JSON or Markdown and export the bookshelf as JSON.
-- Data is local to one browser/profile/device and does not sync automatically. Export backups before clearing site data or changing browsers.
+- Data is local to one browser/profile/device and does not sync automatically. Export backups before clearing site data.
 
-## Development
+## Run and publish
 
-Open `index.html` in a modern browser. Catalogue search needs an internet connection and the Gutendex API. EPUB inspection loads JSZip from a CDN only when requested. No build step is required.
+Open `index.html` in a modern browser. No build step is required. Catalogue search needs an internet connection and the Gutendex API. EPUB inspection loads JSZip from a CDN only when requested.
 
-## Publish with GitHub Pages
+For GitHub Pages settings, see [DEPLOYMENT.md](DEPLOYMENT.md). Recommended settings: **Settings → Pages → Deploy from a branch → `main` → `/(root)`**.
 
-See [DEPLOYMENT.md](DEPLOYMENT.md). The recommended setup for the current static site is **Settings → Pages → Deploy from a branch → `main` → `/(root)`**.
+## Privacy and copyright
 
-## Community and copyright
+Read [PRIVACY.md](PRIVACY.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [RIGHTS_POLICY.md](RIGHTS_POLICY.md). The current version links out to source sites; it does not accept public uploads or host visitor-submitted book files. The MIT licence in [LICENSE](LICENSE) applies to OpenShelf software only and grants no rights in third-party books, images, or metadata.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [RIGHTS_POLICY.md](RIGHTS_POLICY.md) before suggesting a title. The current version links out to source sites; it does not accept public uploads or host visitor-submitted book files. The MIT licence in [LICENSE](LICENSE) applies to OpenShelf software only and grants no rights in third-party books, images, or metadata.
+## Not implemented yet
 
-## What is not implemented yet
-
-- Server-side uploads, file storage, moderated contributor accounts, malware scanning, OCR, conversion jobs, synchronized notes, or a hosted AI/LLM translation endpoint.
-- Full EPUBCheck integration, PDF/OCR repair, or guaranteed internal embedding for every source.
+- Server-side uploads, user accounts, moderated contributor submissions with file storage, malware scanning, OCR, conversion jobs, synchronized notes, or hosted AI/LLM translation.
+- Full EPUBCheck integration, PDF/OCR repair, or guaranteed in-page embedding for every source.
 - Automatic delivery into a Kindle account.
 
-Those require a backend and careful design for permission checks, file quarantine, service costs, secret/API-key handling, privacy, takedown requests, and abuse prevention. Don't publish a book file unless the rightsholder has authorized it or the relevant licence/public-domain status permits it.
+Those require a backend and careful design for permission checks, file quarantine, service costs, secret/API-key handling, privacy, takedown requests, and abuse prevention. Never publish a book file unless its rightsholder authorizes it or the relevant licence/public-domain status permits it.
 
 ## Licence
 
-The OpenShelf software is licensed under the MIT License in [LICENSE](LICENSE). Third-party books remain governed by their own rights and terms.
+OpenShelf software is licensed under the MIT License in [LICENSE](LICENSE). Third-party books remain governed by their own rights and terms.
