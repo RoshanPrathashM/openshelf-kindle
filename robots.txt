@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://roshanprathashm.github.io/openshelf-kindle/sitemap.xml
