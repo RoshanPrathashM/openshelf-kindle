@@ -8,13 +8,13 @@ OpenShelf v0.4 is a static open-source discovery and reading prototype. It feder
 
 - Kindle-inspired desktop sidebar, cover shelf, responsive layout, and right-hand book details/tools panel.
 - Covers use the original source cover when available, or a generated typographic placeholder that does not copy external artwork.
-- Clicking a book opens a side panel with book details, subjects, format links, Read here, Save to shelf, notes, translation, and Send to Kindle guidance.
+- Clicking a book opens a side panel with book details, subjects, authorised source links, Save to shelf, notes, translation, and Send to Kindle guidance. “Read full book” opens the source reading page in a new tab so the full text does not get trapped in a blank embedded frame.
 - The reader has a top toolbar and a side note/tools panel where the original source permits embedding.
 - Multi-collection selector for Project Gutenberg, Open Textbook Library, DOAB and Open Library public-access records.
 - Source-aware cover/format links, public-access filters where the source exposes them, and local reading-history recommendations ranked by matching authors, subjects and languages.
 - Twenty crawlable classic-book title pages with source-linked cover images, book summaries, canonical URLs, Open Graph metadata, Book/Breadcrumb structured data and a generated XML sitemap.
 - Stable book guide index, source directory, engineering textbook page, Tamil book page and public-domain guide.
-- Book guide deep links open the matching Project Gutenberg book detail panel directly inside OpenShelf.
+- Featured book covers and “Read full book” buttons open the official Project Gutenberg book page. “Open book tools in OpenShelf” returns to the matching title panel.
 
 ## Current features
 
@@ -23,7 +23,7 @@ OpenShelf v0.4 is a static open-source discovery and reading prototype. It feder
 - Queries Gutendex for Project Gutenberg books, Open Textbook Library’s public JSON API for textbooks, DOAB’s REST API for open-access scholarly records, and Open Library’s Search API for public-access editions. Availability and response formats depend on each provider’s live API and CORS settings.
 - Supports title/author/topic search, language filtering where supported, pagination, source-format links and title/author/recommendation sorting (recommendations are local and heuristic, not AI).
 - The API is paginated; the first page contains at most 32 records. The count badge is the total matches for the current search/language filter, not the number downloaded into this repository.
-- Supported source editions open in the OpenShelf reader panel. Some source sites prevent embedding; in that case, use the **Open source** option.
+- Full text opens on the authorised publisher/archive reading page. Project Gutenberg asks independent sites to use plain links rather than embedding its books, so its official page opens in a new tab; keep OpenShelf open for private notes and reading tools.
 - OpenStax, Standard Ebooks, Tamil Wikisource, Project Madurai and other collections are linked in the source directory where the best experience is still the publisher/archive page.
 - SEO pages are maintained at [`/books/`](books/index.html), [`/sources/`](sources/index.html), and [`/sitemap.xml`](sitemap.xml). Search engines decide when and whether they index these pages; a sitemap helps discovery but does not guarantee ranking.
 - The library is not a list of every book in the world. Check rights and source conditions before downloading or redistributing an edition.
