@@ -29,7 +29,7 @@ The EPUB tool runs in the browser and does not upload your selected file to Open
 ### Translation
 
 - The translation form works with a user-selected LibreTranslate-compatible endpoint.
-- By default it points to `http://localhost:5000`, suitable only if you have set up a local service and your browser allows the connection.
+- By default it points to the community mirror `https://translate.fedilab.app` listed in LibreTranslate's public mirrors. Public mirrors can be rate-limited, change, or go offline; click **Check languages** before translating. For local/private use, change the endpoint to `http://localhost:5000` after setting up a local service.
 - A managed server may require an API key. The key is entered for a single session and is not written to local storage; the text you translate is sent to whichever endpoint you select.
 - Public API quotas, CORS policy, supported languages, and translation quality are controlled by that service. This prototype has no built-in offline LLM and does not provide a translation endpoint itself.
 
