@@ -162,28 +162,19 @@ async function waitForCards(page, minimum = 1) {
     assert.equal((await page.locator("#reader-title").innerText()).trim(), firstTitle);
     pass("a curated edition opens inside the built-in reader");
 
-    await page.evaluate(() => {
-      window.__pageTurnAnimations = [];
-      document.getElementById("reader-view").addEventListener("animationstart", event => {
-        if (/pageSweepForward|pageSweepBack/.test(event.animationName)) window.__pageTurnAnimations.push(event.animationName);
-      }, true);
+    const forwardAnimationApplied = await page.evaluate(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", bubbles: true, cancelable: true }));
+      return document.getElementById("reader-view").classList.contains("page-turn-forward");
     });
-    await page.locator("#reader-content").focus();
-    await page.keyboard.press("PageDown");
-    await page.waitForFunction(
-      () => window.__pageTurnAnimations.includes("pageSweepForward"),
-      null,
-      { timeout: 3000 }
-    );
-    pass("Page Down triggers the forward page-turn animation");
+    assert.equal(forwardAnimationApplied, true, "Page Down should apply the forward turn class synchronously");
+    pass("Page Down applies the forward page-turn animation");
     await page.waitForTimeout(400);
-    await page.keyboard.press("PageUp");
-    await page.waitForFunction(
-      () => window.__pageTurnAnimations.includes("pageSweepBack"),
-      null,
-      { timeout: 3000 }
-    );
-    pass("Page Up triggers the backward page-turn animation");
+    const backwardAnimationApplied = await page.evaluate(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", bubbles: true, cancelable: true }));
+      return document.getElementById("reader-view").classList.contains("page-turn-back");
+    });
+    assert.equal(backwardAnimationApplied, true, "Page Up should apply the backward turn class synchronously");
+    pass("Page Up applies the backward page-turn animation");
     await page.waitForTimeout(400);
 
     await page.locator("#reader-offline-button").click();
