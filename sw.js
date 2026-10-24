@@ -6,7 +6,8 @@ const APP_SHELL = [
   "./index.html",
   "./manifest.webmanifest",
   "./favicon.svg",
-  "./content/library-index.json"
+  "./content/library-index.json",
+  "./read/index.html"
 ];
 
 self.addEventListener("install", event => {
@@ -41,7 +42,7 @@ self.addEventListener("fetch", event => {
         return response;
       }).catch(async () => {
         const cached = await caches.match(request);
-        return cached || caches.match("./index.html");
+        return cached || (url.pathname.includes("/read/") ? caches.match("./read/index.html") : caches.match("./index.html"));
       })
     );
     return;
