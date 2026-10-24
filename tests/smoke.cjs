@@ -162,22 +162,28 @@ async function waitForCards(page, minimum = 1) {
     assert.equal((await page.locator("#reader-title").innerText()).trim(), firstTitle);
     pass("a curated edition opens inside the built-in reader");
 
+    await page.evaluate(() => {
+      window.__pageTurnAnimations = [];
+      document.getElementById("reader-view").addEventListener("animationstart", event => {
+        if (/pageSweepForward|pageSweepBack/.test(event.animationName)) window.__pageTurnAnimations.push(event.animationName);
+      }, true);
+    });
     await page.locator("#reader-content").focus();
     await page.keyboard.press("PageDown");
     await page.waitForFunction(
-      () => document.getElementById("reader-view").classList.contains("page-turn-forward"),
+      () => window.__pageTurnAnimations.includes("pageSweepForward"),
       null,
       { timeout: 3000 }
     );
-    pass("Page Down advances with the forward page-turn animation");
+    pass("Page Down triggers the forward page-turn animation");
     await page.waitForTimeout(400);
     await page.keyboard.press("PageUp");
     await page.waitForFunction(
-      () => document.getElementById("reader-view").classList.contains("page-turn-back"),
+      () => window.__pageTurnAnimations.includes("pageSweepBack"),
       null,
       { timeout: 3000 }
     );
-    pass("Page Up reverses with the backward page-turn animation");
+    pass("Page Up triggers the backward page-turn animation");
     await page.waitForTimeout(400);
 
     await page.locator("#reader-offline-button").click();
