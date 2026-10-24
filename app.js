@@ -259,6 +259,9 @@
         unique.set(book.id, book);
       }
     });
+    getSavedBooks().forEach((book) => {
+      if (book.tier === "external" && !unique.has(book.id)) unique.set(book.id, book);
+    });
     return Array.from(unique.values());
   }
   function inferGenres(title, subjects, year) {
@@ -366,7 +369,7 @@
     if (list.length) {
       hideEmpty();
     } else if ($("global-search").value.trim().length > 1 && searchIsRunning()) {
-      showSkeletons();
+      hideEmpty();
     } else {
       const titles = {
         saved: "Your library is waiting", downloaded: "No offline books yet",
@@ -387,6 +390,9 @@
       : currentFilter === "unlimited"
         ? "Curated local reading editions with recorded provenance. Copyright status can vary by country."
         : currentFilter === "downloaded" ? "Full book text currently stored in this browser's IndexedDB." : "Curated editions plus live search from legitimate catalogues.";
+    if (searchRunning && $("global-search").value.trim().length >= 2) {
+      grid.insertAdjacentHTML("beforeend", Array.from({ length: 5 }, () => '<article class="skeleton-card"><div class="skeleton-cover"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></article>').join(""));
+    }
     document.querySelectorAll("[data-genre]").forEach((button) => button.classList.toggle("active", button.dataset.genre === currentGenre));
     document.querySelectorAll("[data-filter]").forEach((button) => button.classList.toggle("active", button.dataset.filter === currentFilter));
   }
@@ -543,7 +549,6 @@
     searchRunning = true;
     remoteBooks = [];
     renderShelf();
-    showSkeletons();
     setStatus("Searching live catalogues…");
     const tasks = [
       searchGutendex(query), searchOpenLibrary(query), searchTamilWikisource(query),
@@ -650,7 +655,7 @@
     return progress;
   }
   function readScrollRatio() {
-    const reader = $("reader-content");
+    const reader = currentMode === "paginated" ? $("reader-content") : $("reader-main");
     if (currentMode === "paginated") {
       const max = Math.max(0, reader.scrollWidth - reader.clientWidth);
       return max > 0 ? Math.max(0, Math.min(1, reader.scrollLeft / max)) : 0;
@@ -691,8 +696,13 @@
     $("reader-page-label").textContent = currentMode === "paginated"
       ? "Page " + (pageIndex() + 1) + " of " + pageCount()
       : "Chapter " + (currentChapterIndex + 1) + " of " + currentChapters.length;
-    $("previous-page").disabled = currentChapterIndex === 0 && (currentMode !== "paginated" || pageIndex() === 0);
-    $("next-page").disabled = currentChapterIndex === currentChapters.length - 1 && (currentMode !== "paginated" || pageIndex() >= pageCount() - 1);
+    const scrollArea = $("reader-main");
+    const atScrollStart = scrollArea.scrollTop <= 3;
+    const atScrollEnd = scrollArea.scrollTop >= Math.max(0, scrollArea.scrollHeight - scrollArea.clientHeight - 3);
+    const atStart = currentChapterIndex === 0 && (currentMode === "paginated" ? pageIndex() === 0 : atScrollStart);
+    const atEnd = currentChapterIndex === currentChapters.length - 1 && (currentMode === "paginated" ? pageIndex() >= pageCount() - 1 : atScrollEnd);
+    $("previous-page").disabled = atStart;
+    $("next-page").disabled = atEnd;
   }
   function storeProgress() {
     if (!currentBook || !currentChapters.length) return;
@@ -731,7 +741,8 @@
         const gap = parseFloat(getComputedStyle(reader).columnGap) || 0;
         reader.scrollLeft = (Number(progress.page) || 0) * (reader.clientWidth + gap);
       } else {
-        reader.scrollTop = (Number(progress.scrollRatio) || 0) * Math.max(0, reader.scrollHeight - reader.clientHeight);
+        const area = $("reader-main");
+        area.scrollTop = (Number(progress.scrollRatio) || 0) * Math.max(0, area.scrollHeight - area.clientHeight);
       }
       updateReaderProgressUI();
     });
@@ -781,6 +792,7 @@
     renderSavedAnnotations();
     reader.scrollTop = 0;
     reader.scrollLeft = 0;
+    $("reader-main").scrollTop = 0;
     updateReaderProgressUI();
     scheduleProgressSave();
   }
@@ -860,14 +872,15 @@
         updateReaderProgressUI(); scheduleProgressSave(); return;
       }
     } else {
-      const max = Math.max(0, reader.scrollHeight - reader.clientHeight);
-      if (direction > 0 && reader.scrollTop < max - 3) {
-        reader.scrollBy({ top: reader.clientHeight * 0.88, behavior: "smooth" });
-        return;
+      const area = $("reader-main");
+      const max = Math.max(0, area.scrollHeight - area.clientHeight);
+      if (direction > 0 && area.scrollTop < max - 3) {
+        area.scrollBy({ top: area.clientHeight * 0.88, behavior: "smooth" });
+        updateReaderProgressUI(); scheduleProgressSave(); return;
       }
-      if (direction < 0 && reader.scrollTop > 3) {
-        reader.scrollBy({ top: -reader.clientHeight * 0.88, behavior: "smooth" });
-        return;
+      if (direction < 0 && area.scrollTop > 3) {
+        area.scrollBy({ top: -area.clientHeight * 0.88, behavior: "smooth" });
+        updateReaderProgressUI(); scheduleProgressSave(); return;
       }
     }
     if (direction > 0 && currentChapterIndex < currentChapters.length - 1) {
@@ -875,7 +888,7 @@
     } else if (direction < 0 && currentChapterIndex > 0) {
       goToChapter(currentChapterIndex - 1, "back");
       if (currentMode === "paginated") requestAnimationFrame(() => { const el = $("reader-content"); el.scrollLeft = Math.max(0, el.scrollWidth - el.clientWidth); updateReaderProgressUI(); });
-      else requestAnimationFrame(() => { const el = $("reader-content"); el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight); updateReaderProgressUI(); });
+      else requestAnimationFrame(() => { const el = $("reader-main"); el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight); updateReaderProgressUI(); });
     } else {
       toast(direction > 0 ? "End of this book." : "Beginning of this book.");
     }
@@ -921,7 +934,10 @@
           const gap = parseFloat(getComputedStyle(reader).columnGap) || 0;
           const page = Math.round(oldRatio * Math.max(0, pageCount() - 1));
           reader.scrollLeft = page * (reader.clientWidth + gap);
-        } else reader.scrollTop = oldRatio * Math.max(0, reader.scrollHeight - reader.clientHeight);
+        } else {
+          const area = $("reader-main");
+          area.scrollTop = oldRatio * Math.max(0, area.scrollHeight - area.clientHeight);
+        }
         updateReaderProgressUI();
       });
     }
@@ -1119,6 +1135,10 @@
   async function removeOffline(book) {
     try {
       await idbDelete(book.id);
+      if (book.tier === "import") {
+        const remainingImports = readJSON(KEYS.imports, []).filter((item) => item.id !== book.id);
+        writeJSON(KEYS.imports, remainingImports);
+      }
       await refreshOfflineRecords();
       updateStorageIndicator();
       renderShelf();
@@ -1453,7 +1473,12 @@
       $("external-return-banner").classList.add("hidden");
       if (localStorage.getItem("openshelf.spa.pending-external.v1")) localStorage.removeItem("openshelf.spa.pending-external.v1");
     });
-    $("dismiss-external").addEventListener("click", () => $("external-return-banner").classList.add("hidden"));
+    $("dismiss-external").addEventListener("click", () => {
+      $("external-return-banner").classList.add("hidden");
+      if (localStorage.getItem("openshelf.spa.pending-external.v1")) localStorage.removeItem("openshelf.spa.pending-external.v1");
+      pendingExternal = null;
+      lastExternalOpened = null;
+    });
     document.querySelectorAll("[data-mobile-view]").forEach((button) => button.addEventListener("click", () => {
       const action = button.dataset.mobileView;
       if (action === "home") { showDirectory("library"); setFilter("all"); }
@@ -1473,6 +1498,8 @@
     });
     window.addEventListener("online", updateNetworkStatus);
     window.addEventListener("offline", updateNetworkStatus);
+    window.addEventListener("focus", () => { showExternalReturn(); });
+    window.addEventListener("pageshow", () => { showExternalReturn(); });
     window.addEventListener("resize", () => {
       if (currentBook && currentChapters.length && currentMode === "paginated") updateReaderProgressUI();
     });
@@ -1504,6 +1531,7 @@
     $("network-label").textContent = offline ? "Offline" : "Online";
     $("network-status").title = offline ? "You are offline. Local and downloaded books remain available." : "You are online.";
     if (offline) setStatus("Offline: local and downloaded books remain available; live search is paused.");
+    else if (!searchRunning) setStatus(localBooks.length + " curated editions available · type to search live catalogues.");
   }
   async function initialise() {
     updateNetworkStatus();
