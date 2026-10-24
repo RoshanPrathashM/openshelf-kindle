@@ -276,6 +276,13 @@ async function waitForCards(page, minimum = 1) {
     assert((await page.locator("#book-grid .book-title").allTextContents()).some(t => /Smoke Catalogue Book 20000/.test(t)));
     pass("Browse 100 free books builds a 100-title rights-aware catalogue");
 
+    await page.locator("#load-more-free-books").click();
+    await page.waitForFunction(
+      () => Array.from(document.querySelectorAll("#book-grid .book-card")).filter(card => !String(card.dataset.bookId || "").startsWith("import:")).length >= 132,
+      null, { timeout: 15000 }
+    );
+    pass("Load More Free Books appends the next live Gutendex page");
+
     await page.locator("#global-search").fill("Full Text Smoke Novel");
     await page.waitForFunction(
       () => Array.from(document.querySelectorAll("#book-grid .book-title")).some(node => node.innerText.includes("Full Text Smoke Novel")),
@@ -295,6 +302,23 @@ async function waitForCards(page, minimum = 1) {
     const fullPageCount = Number(await page.locator("#reader-page-slider").getAttribute("max"));
     assert(fullPageCount >= 5, "The full text should be split into multiple approximately 260-word pages; max=" + fullPageCount + ", tocOptions=" + await page.locator("#reader-toc-select option").count() + ", label=" + await page.locator("#reader-page-label").innerText() + ", contentPreview=" + (await page.locator("#reader-content").innerText()).slice(0, 220));
     assert(await page.locator("#reader-toc-select option").count() >= 2, "Detected chapter headings should populate the TOC");
+    const fullTextCache = await page.evaluate(() => new Promise((resolve, reject) => {
+      const request = indexedDB.open("OpenShelfOfflineDB");
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains("books")) { resolve(null); return; }
+        const get = db.transaction("books", "readonly").objectStore("books").get("external:gutenberg:123");
+        get.onerror = () => reject(get.error);
+        get.onsuccess = () => {
+          const record = get.result;
+          resolve(record ? { paged: record.paged, wordsPerPage: record.wordsPerPage, pages: record.chapters && record.chapters.length, toc: record.toc && record.toc.length } : null);
+        };
+      };
+    }));
+    assert(fullTextCache && fullTextCache.paged === true && fullTextCache.pages >= 5 && fullTextCache.toc >= 2,
+      "Full text should automatically cache parsed pages and TOC in IndexedDB: " + JSON.stringify(fullTextCache));
+    pass("full unabridged text is cached in IndexedDB as paginated pages plus TOC");
     await page.locator("#reader-page-number").fill("4");
     await page.locator("#reader-page-number").press("Enter");
     await page.waitForFunction(() => document.getElementById("reader-page-number").value === "4", null, { timeout: 5000 });
