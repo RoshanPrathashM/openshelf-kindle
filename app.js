@@ -1516,6 +1516,7 @@
     }));
     $("back-to-library").addEventListener("click", () => { showDirectory("library"); setFilter("all"); });
     $("global-search").addEventListener("input", () => {
+      if (currentView !== "library") showDirectory("library");
       const query = $("global-search").value;
       searchToken += 1;
       clearTimeout(searchTimer);
