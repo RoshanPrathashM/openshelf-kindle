@@ -12,6 +12,8 @@ on:
       - "manifest.webmanifest"
       - "manifest.json"
       - "app-icon.svg"
+      - "app-icon-192.png"
+      - "app-icon-512.png"
       - "content/library-index.json"
       - "content/featured-free.json"
       - "catalog-registry.json"
@@ -86,9 +88,14 @@ jobs:
           for json_path in (Path("manifest.webmanifest"), Path("manifest.json"), Path("content/library-index.json"), Path("content/featured-free.json"), Path("catalog-registry.json")):
               json.loads(json_path.read_text(encoding="utf-8"))
               print(f"PASS JSON: {json_path}")
+          manifest = json.loads(Path("manifest.json").read_text(encoding="utf-8"))
+          icon_sizes = {icon.get("sizes") for icon in manifest.get("icons", [])}
+          if not {"192x192", "512x512"}.issubset(icon_sizes):
+              raise SystemExit("manifest.json must include 192x192 and 512x512 install icons")
+          print("PASS PWA manifest includes 192px and 512px icons")
 
           sw = Path("sw.js").read_text(encoding="utf-8")
-          for cached in ('"./index.html"', '"./styles.css"', '"./app.js"', '"./manifest.webmanifest"', '"./manifest.json"', '"./app-icon.svg"', '"./content/featured-free.json"'):
+          for cached in ('"./index.html"', '"./styles.css"', '"./app.js"', '"./manifest.webmanifest"', '"./manifest.json"', '"./app-icon.svg"', '"./app-icon-192.png"', '"./app-icon-512.png"', '"./content/featured-free.json"'):
               if cached not in sw:
                   raise SystemExit(f"Service-worker install shell does not cache {cached}")
           print("PASS PWA shell includes the homepage, stylesheet, app script and manifest")

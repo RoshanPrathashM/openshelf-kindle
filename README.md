@@ -69,7 +69,7 @@ The app filters the local shelf immediately while showing loading skeletons for 
 - Small preferences, saved-book metadata, progress, bookmarks and annotations are stored in <code>localStorage</code>.
 - Full saved book content and imported text are stored in the IndexedDB database **OpenShelfOfflineDB**.
 - The Device Storage panel displays offline-book count and approximate content size, along with the browser's reported storage quota when available.
-- The PWA manifest and service worker cache the home page, app script, stylesheet, icons, manifests, reader shell and local catalogue index. Full-text editions are cached in IndexedDB after a successful fetch; a title should be saved offline before relying on it without a network. The app can be installed from a compatible browser using Install app or Add to Home Screen.
+- The PWA manifest and service worker cache the home page, app script, stylesheet, icons, manifests, reader shell and local catalogue index. Full-text editions are cached in IndexedDB after a successful fetch; a title should be saved offline before relying on it without a network. The app can be installed from a compatible browser using Install app or Add to Home Screen. The manifest includes 192px and 512px raster icons plus an SVG fallback.
 
 Browser storage is finite and can be cleared by users or browser policy. “Unlimited” does not mean unlimited device disk space. Data is local to the current browser/profile and does not automatically sync to another device.
 
@@ -97,7 +97,7 @@ Then open <code>http://localhost:8000/</code>.
 - <code>app.js</code> — catalogue search, IndexedDB, reading position, themes, bookmarks, notes, annotations and imports.
 - <code>sw.js</code> — service worker and static-shell cache.
 - <code>manifest.json</code> and <code>manifest.webmanifest</code> — install metadata.
-- <code>app-icon.svg</code> — installable OpenShelf icon.
+- <code>app-icon-192.png</code> and <code>app-icon-512.png</code> — raster install icons for Chromium-based browsers; <code>app-icon.svg</code> remains the scalable fallback.
 - <code>content/library-index.json</code> — curated local shelf and source notes.
 - <code>content/featured-free.json</code> — 10 featured Project Gutenberg source links; popular catalogue results are cached locally as metadata only.
 - <code>catalog-registry.json</code> — sources and content-ingestion policy.

@@ -123,6 +123,24 @@ async function waitForCards(page, minimum = 1) {
     const response = await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
     assert(response && response.ok(), "Homepage should return a successful HTTP response");
     assert.match(await page.title(), /OpenShelf/i);
+    const installMetadata = await page.evaluate(async () => {
+      const response = await fetch("./manifest.json");
+      const manifest = await response.json();
+      const icons = Array.isArray(manifest.icons) ? manifest.icons : [];
+      const requiredSizes = ["192x192", "512x512"];
+      const available = await Promise.all(icons.filter(icon => requiredSizes.includes(icon.sizes)).map(async icon => ({
+        size: icon.sizes,
+        ok: (await fetch(icon.src, { cache: "no-store" })).ok
+      })));
+      return {
+        display: manifest.display,
+        required: requiredSizes.every(size => available.some(icon => icon.size === size && icon.ok)),
+        iconResults: available
+      };
+    });
+    assert.equal(installMetadata.display, "standalone");
+    assert.equal(installMetadata.required, true, "Manifest should provide reachable raster install icons: " + JSON.stringify(installMetadata));
+    pass("standalone PWA manifest and 192px/512px install icons are available");
     pass("homepage loads with the expected title");
 
     await waitForCards(page, 20);
