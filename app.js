@@ -970,7 +970,8 @@
       currentChapters = loaded.chapters;
       recalculateReaderWordCounts();
       const position = getProgressMap()[book.id];
-      restorePosition(position);
+      if (position) restorePosition(position);
+      else renderReaderChapter(false);
       $("reader-offline-button").disabled = false;
       const offline = offlineRecords.some((item) => item.id === book.id);
       $("reader-offline-button").textContent = offline ? "✓ Saved Offline (Remove)" : "⬇ Save Offline";
