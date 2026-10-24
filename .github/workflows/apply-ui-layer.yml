@@ -1,45 +1,61 @@
-name: Apply OpenShelf UI layer
+name: Validate OpenShelf UI
 
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - index.html
+    paths:
+      - "index.html"
+      - "read/index.html"
+      - "sw.js"
+      - "manifest.webmanifest"
+      - "content/library-index.json"
+      - ".github/workflows/apply-ui-layer.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply-ui:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject UI assets into homepage
+      - name: Validate JavaScript, manifests and catalogue JSON
         run: |
           python - <<'PY'
+          import json
+          import re
+          import subprocess
+          import tempfile
           from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          css = '<link rel="stylesheet" href="./kindle-theme.css">'
-          js = '<script defer src="./kindle-tools.js"></script>'
-          if css not in s:
-              s = s.replace('</head>', css + '\n</head>', 1)
-          if js not in s:
-              s = s.replace('</body>', js + '\n</body>', 1)
-          p.write_text(s, encoding='utf-8')
-          PY
 
-      - name: Commit UI layer
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          if git diff --cached --quiet; then
-            echo 'UI layer already applied'
-          else
-            git commit -m 'Apply Kindle-inspired UI and on-demand tools'
-            git push
-          fi
+          def check_js(source, label):
+              with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as f:
+                  f.write(source)
+                  name = f.name
+              result = subprocess.run(["node", "--check", name], text=True, capture_output=True)
+              Path(name).unlink(missing_ok=True)
+              if result.returncode:
+                  raise SystemExit(f"JavaScript syntax error in {label}:\n{result.stderr}")
+              print(f"PASS JavaScript syntax: {label}")
+
+          for html_path in (Path("index.html"), Path("read/index.html")):
+              source = html_path.read_text(encoding="utf-8")
+              scripts = re.finditer(r"<script([^>]*)>([\s\S]*?)</script>", source, re.IGNORECASE)
+              count = 0
+              for match in scripts:
+                  attributes, body = match.groups()
+                  if "application/ld+json" in attributes.lower() or not body.strip():
+                      continue
+                  check_js(body, f"{html_path} inline script")
+                  count += 1
+              if count == 0:
+                  raise SystemExit(f"No executable inline scripts found in {html_path}")
+
+          check_js(Path("sw.js").read_text(encoding="utf-8"), "sw.js")
+          for json_path in (Path("manifest.webmanifest"), Path("content/library-index.json"), Path("catalog-registry.json")):
+              json.loads(json_path.read_text(encoding="utf-8"))
+              print(f"PASS JSON: {json_path}")
+          PY
