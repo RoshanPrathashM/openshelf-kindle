@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "source": "Project Gutenberg",
+  "rights_note": "These entries link to their official source pages; OpenShelf does not host these texts. Project Gutenberg's public-domain determinations are US-based, so access and reuse status can differ by title and country.",
+  "books": [
+    {
+      "id": "external:gutenberg:1342",
+      "sourceKey": "gutenberg:1342",
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen",
+      "year": 1813,
+      "url": "https://www.gutenberg.org/ebooks/1342",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:2701",
+      "sourceKey": "gutenberg:2701",
+      "title": "Moby-Dick; or, The Whale",
+      "author": "Herman Melville",
+      "year": 1851,
+      "url": "https://www.gutenberg.org/ebooks/2701",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics",
+        "adventure"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:74",
+      "sourceKey": "gutenberg:74",
+      "title": "The Adventures of Tom Sawyer",
+      "author": "Mark Twain",
+      "year": 1876,
+      "url": "https://www.gutenberg.org/ebooks/74",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics",
+        "adventure"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:120",
+      "sourceKey": "gutenberg:120",
+      "title": "Treasure Island",
+      "author": "Robert Louis Stevenson",
+      "year": 1883,
+      "url": "https://www.gutenberg.org/ebooks/120",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics",
+        "adventure"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:1260",
+      "sourceKey": "gutenberg:1260",
+      "title": "Jane Eyre",
+      "author": "Charlotte Brontë",
+      "year": 1847,
+      "url": "https://www.gutenberg.org/ebooks/1260",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:55",
+      "sourceKey": "gutenberg:55",
+      "title": "The Wonderful Wizard of Oz",
+      "author": "L. Frank Baum",
+      "year": 1900,
+      "url": "https://www.gutenberg.org/ebooks/55",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics",
+        "adventure"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:46",
+      "sourceKey": "gutenberg:46",
+      "title": "A Christmas Carol",
+      "author": "Charles Dickens",
+      "year": 1843,
+      "url": "https://www.gutenberg.org/ebooks/46",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics",
+        "horror"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:43",
+      "sourceKey": "gutenberg:43",
+      "title": "The Strange Case of Dr. Jekyll and Mr. Hyde",
+      "author": "Robert Louis Stevenson",
+      "year": 1886,
+      "url": "https://www.gutenberg.org/ebooks/43",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics",
+        "horror",
+        "mystery"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:33",
+      "sourceKey": "gutenberg:33",
+      "title": "The Scarlet Letter",
+      "author": "Nathaniel Hawthorne",
+      "year": 1850,
+      "url": "https://www.gutenberg.org/ebooks/33",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    },
+    {
+      "id": "external:gutenberg:98",
+      "sourceKey": "gutenberg:98",
+      "title": "A Tale of Two Cities",
+      "author": "Charles Dickens",
+      "year": 1859,
+      "url": "https://www.gutenberg.org/ebooks/98",
+      "sourceName": "Project Gutenberg",
+      "genres": [
+        "classics",
+        "adventure"
+      ],
+      "sourceNote": "Free to read at the source. Check local copyright law before reuse."
+    }
+  ]
+}

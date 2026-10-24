@@ -1,6 +1,6 @@
 "use strict";
 const CACHE_PREFIX = "openshelf-shell-";
-const CACHE_NAME = CACHE_PREFIX + "v6";
+const CACHE_NAME = CACHE_PREFIX + "v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -9,6 +9,7 @@ const APP_SHELL = [
   "./manifest.webmanifest",
   "./favicon.svg",
   "./content/library-index.json",
+  "./content/featured-free.json",
   "./read/index.html"
 ];
 

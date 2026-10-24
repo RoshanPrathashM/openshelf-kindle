@@ -11,7 +11,8 @@
     bookmarks: "openshelf.spa.bookmarks.v1",
     notes: "openshelf.spa.notes.v1",
     externalProgress: "openshelf.spa.external-progress.v1",
-    imports: "openshelf.spa.imports.v1"
+    imports: "openshelf.spa.imports.v1",
+    freeCatalogue: "openshelf.spa.free-catalogue.v1"
   };
   const DB_NAME = "OpenShelfOfflineDB";
   const DB_VERSION = 1;
@@ -57,6 +58,11 @@
 
   let localBooks = [];
   let remoteBooks = [];
+  let featuredExternalBooks = [];
+  let expandedExternalBooks = [];
+  let freeCatalogueLoaded = false;
+  let loadingFreeCatalogue = false;
+  let pageAnimationTimer = null;
   let importedBooks = [];
   let offlineRecords = [];
   let currentFilter = "all";
@@ -348,18 +354,154 @@
   }
   function buildDisplayPool() {
     const unique = new Map();
+    const localTitleKeys = new Set(localBooks.map((book) => normalizeText(book.title)));
     localBooks.forEach((book) => unique.set(book.id, book));
     importedBooks.forEach((book) => unique.set(book.id, book));
-    remoteBooks.forEach((book) => {
-      if (book.tier === "external" && !localBooks.some((local) => normalizeText(local.title) === normalizeText(book.title))) {
-        unique.set(book.id, book);
-      }
+
+    // Keep externally hosted books distinct from locally readable editions and
+    // deduplicate the featured, popular, live-search and saved-source lists.
+    const seenExternalTitles = new Set(localTitleKeys);
+    const addExternalBooks = (records) => (records || []).forEach((book) => {
+      if (!book || book.tier !== "external") return;
+      const titleKey = normalizeText(book.title);
+      if (!titleKey || seenExternalTitles.has(titleKey)) return;
+      seenExternalTitles.add(titleKey);
+      if (!unique.has(book.id)) unique.set(book.id, book);
     });
-    getSavedBooks().forEach((book) => {
-      if (book.tier === "external" && !unique.has(book.id)) unique.set(book.id, book);
-    });
+    addExternalBooks(featuredExternalBooks);
+    addExternalBooks(expandedExternalBooks);
+    addExternalBooks(remoteBooks);
+    addExternalBooks(getSavedBooks());
     return Array.from(unique.values());
   }
+  function mapGutendexRecord(item) {
+    const authors = (item.authors || []).map((person) => person.name).filter(Boolean).join(", ") || "Author not listed";
+    const subjects = (item.subjects || []).concat(item.bookshelves || []).join(" ");
+    return externalBook({
+      id: "external:gutenberg:" + item.id,
+      sourceKey: "gutenberg:" + item.id,
+      title: item.title || "Untitled",
+      author: authors,
+      sourceName: "Project Gutenberg",
+      url: "https://www.gutenberg.org/ebooks/" + item.id,
+      coverUrl: "",
+      year: "",
+      genres: inferGenres(item.title || "", subjects, ""),
+      searchableText: subjects,
+      sourceNote: "Free to read at the source. Project Gutenberg's public-domain status is US-based; local copyright and reuse rules may differ."
+    });
+  }
+
+  async function loadFeaturedFreeCatalogue() {
+    try {
+      const response = await fetch(ROOT + "content/featured-free.json", { cache: "default" });
+      if (!response.ok) throw new Error("Featured source list returned HTTP " + response.status + ".");
+      const catalogue = await response.json();
+      featuredExternalBooks = (Array.isArray(catalogue.books) ? catalogue.books : []).map(externalBook);
+    } catch (error) {
+      featuredExternalBooks = [];
+      console.warn("OpenShelf featured source links could not be loaded:", error.message);
+    }
+    const cached = readJSON(KEYS.freeCatalogue, []);
+    expandedExternalBooks = (Array.isArray(cached) ? cached : [])
+      .filter((book) => book && book.tier === "external")
+      .map(externalBook);
+    freeCatalogueLoaded = expandedExternalBooks.length >= Math.max(0, 100 - localBooks.length - featuredExternalBooks.length);
+    const button = $("load-free-catalogue");
+    if (button && freeCatalogueLoaded) button.textContent = "✓ 100 books loaded";
+    renderShelf();
+    if (freeCatalogueLoaded) {
+      setStatus("Loaded about 100 catalogue titles: " + localBooks.length + " in-app editions and " +
+        (featuredExternalBooks.length + expandedExternalBooks.length) + " free-at-source links. Rights and access vary by country.");
+    } else {
+      setStatus(localBooks.length + " in-app editions plus " + featuredExternalBooks.length +
+        " featured free-source links. Browse about 100 books to expand the catalogue.");
+    }
+  }
+
+  async function loadHundredFreeBooks() {
+    if (loadingFreeCatalogue) return;
+    const targetCount = Math.max(0, 100 - localBooks.length - featuredExternalBooks.length);
+    if (freeCatalogueLoaded && expandedExternalBooks.length >= targetCount) {
+      currentGenre = "all";
+      $("global-search").value = "";
+      remoteBooks = [];
+      setFilter("all");
+      setStatus("Loaded about " + (localBooks.length + featuredExternalBooks.length + expandedExternalBooks.length) +
+        " catalogue titles. Free-source links open at the original source; availability and rights vary by region.");
+      return;
+    }
+    loadingFreeCatalogue = true;
+    const button = $("load-free-catalogue");
+    const oldLabel = button ? button.textContent : "Browse 100 free books ↗";
+    if (button) { button.disabled = true; button.textContent = "Loading free books…"; }
+    setStatus("Loading popular free-at-source titles from Project Gutenberg…");
+    try {
+      const pages = [1, 2, 3, 4, 5];
+      const settled = await Promise.allSettled(pages.map((page) =>
+        timeoutFetch("https://gutendex.com/books/?languages=en&page=" + page)
+      ));
+      const records = settled.flatMap((result) => result.status === "fulfilled" && Array.isArray(result.value.results) ? result.value.results : []);
+      const seen = new Set(localBooks.concat(featuredExternalBooks).map((book) => normalizeText(book.title)));
+      const popular = [];
+      records.forEach((item) => {
+        const book = mapGutendexRecord(item);
+        const key = normalizeText(book.title);
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        popular.push(book);
+      });
+
+      // If some catalogue pages were unavailable, keep previously cached rows
+      // and still show the largest deduplicated set we have.
+      const cached = readJSON(KEYS.freeCatalogue, []);
+      (Array.isArray(cached) ? cached : []).forEach((item) => {
+        const book = externalBook(item);
+        const key = normalizeText(book.title);
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        popular.push(book);
+      });
+      if (!popular.length) throw new Error("Project Gutenberg is unavailable right now.");
+      expandedExternalBooks = popular.slice(0, targetCount);
+      freeCatalogueLoaded = expandedExternalBooks.length >= targetCount;
+      writeJSON(KEYS.freeCatalogue, expandedExternalBooks);
+      currentGenre = "all";
+      $("global-search").value = "";
+      remoteBooks = [];
+      searchRunning = false;
+      clearTimeout(searchTimer);
+      searchToken += 1;
+      if (searchController) searchController.abort();
+      setFilter("all");
+      const total = localBooks.length + featuredExternalBooks.length + expandedExternalBooks.length;
+      setStatus("Loaded " + total + " catalogue titles: " + localBooks.length +
+        " in-app editions and " + (featuredExternalBooks.length + expandedExternalBooks.length) +
+        " free-at-source links. External titles open at their official source; rights vary by country.");
+      if (!freeCatalogueLoaded) toast("Loaded " + total + " titles. The source returned fewer than 100 unique books this time.");
+      if (button) button.textContent = freeCatalogueLoaded ? "✓ 100 books loaded" : "Browse 100 free books ↗";
+    } catch (error) {
+      const cached = readJSON(KEYS.freeCatalogue, []);
+      if (Array.isArray(cached) && cached.length) {
+        expandedExternalBooks = cached.map(externalBook).slice(0, targetCount);
+        freeCatalogueLoaded = expandedExternalBooks.length >= targetCount;
+        currentGenre = "all";
+        $("global-search").value = "";
+        setFilter("all");
+        setStatus("Using " + (localBooks.length + featuredExternalBooks.length + expandedExternalBooks.length) +
+          " saved catalogue titles. New free-source results could not be loaded: " + error.message);
+      } else {
+        setStatus("Free catalogue could not be reached. Your local books and 10 featured source links are still available. " + error.message);
+        toast("Could not load the larger free catalogue. Try again while online.");
+      }
+      if (button) button.textContent = freeCatalogueLoaded ? "✓ 100 books loaded" : oldLabel;
+    } finally {
+      loadingFreeCatalogue = false;
+      if (button) button.disabled = false;
+      renderShelf();
+    }
+  }
+
   function inferGenres(title, subjects, year) {
     const hay = normalizeText([title, subjects].join(" "));
     const genres = [];
@@ -1009,6 +1151,15 @@
     currentChapterIndex = Math.max(0, Math.min(index, currentChapters.length - 1));
     renderReaderChapter(true, direction || "forward");
   }
+  function animatePageTurn(direction) {
+    const surface = $("reader-view");
+    surface.classList.remove("page-turn-forward", "page-turn-back");
+    void surface.offsetWidth;
+    surface.classList.add(direction > 0 ? "page-turn-forward" : "page-turn-back");
+    clearTimeout(pageAnimationTimer);
+    pageAnimationTimer = setTimeout(() => surface.classList.remove("page-turn-forward", "page-turn-back"), 380);
+  }
+
   function turnPage(direction) {
     if (!currentChapters.length) return;
     const reader = $("reader-content");
@@ -1017,11 +1168,13 @@
       const step = reader.clientWidth + gap;
       const max = Math.max(0, reader.scrollWidth - reader.clientWidth);
       if (direction > 0 && reader.scrollLeft < max - 3) {
+        animatePageTurn(1);
         reader.classList.remove("anim-forward", "anim-back"); void reader.offsetWidth; reader.classList.add("anim-forward");
         reader.scrollTo({ left: Math.min(max, reader.scrollLeft + step), behavior: "smooth" });
         updateReaderProgressUI(); scheduleProgressSave(); return;
       }
       if (direction < 0 && reader.scrollLeft > 3) {
+        animatePageTurn(-1);
         reader.classList.remove("anim-forward", "anim-back"); void reader.offsetWidth; reader.classList.add("anim-back");
         reader.scrollTo({ left: Math.max(0, reader.scrollLeft - step), behavior: "smooth" });
         updateReaderProgressUI(); scheduleProgressSave(); return;
@@ -1030,17 +1183,21 @@
       const area = $("reader-main");
       const max = Math.max(0, area.scrollHeight - area.clientHeight);
       if (direction > 0 && area.scrollTop < max - 3) {
+        animatePageTurn(1);
         area.scrollBy({ top: area.clientHeight * 0.88, behavior: "smooth" });
         updateReaderProgressUI(); scheduleProgressSave(); return;
       }
       if (direction < 0 && area.scrollTop > 3) {
+        animatePageTurn(-1);
         area.scrollBy({ top: -area.clientHeight * 0.88, behavior: "smooth" });
         updateReaderProgressUI(); scheduleProgressSave(); return;
       }
     }
     if (direction > 0 && currentChapterIndex < currentChapters.length - 1) {
+      animatePageTurn(1);
       goToChapter(currentChapterIndex + 1, "forward");
     } else if (direction < 0 && currentChapterIndex > 0) {
+      animatePageTurn(-1);
       goToChapter(currentChapterIndex - 1, "back");
       if (currentMode === "paginated") requestAnimationFrame(() => { const el = $("reader-content"); el.scrollLeft = Math.max(0, el.scrollWidth - el.clientWidth); updateReaderProgressUI(); });
       else requestAnimationFrame(() => { const el = $("reader-main"); el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight); updateReaderProgressUI(); });
@@ -1669,6 +1826,7 @@
     $("import-button").addEventListener("click", () => $("import-file").click());
     $("import-file").addEventListener("change", () => importLocalFile($("import-file").files && $("import-file").files[0]));
     $("manage-downloads").addEventListener("click", () => setFilter("downloaded"));
+    $("load-free-catalogue").addEventListener("click", loadHundredFreeBooks);
     $("save-external-progress").addEventListener("click", saveExternalProgress);
     $("bookmark-external").addEventListener("click", () => {
       if (!pendingExternal) return;
@@ -1723,13 +1881,18 @@
         else openDrawer("appearance");
       }
       if (!$("reader-view").classList.contains("hidden")) {
+        const target = event.target;
+        const isTextEntry = Boolean(target && target.closest && target.closest("input,textarea,select,[contenteditable='true']"));
+        const isActionControl = Boolean(target && target.closest && target.closest("button,a,[role='button']"));
         if (event.key === "Escape") {
           if ($("reader-drawer").classList.contains("open")) closeDrawer();
           else exitReader();
-        } else if (event.key === "ArrowRight" && !/input|textarea|select/i.test(event.target.tagName)) {
+        } else if (!isTextEntry && (event.key === "PageDown" || event.key === "ArrowRight")) {
           event.preventDefault(); turnPage(1);
-        } else if (event.key === "ArrowLeft" && !/input|textarea|select/i.test(event.target.tagName)) {
+        } else if (!isTextEntry && (event.key === "PageUp" || event.key === "ArrowLeft")) {
           event.preventDefault(); turnPage(-1);
+        } else if (!isTextEntry && !isActionControl && (event.key === " " || event.key === "Spacebar")) {
+          event.preventDefault(); turnPage(event.shiftKey ? -1 : 1);
         }
       }
     });
@@ -1751,6 +1914,7 @@
     wireEvents();
     await refreshOfflineRecords();
     await loadLocalCatalogue();
+    await loadFeaturedFreeCatalogue();
     migrateLegacyData();
     await updateStorageIndicator();
     renderShelf();

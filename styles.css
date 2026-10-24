@@ -95,6 +95,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @keyframes shimmer{to{background-position:-200% 0}}
 .empty-state{max-width:1100px;margin:18px auto;padding:30px 18px;border:1px dashed var(--line);border-radius:15px;text-align:center;color:var(--muted);font-size:13px;background:var(--paper)}
 .empty-state strong{display:block;font:500 20px Georgia,serif;color:var(--ink);margin-bottom:6px}
+.catalogue-callout{max-width:1100px;margin:0 auto 18px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+.catalogue-callout strong{display:block;font-size:13px}
+.catalogue-callout span{display:block;max-width:720px;color:var(--muted);font-size:11px;margin-top:3px}
+.catalogue-callout .button{flex-shrink:0}
+.catalogue-callout .button:disabled{opacity:.65;cursor:progress}
 .status-line{max-width:1100px;margin:12px auto 20px;color:var(--muted);font-size:11px;min-height:18px}
 .inline-notice{max-width:1100px;margin:14px auto;padding:13px 15px;background:var(--warning);border:1px solid var(--line);border-radius:12px;font-size:12px;color:var(--ink)}
 .inline-notice .notice-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
@@ -104,7 +109,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .reader-title{font:500 17px/1.2 Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}
 .reader-author{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:4px 0 0}
 .reader-tools-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.reader-main{flex:1;overflow:auto;min-height:0;padding:clamp(18px,4vh,42px) clamp(12px,4vw,48px) 26px}
+.reader-main{position:relative;flex:1;overflow:auto;min-height:0;padding:clamp(18px,4vh,42px) clamp(12px,4vw,48px) 26px}
 .reader-page{font:21px/1.85 Georgia,"Times New Roman",serif;max-width:var(--reader-max);margin:0 auto;overflow-wrap:anywhere;letter-spacing:.005em;min-height:100%;color:var(--ink)}
 .reader-page p{margin:0 0 1.1em;text-indent:1.25em}
 .reader-page h1,.reader-page h2,.reader-page h3,.reader-page h4{font-weight:500;line-height:1.25;text-align:center;margin:0 0 1.25em;break-after:avoid}
@@ -117,10 +122,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 :root[data-theme="night"] .reader-page .os-highlight{background:#766126;color:#fff3ca}
 .reader-page.paginated{height:100%;min-height:300px;overflow-x:auto;overflow-y:hidden;column-width:100%;column-gap:clamp(28px,5vw,62px);column-fill:auto;scroll-behavior:smooth;overscroll-behavior-x:contain;touch-action:pan-y;padding-bottom:15px}
 .reader-page.paginated>*{break-inside:auto}
-.reader-page.anim-forward{animation:pageInForward .18s ease-out}
-.reader-page.anim-back{animation:pageInBack .18s ease-out}
-@keyframes pageInForward{from{opacity:.65;transform:translateX(9px)}to{opacity:1;transform:translateX(0)}}
-@keyframes pageInBack{from{opacity:.65;transform:translateX(-9px)}to{opacity:1;transform:translateX(0)}}
+.reader-page.anim-forward{animation:pageInForward .24s cubic-bezier(.2,.7,.25,1)}
+.reader-page.anim-back{animation:pageInBack .24s cubic-bezier(.2,.7,.25,1)}
+.reader-shell::after{content:"";position:absolute;left:0;right:0;top:62px;bottom:84px;pointer-events:none;z-index:81;opacity:0;background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--ink) 3%,transparent) 23%,color-mix(in srgb,var(--ink) 13%,transparent) 52%,color-mix(in srgb,var(--paper) 30%,transparent) 73%,transparent 100%);background-size:190% 100%}
+.reader-shell.page-turn-forward::after{animation:pageSweepForward .34s cubic-bezier(.2,.7,.25,1) both}
+.reader-shell.page-turn-back::after{background-image:linear-gradient(270deg,transparent 0%,color-mix(in srgb,var(--ink) 3%,transparent) 23%,color-mix(in srgb,var(--ink) 13%,transparent) 52%,color-mix(in srgb,var(--paper) 30%,transparent) 73%,transparent 100%);animation:pageSweepBack .34s cubic-bezier(.2,.7,.25,1) both}
+@keyframes pageInForward{from{opacity:.72;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pageInBack{from{opacity:.72;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pageSweepForward{0%{opacity:0;background-position:100% 0}18%{opacity:1}100%{opacity:0;background-position:0 0}}
+@keyframes pageSweepBack{0%{opacity:0;background-position:0 0}18%{opacity:1}100%{opacity:0;background-position:100% 0}}
 .reader-footer{border-top:1px solid var(--line);background:var(--paper);padding:10px clamp(12px,3vw,28px) max(10px,env(safe-area-inset-bottom));}
 .reader-progress-top{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px;margin-bottom:7px}
 .reader-progress-track{height:4px;background:var(--line);border-radius:99px;overflow:hidden}
@@ -166,6 +176,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:1150px){.book-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:22px 15px}}
 @media(max-width:900px){.app-layout{grid-template-columns:190px minmax(0,1fr)}.sidebar{padding:20px 11px}.book-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:720px){
+  .catalogue-callout{align-items:flex-start;flex-direction:column;gap:10px}.catalogue-callout .button{width:100%}
+  .reader-shell::after{top:56px;bottom:90px}
  .app-header{gap:10px;padding:9px 12px}.search-wrap{min-width:0}.brand-tag{display:none}.brand-name{font-size:19px}.brand-mark{width:34px;height:34px}.app-layout{display:block}.sidebar{display:none}.main{padding:24px 14px 100px}.search-wrap{max-width:none}.search-shortcut{display:none}.status-badge{font-size:10px;padding:7px 8px}.status-dot{width:7px;height:7px}.status-badge .status-dot{width:7px;height:7px}.header-actions .desktop-action{display:none}
  .hero h1{font-size:34px}.continue-card{grid-template-columns:49px minmax(0,1fr);padding:13px;margin:18px 0 25px;gap:12px}.continue-card .cover{width:49px;height:70px}.continue-card>.button{grid-column:1/-1;width:100%}.continue-card h2{font-size:15px}.continue-card p{font-size:11px}
  .book-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 11px}.book-title{font-size:13px}.tier-badge{font-size:8px;left:4px;top:4px;padding:4px 5px}.save-button{width:28px;height:28px;right:4px;top:4px}.tier-badge+.save-button{top:31px}

@@ -33,11 +33,18 @@ The curated local catalogue currently has 10 English text editions:
 
 The local library manifest is at [content/library-index.json](content/library-index.json). Curated text data lives in [content/](content/), with the chapter-file map in <code>app.js</code>.
 
+### 3. About 100 free-source catalogue titles
+
+OpenShelf now features 10 additional source-linked classics: *Pride and Prejudice*, *Moby-Dick*, *The Adventures of Tom Sawyer*, *Treasure Island*, *Jane Eyre*, *The Wonderful Wizard of Oz*, *A Christmas Carol*, *The Strange Case of Dr. Jekyll and Mr. Hyde*, *The Scarlet Letter*, and *A Tale of Two Cities*. The **Browse 100 free books** button fetches popular English-language listings through Gutendex/Project Gutenberg and combines up to 80 more unique source links with the 10 local editions and 10 featured external titles.
+
+These 20 featured source-linked titles and the larger popular list are **external**: they open at the source's official eBook page; OpenShelf does not host their full text and does not enable in-app notes or offline copies for them. The locally readable shelf remains the 10 curated full-text books plus files a person imports. Project Gutenberg says its public-domain determination is US-based and that copyright status can differ outside the US; therefore the app labels these as free at source, not as universally public-domain or licensed for redistribution. See [Project Gutenberg's permission guidance](https://www.gutenberg.org/policy/permission.html).
+
+
 ### 3. Kindle-style reader
 
 For curated editions and private local imports, the fullscreen reader provides:
 - Four reading themes: Paperwhite, Sepia, Kindle Sage and Night E-Ink.
-- Paginated horizontal columns with next/previous buttons, left/right arrows and touch swipe; smooth-scroll mode is also available.
+- Paginated horizontal columns with animated page turns, next/previous buttons, left/right arrows, Page Up/Page Down, Space/Shift+Space and touch swipe; smooth-scroll mode is also available.
 - Serif, sans-serif and monospace type; font size, line spacing and reading-margin controls.
 - Progress percentage, estimated reading time remaining and saved reading position.
 - Bookmarks, private notes, text highlights, underlines and export of notes/bookmarks as JSON.
@@ -91,6 +98,7 @@ Then open <code>http://localhost:8000/</code>.
 - <code>sw.js</code> — service worker and static-shell cache.
 - <code>manifest.webmanifest</code> — install metadata.
 - <code>content/library-index.json</code> — curated local shelf and source notes.
+- <code>content/featured-free.json</code> — 10 featured Project Gutenberg source links; popular catalogue results are cached locally as metadata only.
 - <code>catalog-registry.json</code> — sources and content-ingestion policy.
 - <code>read/index.html</code> — the earlier standalone reader page retained for compatibility.
 

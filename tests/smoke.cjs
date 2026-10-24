@@ -42,15 +42,37 @@ async function waitForCards(page, minimum = 1) {
     page.on("response", response => { if (response.url().startsWith(BASE_URL)) browserMessages.push("response: " + response.status() + " " + response.url()); });
     page.on("requestfailed", request => browserMessages.push("request failed: " + request.url() + " · " + request.failure()?.errorText));
     await page.route("https://**/*", route => route.abort());
+    await page.route("https://gutendex.com/books/**", async route => {
+      const url = new URL(route.request().url());
+      const pageNumber = Number(url.searchParams.get("page") || 1);
+      const results = Array.from({ length: 32 }, (_, index) => {
+        const id = 20000 + (pageNumber - 1) * 32 + index;
+        return {
+          id,
+          title: "Smoke Catalogue Book " + id,
+          authors: [{ name: "Smoke Author " + id }],
+          subjects: ["Adventure stories"],
+          bookshelves: ["Adventure"],
+          formats: {},
+          download_count: 10000 - id
+        };
+      });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        count: 160,
+        next: pageNumber < 5 ? "https://gutendex.com/books/?languages=en&page=" + (pageNumber + 1) : null,
+        previous: pageNumber > 1 ? "https://gutendex.com/books/?languages=en&page=" + (pageNumber - 1) : null,
+        results
+      }) });
+    });
 
     const response = await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
     assert(response && response.ok(), "Homepage should return a successful HTTP response");
     assert.match(await page.title(), /OpenShelf/i);
     pass("homepage loads with the expected title");
 
-    await waitForCards(page, 10);
+    await waitForCards(page, 20);
     const initialCount = await page.locator("#book-grid .book-card").count();
-    assert(initialCount >= 10, "The 10 curated editions should render");
+    assert(initialCount >= 20, "The 10 curated editions and 10 featured free-source books should render");
     assert((await page.locator("#book-grid .book-title").allTextContents()).some(t => /The Time Machine/i.test(t)));
     pass("curated local catalogue renders and includes The Time Machine");
 
@@ -84,6 +106,24 @@ async function waitForCards(page, minimum = 1) {
     assert(firstReaderText.length > 50, "Reader should contain actual book text; diagnostics: " + browserMessages.slice(-12).join("\n"));
     assert.equal((await page.locator("#reader-title").innerText()).trim(), firstTitle);
     pass("a curated edition opens inside the built-in reader");
+
+    await page.locator("#reader-content").focus();
+    await page.keyboard.press("PageDown");
+    await page.waitForFunction(
+      () => document.getElementById("reader-view").classList.contains("page-turn-forward"),
+      null,
+      { timeout: 3000 }
+    );
+    pass("Page Down advances with the forward page-turn animation");
+    await page.waitForTimeout(400);
+    await page.keyboard.press("PageUp");
+    await page.waitForFunction(
+      () => document.getElementById("reader-view").classList.contains("page-turn-back"),
+      null,
+      { timeout: 3000 }
+    );
+    pass("Page Up reverses with the backward page-turn animation");
+    await page.waitForTimeout(400);
 
     await page.locator("#reader-offline-button").click();
     await page.waitForFunction(
@@ -171,6 +211,15 @@ async function waitForCards(page, minimum = 1) {
     );
     pass("offline reload keeps the local catalogue accessible and shows Offline status");
     await desktop.setOffline(false);
+
+    await page.locator("#load-free-catalogue").click();
+    await page.waitForFunction(
+      () => document.querySelectorAll("#book-grid .book-card").length === 100,
+      null,
+      { timeout: 20000 }
+    );
+    assert((await page.locator("#book-grid .book-title").allTextContents()).some(t => /Smoke Catalogue Book 20000/.test(t)));
+    pass("Browse 100 free books builds a 100-title rights-aware catalogue");
     await desktop.close();
 
     // Verify the actual narrow-screen layout and the mobile bottom navigation.
