@@ -1018,24 +1018,263 @@
     Array.from(parsed.body.childNodes).forEach((node) => scrubNode(node, safe));
     return safe.innerHTML;
   }
+  function isDetectedChapterHeading(line) {
+    const value = String(line || "").trim().replace(/^[-*_= ]+|[-*_= ]+$/g, "");
+    if (!value || value.length > 125) return false;
+    return /^(?:(?:CHAPTER|BOOK|PART|LETTER|VOLUME|CANTO|ACT|SCENE)\s+(?:[IVXLCDM]+|\d+|FIRST|SECOND|THIRD|FOURTH|FIFTH|SIXTH|SEVENTH|EIGHTH|NINTH|TENTH|[A-Z]+)(?:\b[\s.:;—–-].*)?|PROLOGUE|EPILOGUE|PREFACE|INTRODUCTION|FOREWORD|AFTERWORD|CONTENTS|APPENDIX(?:\s+[IVXLCDM0-9]+)?|CONCLUSION)$/i.test(value);
+  }
+
+  function stripGutenbergBoilerplate(rawText) {
+    const lines = String(rawText || "").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").replace(/\u0000/g, "").split("\n");
+    const start = lines.findIndex((line) => /\*{3}\s*START OF (?:THE|THIS) PROJECT GUTENBERG EBOOK\b/i.test(line));
+    if (start >= 0) lines.splice(0, start + 1);
+    const end = lines.findIndex((line) => /\*{3}\s*END OF (?:THE|THIS) PROJECT GUTENBERG EBOOK\b/i.test(line));
+    if (end >= 0) lines.splice(end);
+    return lines.join("\n").trim();
+  }
+
+  function splitTextToPagedEdition(bookTitle, textSections) {
+    const pages = [];
+    const toc = [];
+    textSections.forEach((section, chapterIndex) => {
+      const title = String(section.title || "Chapter " + (chapterIndex + 1)).trim();
+      const paragraphs = Array.isArray(section.paragraphs) ? section.paragraphs : [];
+      const startPage = pages.length;
+      let pageParagraphs = [];
+      let pageWords = 0;
+      const flushPage = () => {
+        if (!pageParagraphs.length) return;
+        const firstPage = pages.length === startPage;
+        const heading = firstPage ? "<h2>" + escapeHTML(title) + "</h2>" : "";
+        pages.push({
+          title, chapterTitle: title, chapterIndex, pageNumber: pages.length + 1,
+          wordCount: pageWords,
+          html: heading + pageParagraphs.map((paragraph) => "<p>" + escapeHTML(paragraph) + "</p>").join("")
+        });
+        pageParagraphs = [];
+        pageWords = 0;
+      };
+      paragraphs.forEach((paragraph) => {
+        const words = String(paragraph || "").trim().split(/\s+/).filter(Boolean);
+        let offset = 0;
+        while (offset < words.length) {
+          const capacity = WORDS_PER_PAGE - pageWords;
+          const take = Math.min(capacity, words.length - offset);
+          pageParagraphs.push(words.slice(offset, offset + take).join(" "));
+          pageWords += take;
+          offset += take;
+          if (pageWords >= WORDS_PER_PAGE) flushPage();
+        }
+      });
+      flushPage();
+      if (pages.length === startPage) {
+        pages.push({ title, chapterTitle: title, chapterIndex, pageNumber: pages.length + 1, wordCount: 0,
+          html: "<h2>" + escapeHTML(title) + "</h2><p>This section contains no readable text.</p>" });
+      }
+      toc.push({ title, pageIndex: startPage });
+    });
+    if (!pages.length) {
+      pages.push({ title: bookTitle || "Full text", chapterTitle: bookTitle || "Full text", chapterIndex: 0, pageNumber: 1, wordCount: 0, html: "<p>No text was available for this edition.</p>" });
+      toc.push({ title: bookTitle || "Full text", pageIndex: 0 });
+    }
+    return { chapters: pages, toc, paged: true, wordsPerPage: WORDS_PER_PAGE };
+  }
+
+  function parseGutenbergText(rawText, book) {
+    const text = stripGutenbergBoilerplate(rawText);
+    if (!text || text.length < 120) throw new Error("The source returned an empty or incomplete text file.");
+    const sections = [];
+    let current = { title: book.title || "Full text", paragraphs: [] };
+    let lineBuffer = [];
+    const flushParagraph = () => {
+      const value = lineBuffer.join(" ").replace(/\s+/g, " ").trim();
+      if (value) current.paragraphs.push(value);
+      lineBuffer = [];
+    };
+    const finish = () => {
+      flushParagraph();
+      if (current.paragraphs.length) sections.push(current);
+    };
+    text.split("\n").forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) { flushParagraph(); return; }
+      if (/^[_*=~-]{4,}$/.test(trimmed)) return;
+      if (isDetectedChapterHeading(trimmed)) {
+        flushParagraph();
+        if (current.paragraphs.length) {
+          sections.push(current);
+          current = { title: trimmed, paragraphs: [] };
+        } else {
+          current.title = trimmed;
+        }
+        return;
+      }
+      lineBuffer.push(trimmed);
+    });
+    finish();
+    return splitTextToPagedEdition(book.title || "Full text", sections);
+  }
+
+  function paragraphsFromHTML(html) {
+    const parsed = new DOMParser().parseFromString(String(html || ""), "text/html");
+    parsed.querySelectorAll("script,style,iframe,object,embed,form,nav,footer,header").forEach((node) => node.remove());
+    const blocks = Array.from(parsed.body.querySelectorAll("p,blockquote,li,pre,dt,dd"))
+      .filter((node) => !node.closest("hgroup"))
+      .map((node) => String(node.innerText || node.textContent || "").replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    if (blocks.length) return blocks;
+    return String(parsed.body.innerText || parsed.body.textContent || "").split(/\n+/).map((value) => value.trim()).filter(Boolean);
+  }
+
+  function paginateChapterRecords(records, title) {
+    const sections = (Array.isArray(records) ? records : []).map((record, index) => ({
+      title: record.chapterTitle || record.title || "Chapter " + (index + 1),
+      paragraphs: paragraphsFromHTML(record.html || record.text || "")
+    }));
+    return splitTextToPagedEdition(title || "Reading edition", sections);
+  }
+
+  function tocFromPages(pages) {
+    const toc = [];
+    const seen = new Set();
+    (pages || []).forEach((page, index) => {
+      const chapterIndex = Number.isFinite(Number(page.chapterIndex)) ? Number(page.chapterIndex) : index;
+      if (seen.has(String(chapterIndex))) return;
+      seen.add(String(chapterIndex));
+      toc.push({ title: page.chapterTitle || page.title || "Chapter " + (chapterIndex + 1), pageIndex: index });
+    });
+    return toc.length ? toc : [{ title: "Beginning", pageIndex: 0 }];
+  }
+
+  async function fetchTextWithTimeout(url) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TEXT_FETCH_TIMEOUT_MS);
+    try {
+      const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const body = await response.text();
+      if (/^\s*\{/.test(body.trim()) && /"contents"\s*:/.test(body)) {
+        try {
+          const parsed = JSON.parse(body);
+          if (typeof parsed.contents === "string") return parsed.contents;
+        } catch (_) {}
+      }
+      if (body.length < 120 || /<(?:!doctype|html|head|body)\b/i.test(body.slice(0, 500))) {
+        throw new Error("Source did not return a usable plain-text ebook.");
+      }
+      return body;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function fetchGutenbergFullText(book) {
+    const id = Number(book.gutenbergId);
+    if (!Number.isInteger(id) || id < 1) throw new Error("This title has no Project Gutenberg plain-text ID.");
+    const defaultURL = "https://www.gutenberg.org/cache/epub/" + id + "/pg" + id + ".txt";
+    const candidates = Array.from(new Set([safeHTTPURL(book.textUrl || ""), defaultURL].filter(Boolean)));
+    const errors = [];
+    for (const sourceURL of candidates) {
+      const attempts = [
+        sourceURL,
+        "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(sourceURL),
+        "https://api.allorigins.win/raw?url=" + encodeURIComponent(sourceURL),
+        "https://corsproxy.io/?url=" + encodeURIComponent(sourceURL)
+      ];
+      for (const attemptURL of attempts) {
+        try {
+          const text = await fetchTextWithTimeout(attemptURL);
+          return Object.assign(parseGutenbergText(text, book), { sourceURL });
+        } catch (error) {
+          errors.push(attemptURL + " → " + error.message);
+        }
+      }
+    }
+    throw new Error("Could not retrieve the full plain-text edition. Direct source and proxy fallbacks failed. " + errors.slice(-4).join(" · "));
+  }
+
+  async function cachePagedEdition(book, edition, sourceName) {
+    const record = {
+      id: book.id, title: book.title || "Untitled", author: book.author || "Author not listed",
+      tier: book.tier || "unlimited", slug: book.slug || "",
+      gutenbergId: book.gutenbergId || null, textUrl: book.textUrl || "",
+      coverUrl: book.coverUrl || "", sourceName: sourceName || book.sourceName || "OpenShelf",
+      sourceUrl: book.sourceUrl || book.url || "", genres: book.genres || [],
+      language: book.language || "en", chapters: edition.chapters, toc: edition.toc,
+      paged: true, wordsPerPage: WORDS_PER_PAGE, approxBytes: 0, savedAt: Date.now()
+    };
+    record.approxBytes = estimateJSONBytes(record);
+    await idbPut(record);
+    await refreshOfflineRecords();
+    return record;
+  }
+
+  async function tryLocalGutenbergText(book) {
+    const id = Number(book.gutenbergId);
+    if (!Number.isInteger(id) || id < 1) return null;
+    try {
+      const response = await fetch(ROOT + "books/pg" + id + ".txt", { cache: "default" });
+      if (!response.ok) return null;
+      const text = await response.text();
+      if (text.length < 120) return null;
+      return parseGutenbergText(text, book);
+    } catch (_) {
+      return null;
+    }
+  }
+
   async function loadBookContent(book) {
+    // First: retrieve the complete reading edition from local IndexedDB.
     const cached = await idbGet(book.id).catch(() => null);
     if (cached && Array.isArray(cached.chapters) && cached.chapters.length) {
-      return { chapters: cached.chapters, cached: true, record: cached };
+      if (cached.paged && Array.isArray(cached.toc)) {
+        return { chapters: cached.chapters, toc: cached.toc, cached: true, record: cached };
+      }
+      const normalized = paginateChapterRecords(cached.chapters, cached.title || book.title);
+      const updated = Object.assign({}, cached, {
+        chapters: normalized.chapters, toc: normalized.toc, paged: true,
+        wordsPerPage: WORDS_PER_PAGE, approxBytes: estimateJSONBytes(normalized.chapters)
+      });
+      await idbPut(updated).catch(() => {});
+      await refreshOfflineRecords();
+      return { chapters: normalized.chapters, toc: normalized.toc, cached: true, record: updated };
     }
     if (book.tier === "import") {
       throw new Error("This imported file is not available in offline storage. Import it again from your device.");
     }
+
+    // Second: try an optional plain-text file stored at ./books/pg<ID>.txt.
+    const localText = await tryLocalGutenbergText(book);
+    if (localText) {
+      const record = await cachePagedEdition(book, localText, "Repository full text");
+      return { chapters: record.chapters, toc: record.toc, cached: false, record };
+    }
+
+    // Third: source plain text, then the sequential CORS-proxy fallback chain.
+    if (book.gutenbergId && (book.textUrl || book.tier === "unlimited")) {
+      try {
+        const fullText = await fetchGutenbergFullText(book);
+        const record = await cachePagedEdition(book, fullText, "Project Gutenberg full text");
+        return { chapters: record.chapters, toc: record.toc, cached: false, record };
+      } catch (sourceError) {
+        // A bundled curated edition still works if a network/proxy is unavailable.
+        const paths = book.contentFiles || readerFiles[book.slug] || [];
+        if (!paths.length) throw sourceError;
+      }
+    }
+
     const paths = book.contentFiles || readerFiles[book.slug] || [];
-    if (!paths.length) throw new Error("This title has no verified in-app reading edition. Open its official source instead.");
+    if (!paths.length) throw new Error("No full-text reader edition is available. Open the original source page instead.");
     const parts = await Promise.all(paths.map(async (path) => {
       const response = await fetch(ROOT + path.replace(/^\.\//, ""), { cache: "default" });
       if (!response.ok) throw new Error("The local reading edition could not be loaded (" + response.status + ").");
       return response.json();
     }));
-    const chapters = parts.flatMap((part) => Array.isArray(part.chapters) ? part.chapters : []);
-    if (!chapters.length) throw new Error("This reading edition contains no chapters.");
-    return { chapters, cached: false, record: null };
+    const sourceChapters = parts.flatMap((part) => Array.isArray(part.chapters) ? part.chapters : []);
+    if (!sourceChapters.length) throw new Error("This reading edition contains no chapters.");
+    const normalized = paginateChapterRecords(sourceChapters, book.title);
+    const record = await cachePagedEdition(book, normalized, book.sourceName || "OpenShelf curated edition");
+    return { chapters: record.chapters, toc: record.toc, cached: false, record };
   }
   function recalculateReaderWordCounts() {
     currentChapterWordCounts = currentChapters.map((chapter) => wordCountFromHTML(chapter.html || ""));
