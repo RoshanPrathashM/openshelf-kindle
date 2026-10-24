@@ -41,6 +41,35 @@ async function waitForCards(page, minimum = 1) {
     page.on("request", request => { if (request.url().startsWith(BASE_URL)) browserMessages.push("request: " + request.method() + " " + request.url()); });
     page.on("response", response => { if (response.url().startsWith(BASE_URL)) browserMessages.push("response: " + response.status() + " " + response.url()); });
     page.on("requestfailed", request => browserMessages.push("request failed: " + request.url() + " · " + request.failure()?.errorText));
+    await page.addInitScript(() => {
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = async (input, init) => {
+        const requestUrl = typeof input === "string" ? input : input && input.url;
+        if (requestUrl && requestUrl.startsWith("https://gutendex.com/books/")) {
+          const url = new URL(requestUrl);
+          const pageNumber = Number(url.searchParams.get("page") || 1);
+          const results = Array.from({ length: 32 }, (_, index) => {
+            const id = 20000 + (pageNumber - 1) * 32 + index;
+            return {
+              id,
+              title: "Smoke Catalogue Book " + id,
+              authors: [{ name: "Smoke Author " + id }],
+              subjects: ["Adventure stories"],
+              bookshelves: ["Adventure"],
+              formats: {},
+              download_count: 10000 - id
+            };
+          });
+          return new Response(JSON.stringify({
+            count: 160,
+            next: pageNumber < 5 ? "https://gutendex.com/books/?languages=en&page=" + (pageNumber + 1) : null,
+            previous: pageNumber > 1 ? "https://gutendex.com/books/?languages=en&page=" + (pageNumber - 1) : null,
+            results
+          }), { status: 200, headers: { "Content-Type": "application/json" } });
+        }
+        return originalFetch(input, init);
+      };
+    });
     await page.route("https://**/*", route => route.abort());
     await page.route("https://gutendex.com/books/**", async route => {
       const url = new URL(route.request().url());
@@ -213,11 +242,22 @@ async function waitForCards(page, minimum = 1) {
     await desktop.setOffline(false);
 
     await page.locator("#load-free-catalogue").click();
-    await page.waitForFunction(
-      () => document.querySelectorAll("#book-grid .book-card").length === 100,
-      null,
-      { timeout: 20000 }
-    );
+    try {
+      await page.waitForFunction(
+        () => document.querySelectorAll("#book-grid .book-card").length === 100,
+        null,
+        { timeout: 20000 }
+      );
+    } catch (error) {
+      const diagnostics = {
+        cardCount: await page.locator("#book-grid .book-card").count().catch(() => -1),
+        status: await page.locator("#result-status").innerText().catch(() => "(unavailable)"),
+        button: await page.locator("#load-free-catalogue").innerText().catch(() => "(unavailable)"),
+        browserMessages: browserMessages.slice(-30),
+        pageErrors
+      };
+      throw new Error("100-title catalogue assertion failed: " + JSON.stringify(diagnostics) + "\\n" + error.message);
+    }
     assert((await page.locator("#book-grid .book-title").allTextContents()).some(t => /Smoke Catalogue Book 20000/.test(t)));
     pass("Browse 100 free books builds a 100-title rights-aware catalogue");
     await desktop.close();
