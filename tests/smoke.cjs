@@ -38,6 +38,8 @@ async function waitForCards(page, minimum = 1) {
     const page = await desktop.newPage();
     page.on("pageerror", error => pageErrors.push("desktop: " + error.message));
     page.on("console", message => { if (message.type() === "error") browserMessages.push("console: " + message.text()); });
+    page.on("request", request => { if (request.url().startsWith(BASE_URL)) browserMessages.push("request: " + request.method() + " " + request.url()); });
+    page.on("response", response => { if (response.url().startsWith(BASE_URL)) browserMessages.push("response: " + response.status() + " " + response.url()); });
     page.on("requestfailed", request => browserMessages.push("request failed: " + request.url() + " · " + request.failure()?.errorText));
     await page.route("https://**/*", route => route.abort());
 
@@ -60,14 +62,20 @@ async function waitForCards(page, minimum = 1) {
       null,
       { timeout: 10000 }
     );
-    await page.waitForFunction(
-      () => {
-        const content = document.getElementById("reader-content");
-        return content && !content.innerText.includes("Opening your book…");
-      },
-      null,
-      { timeout: 20000 }
-    );
+    try {
+      await page.waitForFunction(
+        () => {
+          const content = document.getElementById("reader-content");
+          return content && !content.innerText.includes("Opening your book…");
+        },
+        null,
+        { timeout: 20000 }
+      );
+    } catch (error) {
+      const stuckText = await page.locator("#reader-content").innerText().catch(() => "(unavailable)");
+      throw new Error("Reader remained in loading state. Visible content: " + stuckText.slice(0, 600) +
+        "\nBrowser events:\n" + browserMessages.slice(-30).join("\n") + "\n" + error.message);
+    }
     const firstReaderText = (await page.locator("#reader-content").innerText()).trim();
     if (firstReaderText.includes("Could not load this edition")) {
       throw new Error("Curated reader failed to open " + firstTitle + ": " + firstReaderText.slice(0, 1200) +
