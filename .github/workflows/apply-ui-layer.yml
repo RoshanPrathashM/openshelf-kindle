@@ -56,8 +56,21 @@ jobs:
           if not Path("styles.css").is_file():
               raise SystemExit("styles.css is missing")
 
-          check_js(Path("app.js").read_text(encoding="utf-8"), "app.js")
+          script = Path("app.js").read_text(encoding="utf-8")
+          check_js(script, "app.js")
           check_js(Path("sw.js").read_text(encoding="utf-8"), "sw.js")
+
+          css = Path("styles.css").read_text(encoding="utf-8")
+          if css.count("{") != css.count("}"):
+              raise SystemExit("styles.css contains an unmatched CSS brace")
+          print("PASS CSS brace balance")
+
+          html_ids = set(re.findall(r'\\bid=["\\']([^"\\']+)["\\']', app))
+          script_refs = set(re.findall(r'\\$\\(["\\']([^"\\']+)["\\']\\)', script))
+          missing_ids = sorted(script_refs - html_ids)
+          if missing_ids:
+              raise SystemExit("app.js references missing HTML IDs: " + ", ".join(missing_ids))
+          print("PASS app.js static element IDs")
 
           reader = Path("read/index.html").read_text(encoding="utf-8")
           for match in re.finditer(r"<script([^>]*)>([\s\S]*?)</script>", reader, re.IGNORECASE):
