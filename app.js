@@ -415,12 +415,27 @@
   }
 
   function timeoutFetch(url, options) {
+    const requestOptions = Object.assign({}, options || {});
+    const externalSignal = requestOptions.signal || null;
     const controller = new AbortController();
+    let unlinkAbort = null;
+    if (externalSignal) {
+      if (externalSignal.aborted) controller.abort();
+      else {
+        const abortRequest = () => controller.abort();
+        externalSignal.addEventListener("abort", abortRequest, { once: true });
+        unlinkAbort = () => externalSignal.removeEventListener("abort", abortRequest);
+      }
+    }
     const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
-    return fetch(url, Object.assign({}, options || {}, { signal: controller.signal })).then((response) => {
+    requestOptions.signal = controller.signal;
+    return fetch(url, requestOptions).then((response) => {
       if (!response.ok) throw new Error("Source returned HTTP " + response.status);
       return response.json();
-    }).finally(() => clearTimeout(timer));
+    }).finally(() => {
+      clearTimeout(timer);
+      if (unlinkAbort) unlinkAbort();
+    });
   }
   function externalBook(data) {
     const safeURL = safeHTTPURL(data.url || data.sourceUrl || "");
@@ -431,8 +446,8 @@
       url: safeURL, genres: ["classics"]
     }, data, { url: safeURL, tier: "external", tierLabel: "↗ EXTERNAL FREE" });
   }
-  async function searchGutendex(query) {
-    const data = await timeoutFetch("https://gutendex.com/books/?search=" + encodeURIComponent(query) + "&page=1");
+  async function searchGutendex(query, signal) {
+    const data = await timeoutFetch("https://gutendex.com/books/?search=" + encodeURIComponent(query) + "&page=1", { signal });
     return (data.results || []).slice(0, 12).map((item) => {
       const formats = item.formats || {};
       const cover = formats["image/jpeg"] || "";
@@ -446,8 +461,8 @@
       });
     });
   }
-  async function searchOpenLibrary(query) {
-    const data = await timeoutFetch("https://openlibrary.org/search.json?q=" + encodeURIComponent(query) + "&limit=12");
+  async function searchOpenLibrary(query, signal) {
+    const data = await timeoutFetch("https://openlibrary.org/search.json?q=" + encodeURIComponent(query) + "&limit=12", { signal });
     return (data.docs || []).slice(0, 12).map((item) => {
       const key = item.key || "";
       const cover = item.cover_i ? "https://covers.openlibrary.org/b/id/" + item.cover_i + "-M.jpg" : "";
@@ -461,7 +476,7 @@
       });
     });
   }
-  async function searchTamilWikisource(query) {
+  async function searchTamilWikisource(query, signal) {
     const data = await timeoutFetch("https://ta.wikisource.org/w/api.php?action=query&generator=search&gsrsearch=" + encodeURIComponent(query) + "&gsrnamespace=0&gsrlimit=8&prop=info&inprop=url&format=json&origin=*");
     return Object.values((data.query && data.query.pages) || {}).map((page) => externalBook({
       id: "external:tawikisource:" + page.pageid, sourceKey: "tawikisource:" + page.pageid,
@@ -521,9 +536,9 @@
     }
     return String(metadata[keyPart] || "");
   }
-  async function searchDOAB(query) {
+  async function searchDOAB(query, signal) {
     const params = new URLSearchParams({ query, limit: "8", start: "0", expand: "metadata,bitstreams" });
-    const data = await timeoutFetch("https://directory.doabooks.org/rest/search?" + params.toString(), { headers: { Accept: "application/json" } });
+    const data = await timeoutFetch("https://directory.doabooks.org/rest/search?" + params.toString(), { headers: { Accept: "application/json" }, signal });
     const parent = data.searchResults || data.search_results || data;
     let items = parent.results || parent.searchResult || parent.search_result || data.results || data.items || [];
     if (!Array.isArray(items) && Array.isArray(items.searchResult)) items = items.searchResult;
@@ -559,9 +574,10 @@
     remoteBooks = [];
     renderShelf();
     setStatus("Searching live catalogues…");
+    const signal = searchController.signal;
     const tasks = [
-      searchGutendex(query), searchOpenLibrary(query), searchTamilWikisource(query),
-      searchOpenTextbooks(query), searchDOAB(query)
+      searchGutendex(query, signal), searchOpenLibrary(query, signal), searchTamilWikisource(query, signal),
+      searchOpenTextbooks(query), searchDOAB(query, signal)
     ];
     const settled = await Promise.allSettled(tasks);
     if (token !== searchToken) return;
