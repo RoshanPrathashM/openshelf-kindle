@@ -219,3 +219,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:420px){.brand-name{display:none}.app-header{gap:8px}.header-actions{gap:5px}.book-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 13px}.book-title{font-size:15px}.book-author{font-size:11px}.directory-grid{grid-template-columns:1fr}.reader-tools-row .text-control{display:none}.reader-titlebox{max-width:125px}.reader-topbar .reader-title{font-size:13px}.reader-topbar{flex-wrap:wrap;align-items:center}.reader-titlebox{flex:1 1 150px;max-width:none}.reader-tools-row{flex:1 1 100%;max-width:100%;overflow-x:auto;justify-content:space-between;padding-bottom:2px}.reader-tools-row .icon-button{min-width:31px;width:31px;height:31px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Install prompt floats above the bottom navigation on narrow screens. */
+@media(max-width:720px){
+  #install-app-button{position:fixed;z-index:72;right:12px;bottom:calc(78px + env(safe-area-inset-bottom));box-shadow:var(--shadow)}
+}
