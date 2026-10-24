@@ -275,7 +275,7 @@
     if (/horror|gothic|ghost|vampire|dracula|frankenstein|supernatural/.test(hay)) genres.push("horror");
     if (/adventure|journey|expedition|survival|voyage|travel|island/.test(hay)) genres.push("adventure");
     if (/philosophy|ethics|metaphysics|logic|socrates|plato|aristotle/.test(hay)) genres.push("philosophy");
-    return genres.length ? Array.from(new Set(genres)) : ["classics"];
+    return Array.from(new Set(genres));
   }
   function coverMarkup(book) {
     if (book.coverUrl) {
