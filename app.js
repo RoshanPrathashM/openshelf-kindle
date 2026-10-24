@@ -1668,7 +1668,6 @@
     $("import-button").addEventListener("click", () => $("import-file").click());
     $("import-file").addEventListener("change", () => importLocalFile($("import-file").files && $("import-file").files[0]));
     $("manage-downloads").addEventListener("click", () => setFilter("downloaded"));
-    $("resume-button").addEventListener("click", () => {});
     $("save-external-progress").addEventListener("click", saveExternalProgress);
     $("bookmark-external").addEventListener("click", () => {
       if (!pendingExternal) return;
