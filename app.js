@@ -300,8 +300,9 @@
       openControl = '<button class="book-cover-button" type="button" data-open-book="' + escapeHTML(book.id) + '" aria-label="Read ' + escapeHTML(book.title) + '">' + coverMarkup(book) + '<span class="tier-badge">' + badge + '</span></button>';
     }
     const genreText = (book.genres || []).map((genre) => genreLabels[genre] || genre).join(" · ");
+    const externalProgress = external ? getExternalProgressMap()[book.id] : null;
     const externalLabel = external
-      ? '<p class="book-open-label">Opens on ' + escapeHTML(book.sourceName || "source website") + ' ↗ · Internal Kindle features unavailable</p>'
+      ? '<p class="book-open-label">Opens on ' + escapeHTML(book.sourceName || "source website") + ' ↗ · Internal Kindle features unavailable' + (externalProgress ? ' · ' + Math.round(externalProgress.percent || 0) + '% logged' : '') + '</p>'
       : '<p class="book-open-label">' + (isImport ? "Private file · stored on this device" : "Read in the OpenShelf Kindle Reader") + '</p>';
     const readButton = external
       ? (externalLink ? '<a class="button" href="' + escapeHTML(externalLink) + '" target="_blank" rel="noopener noreferrer" data-external-id="' + escapeHTML(book.id) + '">Open source ↗</a>' : '<button class="button" disabled>Source unavailable</button>')
@@ -1285,6 +1286,7 @@
     $("external-return-title").textContent = "Back from “" + book.title + "”?";
     $("external-return-text").textContent = "This book opened on " + (book.sourceName || "its source website") + ". You can record your progress without importing or copying its text.";
     $("external-percent").value = String((getExternalProgressMap()[book.id] || {}).percent || 10);
+    $("external-page-note").value = String((getExternalProgressMap()[book.id] || {}).note || "");
   }
   function showExternalReturn() {
     const pending = readJSON("openshelf.spa.pending-external.v1", null);
@@ -1293,6 +1295,7 @@
     $("external-return-title").textContent = "Back from “" + pending.title + "”?";
     $("external-return-text").textContent = "Log your progress or save the source to My Library. OpenShelf's internal reader tools are not available for this external edition.";
     $("external-percent").value = String((getExternalProgressMap()[pending.id] || {}).percent || 10);
+    $("external-page-note").value = String((getExternalProgressMap()[pending.id] || {}).note || "");
     $("external-return-banner").classList.remove("hidden");
   }
   function saveExternalProgress() {
@@ -1304,7 +1307,7 @@
     progress[pendingExternal.id] = {
       id: pendingExternal.id, title: pendingExternal.title, author: pendingExternal.author,
       url: pendingExternal.url, sourceName: pendingExternal.sourceName,
-      percent, note: "Manually updated on OpenShelf", updatedAt: Date.now()
+      percent, note: String($("external-page-note").value || "").trim().slice(0, 300), updatedAt: Date.now()
     };
     writeJSON(KEYS.externalProgress, progress);
     $("external-return-banner").classList.add("hidden");
