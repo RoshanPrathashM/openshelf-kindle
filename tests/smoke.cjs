@@ -45,8 +45,34 @@ async function waitForCards(page, minimum = 1) {
       const originalFetch = window.fetch.bind(window);
       window.fetch = async (input, init) => {
         const requestUrl = typeof input === "string" ? input : input && input.url;
+        if (requestUrl && requestUrl.includes("/cache/epub/123/pg123.txt")) {
+          const firstChapter = Array.from({ length: 920 }, () => "unabridged").join(" ");
+          const secondChapter = Array.from({ length: 420 }, () => "chapterword").join(" ");
+          const text = "*** START OF THE PROJECT GUTENBERG EBOOK FULL TEXT SMOKE NOVEL ***\n\nCHAPTER I\n\n" +
+            firstChapter + "\n\nCHAPTER II\n\n" + secondChapter +
+            "\n\n*** END OF THE PROJECT GUTENBERG EBOOK FULL TEXT SMOKE NOVEL ***";
+          return new Response(text, { status: 200, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+        }
+        if (requestUrl && requestUrl.startsWith("https://api.dictionaryapi.dev/api/v2/entries/en/")) {
+          return new Response(JSON.stringify([{
+            word: "unabridged",
+            meanings: [{ partOfSpeech: "adjective", definitions: [{ definition: "Complete; not shortened or abridged." }] }]
+          }]), { status: 200, headers: { "Content-Type": "application/json" } });
+        }
         if (requestUrl && requestUrl.startsWith("https://gutendex.com/books/")) {
           const url = new URL(requestUrl);
+          if (url.searchParams.has("search")) {
+            return new Response(JSON.stringify({
+              count: 1, next: null, previous: null,
+              results: [{
+                id: 123, title: "Full Text Smoke Novel",
+                authors: [{ name: "Browser Test Author" }],
+                subjects: ["Adventure"], bookshelves: ["Adventure"],
+                formats: { "text/plain; charset=utf-8": "https://www.gutenberg.org/cache/epub/123/pg123.txt" },
+                download_count: 400
+              }]
+            }), { status: 200, headers: { "Content-Type": "application/json" } });
+          }
           const pageNumber = Number(url.searchParams.get("page") || 1);
           const results = Array.from({ length: 32 }, (_, index) => {
             const id = 20000 + (pageNumber - 1) * 32 + index;
@@ -265,6 +291,58 @@ async function waitForCards(page, minimum = 1) {
     }
     assert((await page.locator("#book-grid .book-title").allTextContents()).some(t => /Smoke Catalogue Book 20000/.test(t)));
     pass("Browse 100 free books builds a 100-title rights-aware catalogue");
+
+    await page.locator("#global-search").fill("Full Text Smoke Novel");
+    await page.waitForFunction(
+      () => Array.from(document.querySelectorAll("#book-grid .book-title")).some(node => node.innerText.includes("Full Text Smoke Novel")),
+      null, { timeout: 12000 }
+    );
+    await page.locator('#book-grid [data-open-book="external:gutenberg:123"]').first().click();
+    await page.waitForFunction(
+      () => document.getElementById("reader-title").innerText.includes("Full Text Smoke Novel") &&
+        document.getElementById("reader-content").innerText.includes("unabridged"),
+      null, { timeout: 20000 }
+    );
+    const fullPageCount = Number(await page.locator("#reader-page-slider").getAttribute("max"));
+    assert(fullPageCount >= 5, "The full text should be split into multiple approximately 260-word pages");
+    assert(await page.locator("#reader-toc-select option").count() >= 2, "Detected chapter headings should populate the TOC");
+    await page.locator("#reader-page-number").fill("4");
+    await page.locator("#reader-page-number").press("Enter");
+    await page.waitForFunction(() => document.getElementById("reader-page-number").value === "4", null, { timeout: 5000 });
+    pass("Gutendex text/plain books open as paginated full text with chapter and page navigation");
+
+    await page.evaluate(() => {
+      const reader = document.getElementById("reader-content");
+      const textNode = Array.from(reader.querySelectorAll("p")).map(p => p.firstChild).find(node => node && node.nodeType === Node.TEXT_NODE && node.textContent.includes("unabridged"));
+      if (!textNode) throw new Error("No selectable source text was found");
+      const offset = textNode.textContent.indexOf("unabridged");
+      const range = document.createRange();
+      range.setStart(textNode, offset);
+      range.setEnd(textNode, offset + "unabridged".length);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      reader.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      window.prompt = () => "A note attached to this word.";
+    });
+    await page.waitForFunction(
+      () => !document.getElementById("reader-selection-toolbar").classList.contains("hidden"),
+      null, { timeout: 5000 }
+    );
+    await page.locator("#selection-define-word").click();
+    await page.waitForFunction(
+      () => document.getElementById("selection-definition").innerText.includes("Complete; not shortened"),
+      null, { timeout: 5000 }
+    );
+    await page.locator("#selection-add-note").click();
+    await page.waitForFunction(
+      () => document.getElementById("toast").innerText.includes("Private note saved"),
+      null, { timeout: 5000 }
+    );
+    await page.locator('[data-selection-highlight="green"]').click();
+    await page.waitForFunction(() => document.querySelector("#reader-content .os-highlight-green"), null, { timeout: 5000 });
+    pass("selection toolbar supports dictionary definitions, selected-text notes and colored highlighting");
+    await page.locator("#exit-reader").click();
     await desktop.close();
 
     // Verify the actual narrow-screen layout and the mobile bottom navigation.
