@@ -1423,7 +1423,8 @@
         range.setStart(node, index);
         range.setEnd(node, index + text.length);
         const wrapper = document.createElement(item.kind === "highlight" ? "mark" : "span");
-        wrapper.className = item.kind === "highlight" ? "os-highlight" : "os-underline";
+        wrapper.className = item.kind === "highlight" ? "os-highlight os-highlight-" + (item.color || "yellow") : "os-underline";
+        if (item.kind === "highlight") wrapper.dataset.highlightColor = item.color || "yellow";
         try { range.surroundContents(wrapper); } catch (_) {}
         break;
       }
@@ -1681,7 +1682,8 @@
       page: pageIndex(),
       scrollRatio: readScrollRatio(),
       mode: currentMode,
-      label: label || (currentChapters[currentChapterIndex] && currentChapters[currentChapterIndex].title) || "Page " + (pageIndex() + 1),
+      layout: "pages-v2",
+      label: label || (currentChapters[currentChapterIndex] && (currentChapters[currentChapterIndex].chapterTitle || currentChapters[currentChapterIndex].title)) || "Page " + (pageIndex() + 1),
       percent: estimatePercentage(),
       createdAt: Date.now()
     };
@@ -1691,15 +1693,14 @@
   }
   function restoreBookmark(bookmark) {
     if (!currentBook) return;
-    goToChapter(bookmark.chapter || 0, "forward");
+    let targetPage = Number(bookmark.chapter) || 0;
+    if (bookmark.layout !== "pages-v2" && currentTOC.length) {
+      targetPage = Number((currentTOC[Math.max(0, Math.min(targetPage, currentTOC.length - 1))] || {}).pageIndex) || 0;
+    }
+    goToChapter(targetPage, targetPage >= currentChapterIndex ? "forward" : "back");
     requestAnimationFrame(() => {
-      const reader = $("reader-content");
-      if (bookmark.mode === "paginated" && currentMode === "paginated") {
-        const gap = parseFloat(getComputedStyle(reader).columnGap) || 0;
-        reader.scrollLeft = (Number(bookmark.page) || 0) * (reader.clientWidth + gap);
-      } else {
-        reader.scrollTop = (Number(bookmark.scrollRatio) || 0) * Math.max(0, reader.scrollHeight - reader.clientHeight);
-      }
+      const area = $("reader-main");
+      area.scrollTop = (Number(bookmark.scrollRatio) || 0) * Math.max(0, area.scrollHeight - area.clientHeight);
       updateReaderProgressUI();
       storeProgress();
     });
@@ -1724,7 +1725,7 @@
     const noteText = String(body || "").trim();
     if (!noteText) { toast("Write a note first."); return; }
     const notes = getBookNotes();
-    notes.push({ id: "note:" + Date.now() + ":" + Math.random().toString(36).slice(2, 7), kind: "note", text: "", body: noteText, chapter: currentChapterIndex, page: pageIndex(), createdAt: Date.now() });
+    notes.push({ id: "note:" + Date.now() + ":" + Math.random().toString(36).slice(2, 7), kind: "note", text: "", body: noteText, chapter: currentChapterIndex, page: pageIndex(), layout: "pages-v2", createdAt: Date.now() });
     putBookNotes(notes);
     $("note-input").value = "";
     toast("Private note saved.");
@@ -1736,7 +1737,48 @@
     if (!$("reader-content").contains(range.commonAncestorContainer)) return;
     lastReaderSelection = { range: range.cloneRange(), text: String(selection).trim(), chapter: currentChapterIndex };
   }
-  function wrapSelection(kind) {
+  function selectedReaderText() {
+    const selection = window.getSelection();
+    const selectedText = selection && selection.rangeCount && !selection.isCollapsed ? String(selection).trim() : "";
+    if (selectedText && selection.rangeCount && $("reader-content").contains(selection.getRangeAt(0).commonAncestorContainer)) {
+      lastReaderSelection = { range: selection.getRangeAt(0).cloneRange(), text: selectedText, chapter: currentChapterIndex };
+      return selectedText;
+    }
+    return lastReaderSelection && lastReaderSelection.chapter === currentChapterIndex ? lastReaderSelection.text : "";
+  }
+
+  function hideSelectionToolbar() {
+    const toolbar = $("reader-selection-toolbar");
+    if (toolbar) toolbar.classList.add("hidden");
+  }
+
+  function scheduleSelectionToolbar() {
+    clearTimeout(selectionHideTimer);
+    const selection = window.getSelection();
+    const toolbar = $("reader-selection-toolbar");
+    if (!currentBook || $("reader-view").classList.contains("hidden") || !selection || !selection.rangeCount || selection.isCollapsed) {
+      if (!toolbar.matches(":hover")) hideSelectionToolbar();
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    if (!$("reader-content").contains(range.commonAncestorContainer) || !String(selection).trim()) {
+      hideSelectionToolbar(); return;
+    }
+    rememberReaderSelection();
+    const rect = range.getBoundingClientRect();
+    if (!rect || (!rect.width && !rect.height)) return;
+    const width = Math.min(350, window.innerWidth - 20);
+    const left = Math.max(10, Math.min(window.innerWidth - width - 10, rect.left + rect.width / 2 - width / 2));
+    toolbar.style.width = width + "px";
+    toolbar.style.left = left + "px";
+    toolbar.style.top = Math.max(8, rect.top - 60) + "px";
+    toolbar.classList.remove("hidden");
+    const word = String(selection).trim();
+    $("selection-define-word").disabled = !/^[A-Za-z]+(?:['-][A-Za-z]+)?$/.test(word);
+    $("selection-definition").textContent = "";
+  }
+
+  function wrapSelection(kind, color) {
     if (!currentBook) return;
     const selection = window.getSelection();
     let range = selection && selection.rangeCount && !selection.isCollapsed ? selection.getRangeAt(0) : null;
@@ -1744,16 +1786,13 @@
     if ((!range || !selectedText) && lastReaderSelection && lastReaderSelection.chapter === currentChapterIndex) {
       range = lastReaderSelection.range;
       selectedText = lastReaderSelection.text;
-      try {
-        const restored = window.getSelection();
-        restored.removeAllRanges();
-        restored.addRange(range);
-      } catch (_) {}
+      try { selection.removeAllRanges(); selection.addRange(range); } catch (_) {}
     }
     if (!range || !selectedText) { toast("Select text in the book first."); return; }
     if (!$("reader-content").contains(range.commonAncestorContainer)) { toast("Select text inside the reader."); return; }
     const wrapper = document.createElement(kind === "highlight" ? "mark" : "span");
-    wrapper.className = kind === "highlight" ? "os-highlight" : "os-underline";
+    wrapper.className = kind === "highlight" ? "os-highlight os-highlight-" + (color || "yellow") : "os-underline";
+    if (kind === "highlight") wrapper.dataset.highlightColor = color || "yellow";
     try {
       wrapper.appendChild(range.extractContents());
       range.insertNode(wrapper);
@@ -1763,11 +1802,73 @@
       return;
     }
     const notes = getBookNotes();
-    notes.push({ id: kind + ":" + Date.now() + ":" + Math.random().toString(36).slice(2, 7), kind, text: selectedText.slice(0, 1200), body: "", chapter: currentChapterIndex, page: pageIndex(), createdAt: Date.now() });
+    notes.push({
+      id: kind + ":" + Date.now() + ":" + Math.random().toString(36).slice(2, 7),
+      kind, color: color || "yellow", text: selectedText.slice(0, 1200), body: "",
+      chapter: currentChapterIndex, page: pageIndex(), layout: "pages-v2", createdAt: Date.now()
+    });
     putBookNotes(notes);
     lastReaderSelection = null;
+    hideSelectionToolbar();
     toast(kind === "highlight" ? "Selection highlighted and saved." : "Underline saved.");
   }
+
+  function addNoteForSelection() {
+    if (!currentBook) return;
+    const text = selectedReaderText();
+    if (!text) { toast("Select text in the book first."); return; }
+    const body = window.prompt("Add a private note for this selection:", "");
+    if (body == null || !body.trim()) return;
+    const notes = getBookNotes();
+    notes.push({
+      id: "note-selection:" + Date.now() + ":" + Math.random().toString(36).slice(2, 7),
+      kind: "note", text: text.slice(0, 1200), body: body.trim().slice(0, 3000),
+      chapter: currentChapterIndex, page: pageIndex(), layout: "pages-v2", createdAt: Date.now()
+    });
+    putBookNotes(notes);
+    hideSelectionToolbar();
+    toast("Private note saved for the selected quote.");
+  }
+
+  async function defineSelectedWord() {
+    const word = selectedReaderText();
+    if (!/^[A-Za-z]+(?:['-][A-Za-z]+)?$/.test(word)) {
+      toast("Select a single English word to look it up."); return;
+    }
+    const output = $("selection-definition");
+    output.textContent = "Looking up “" + word + "”…";
+    try {
+      const response = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word), { cache: "no-store" });
+      if (!response.ok) throw new Error(response.status === 404 ? "No definition found." : "Dictionary is unavailable.");
+      const data = await response.json();
+      const definitions = [];
+      (data || []).forEach((entry) => (entry.meanings || []).forEach((meaning) => {
+        (meaning.definitions || []).slice(0, 2).forEach((item) => {
+          if (item.definition) definitions.push((meaning.partOfSpeech ? meaning.partOfSpeech + ": " : "") + item.definition);
+        });
+      }));
+      output.textContent = definitions.length ? definitions.slice(0, 3).join(" · ") : "No definition found.";
+    } catch (error) {
+      output.textContent = error.message || "Dictionary lookup failed. Check your connection.";
+    }
+  }
+
+  async function copySelectedQuote() {
+    const text = selectedReaderText();
+    if (!text) { toast("Select text to copy first."); return; }
+    const quote = "“" + text + "” — " + (currentBook.title || "OpenShelf");
+    try { await navigator.clipboard.writeText(quote); }
+    catch (_) {
+      const input = document.createElement("textarea");
+      input.value = quote; input.style.position = "fixed"; input.style.opacity = "0";
+      document.body.appendChild(input); input.select();
+      try { document.execCommand("copy"); } catch (_) {}
+      input.remove();
+    }
+    hideSelectionToolbar();
+    toast("Quote copied.");
+  }
+
   function exportNotes() {
     if (!currentBook) return;
     const payload = { title: currentBook.title, author: currentBook.author, exportedAt: new Date().toISOString(), notes: getBookNotes(), bookmarks: getBookBookmarks() };
@@ -1895,7 +1996,9 @@
     const row = rows[0];
     const book = currentBookLookup(row.id) || row;
     $("continue-card").classList.remove("hidden");
-    $("continue-cover").src = safeHTTPURL(book.coverUrl || row.coverUrl || "") || "";
+    const continueCover = safeHTTPURL(book.coverUrl || row.coverUrl || "");
+    if (continueCover) $("continue-cover").setAttribute("src", continueCover);
+    else $("continue-cover").removeAttribute("src");
     $("continue-cover").alt = "Cover of " + (book.title || row.title || "your book");
     $("continue-title").textContent = book.title || row.title || "Continue reading";
     $("continue-description").textContent = (book.author || row.author || "Author not listed") + " · " + Math.round(row.percent || 0) + "% complete";
@@ -1917,7 +2020,8 @@
       const metadata = {
         id: book.id, title: book.title, author: book.author, tier: book.tier,
         coverUrl: book.coverUrl || "", url: book.url || "", sourceName: book.sourceName || "",
-        sourceUrl: book.sourceUrl || "", genres: book.genres || [], slug: book.slug || "",
+        sourceUrl: book.sourceUrl || "", textUrl: book.textUrl || "", gutenbergId: book.gutenbergId || null,
+        genres: book.genres || [], slug: book.slug || "",
         contentFiles: book.contentFiles || [], year: book.year || "", language: book.language || "en",
         searchableText: book.searchableText || ""
       };
@@ -2158,8 +2262,21 @@
     $("bookmark-page").addEventListener("click", () => addBookmark());
     $("bookmark-current").addEventListener("click", () => addBookmark());
     $("note-form").addEventListener("submit", (event) => { event.preventDefault(); savePrivateNote($("note-input").value); });
-    $("add-highlight").addEventListener("click", () => wrapSelection("highlight"));
+    $("add-highlight").addEventListener("click", () => wrapSelection("highlight", "yellow"));
     $("add-underline").addEventListener("click", () => wrapSelection("underline"));
+    document.querySelectorAll("[data-selection-highlight]").forEach((button) => {
+      button.addEventListener("click", () => wrapSelection("highlight", button.dataset.selectionHighlight));
+    });
+    $("selection-add-note").addEventListener("click", addNoteForSelection);
+    $("selection-define-word").addEventListener("click", defineSelectedWord);
+    $("selection-copy-quote").addEventListener("click", copySelectedQuote);
+    $("reader-content").addEventListener("mouseup", () => scheduleSelectionToolbar());
+    $("reader-content").addEventListener("touchend", () => scheduleSelectionToolbar());
+    document.addEventListener("selectionchange", () => {
+      clearTimeout(selectionToolbarTimer);
+      selectionToolbarTimer = setTimeout(scheduleSelectionToolbar, 80);
+    });
+    $("reader-selection-toolbar").addEventListener("mousedown", (event) => event.preventDefault());
     $("export-notes").addEventListener("click", exportNotes);
     $("notes-list").addEventListener("click", (event) => {
       const button = event.target.closest("[data-delete-note]");
@@ -2185,6 +2302,14 @@
     $("import-file").addEventListener("change", () => importLocalFile($("import-file").files && $("import-file").files[0]));
     $("manage-downloads").addEventListener("click", () => setFilter("downloaded"));
     $("load-free-catalogue").addEventListener("click", loadHundredFreeBooks);
+    $("load-more-free-books").addEventListener("click", loadMoreFreeBooks);
+    $("install-app-button").addEventListener("click", installOpenShelf);
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault(); deferredInstallPrompt = event; $("install-app-button").classList.remove("hidden");
+    });
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null; $("install-app-button").classList.add("hidden"); toast("OpenShelf installed successfully.");
+    });
     $("save-external-progress").addEventListener("click", saveExternalProgress);
     $("bookmark-external").addEventListener("click", () => {
       if (!pendingExternal) return;
@@ -2254,6 +2379,19 @@
         }
       }
     });
+  }
+
+  async function installOpenShelf() {
+    if (!deferredInstallPrompt) {
+      toast("To install OpenShelf, open your browser menu and choose Install app or Add to Home Screen.");
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    try {
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice && choice.outcome === "accepted") $("install-app-button").classList.add("hidden");
+    } catch (_) {}
+    deferredInstallPrompt = null;
   }
 
   function updateNetworkStatus() {
