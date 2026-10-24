@@ -244,13 +244,18 @@ async function waitForCards(page, minimum = 1) {
     await page.locator("#load-free-catalogue").click();
     try {
       await page.waitForFunction(
-        () => document.querySelectorAll("#book-grid .book-card").length === 100,
+        () => {
+          const cards = Array.from(document.querySelectorAll("#book-grid .book-card"));
+          const publicCards = cards.filter(card => !String(card.dataset.bookId || "").startsWith("import:"));
+          return publicCards.length === 100;
+        },
         null,
         { timeout: 20000 }
       );
     } catch (error) {
       const diagnostics = {
         cardCount: await page.locator("#book-grid .book-card").count().catch(() => -1),
+        publicCardCount: await page.locator("#book-grid .book-card:not([data-book-id^=\"import:\"])").count().catch(() => -1),
         status: await page.locator("#result-status").innerText().catch(() => "(unavailable)"),
         button: await page.locator("#load-free-catalogue").innerText().catch(() => "(unavailable)"),
         browserMessages: browserMessages.slice(-30),
