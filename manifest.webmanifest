@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "OpenShelf — Open Reading Library",
+  "short_name": "OpenShelf",
+  "description": "Discover and read public-domain and open books in a calm reading space.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f7f5ef",
+  "theme_color": "#5a4632",
+  "categories": [
+    "books",
+    "education",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
