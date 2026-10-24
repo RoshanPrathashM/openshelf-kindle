@@ -88,12 +88,12 @@ const shelfCount=document.getElementById("shelfCount"),savedEmpty=document.getEl
 const externalSection=document.getElementById("external-section"),externalGrid=document.getElementById("external-grid");
 const externalTitle=document.getElementById("external-title"),externalCount=document.getElementById("external-count"),externalState=document.getElementById("external-state");
 const savedKey="openshelf-saved-library-v1";
-let books=[],booksLoaded=false,cat="all",view="home",searchTimer=null,searchRequest=0;
+let books=[],booksLoaded=false,cat="all",view="home",searchTimer=null,searchRequest=0,lastExternalResults=[];
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function safeUrl(s){try{const u=new URL(s,location.href);return ["http:","https:"].includes(u.protocol)?u.href:"#";}catch{return "#";}}
 function readSaved(){try{const v=JSON.parse(localStorage.getItem(savedKey)||"[]");return Array.isArray(v)?v:[];}catch{return [];}}
 function isSaved(b){return readSaved().some(x=>x.key===b.key);}
-function toggleSaved(b){let a=readSaved();if(a.some(x=>x.key===b.key))a=a.filter(x=>x.key!==b.key);else a.push({key:b.key,title:b.title,author:b.author,cover:b.cover||"",reader:b.reader||"",url:b.url||"",source:b.source||"",kind:b.kind||"local",category:b.category||"classics"});localStorage.setItem(savedKey,JSON.stringify(a));renderShelf();}
+function toggleSaved(b){let a=readSaved();if(a.some(x=>x.key===b.key))a=a.filter(x=>x.key!==b.key);else a.push({key:b.key,title:b.title,author:b.author,cover:b.cover||"",reader:b.reader||"",url:b.url||"",source:b.source||"",kind:b.kind||"local",category:b.category||"classics"});localStorage.setItem(savedKey,JSON.stringify(a));renderShelf();if(lastExternalResults.length)externalGrid.innerHTML=lastExternalResults.map(cardHtml).join("");}
 function categoryFor(b){if(b.language==="ta")return"tamil";const v=(b.category||"").toLowerCase();if(/education|textbook|course|engineering|mathematics|programming/.test(v))return"education";if(/science|technology|computing|physics|biology/.test(v))return"science";if(/history|historical/.test(v))return"history";return"classics";}
 function bookHref(b){return b.kind==="external"?safeUrl(b.url):(String(b.reader||"").startsWith("./read/")?b.reader:"./read/?book="+encodeURIComponent(b.slug));}
 function cardHtml(b){const href=bookHref(b),saved=isSaved(b),cover=safeUrl(b.cover||"");
@@ -112,7 +112,8 @@ function renderExternal(results,q,token){
  const localNames=new Set(books.map(b=>normalTitle(b.title)));
  const seen=new Set(),deduped=[];
  for(const b of results){const k=normalTitle(b.title);if(!k||seen.has(k))continue;seen.add(k);deduped.push(b);}
- const final=deduped.filter(b=>!(b.kind==="gutenberg"&&localNames.has(normalTitle(b.title))));
+ const final=deduped.filter(b=>!localNames.has(normalTitle(b.title)));
+ lastExternalResults=final;
  externalSection.classList.remove("hidden");externalTitle.textContent="More books for “"+q+"”";externalCount.textContent=final.length+" source results";externalGrid.innerHTML=final.map(cardHtml).join("");
  externalState.classList.toggle("hidden",final.length>0);externalState.textContent=final.length?"":"No external matches were returned. Try another title or search the source collections directly.";
 }
