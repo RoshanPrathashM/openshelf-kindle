@@ -1,75 +1,99 @@
 # OpenShelf
 
-**A free, Kindle-inspired reading library for discovering open books and reading supported editions inside one calm workspace.**
+**A free, Kindle-inspired web reading library for discovering open books, reading curated editions in-app, and keeping private notes.**
 
-Live site: https://roshanprathashm.github.io/openshelf-kindle/  
-Repository: https://github.com/RoshanPrathashM/openshelf-kindle
+- **Live app:** https://roshanprathashm.github.io/openshelf-kindle/
+- **Repository:** https://github.com/RoshanPrathashM/openshelf-kindle
 
-OpenShelf is an open-source prototype designed for phones, tablets and laptops. The current build focuses on a clean cover-first homepage, local reading, external book discovery, and lightweight reading tools that run in the browser.
+OpenShelf is a static progressive web app built for phone, tablet and laptop browsers. It uses a single-page shell plus separate CSS and JavaScript files; no build step, account, paid API key or application server is required for the basic experience.
 
-## Current build
+## Current architecture
 
-### Library and discovery
-- Responsive cover grid, book search, categories, a **Continue Reading** card and a device-local **My Library** shelf.
-- Search supported local titles and live results from Project Gutenberg via Gutendex, Open Library, Tamil Wikisource, Open Textbook Library and DOAB (Directory of Open Access Books). The provider APIs are best-effort and a failed source is shown as unavailable instead of silently counted.
-- Local full-text editions open in the OpenShelf reader. Results that are not hosted here open at their source/catalogue, where access and rights vary.
-- Cards can be saved to the user's local library. Saved items, reading history and reading settings are not synced between devices.
-- **OpenShelf Unlimited** is a discovery concept: one search across legitimate catalogues. It is not a subscription and does not make every result free to redistribute or readable inside OpenShelf.
+### 1. Two-tier catalogue
 
-### Reader
-- Local reader editions currently include 10 English works: *The Time Machine*, *The Call of the Wild*, *The Jungle Book*, *Hamlet*, *The Adventures of Sherlock Holmes*, *Frankenstein*, *The Picture of Dorian Gray*, *Dracula*, *Alice's Adventures in Wonderland*, and *The Secret Garden*.
-- Reading controls for font size, line spacing, typeface, warm-paper/sepia/dark themes, a one-tap reader theme switch, and page-turn mode with horizontal swiping and transition animation. Continuous scrolling remains available.
-- English dictionary lookup through a public dictionary API; an internet connection is required for definitions.
-- Select text to highlight or underline it, add private notes, delete saved note/highlight entries, and export notes to a text file.
-- Pencil mode lets touch and pointer users draw over the visible reading area. Drawings are stored locally by book/chapter/page or scroll region; the current drawing can be cleared or exported as PNG.
-- Reading position and reader settings are saved locally, including the current page in page-turn mode.
+**OpenShelf Unlimited** contains the curated local full-text editions with source and rights notes recorded in this repository. They open in the built-in reader and can be saved to browser storage for offline reading.
 
-### Install and offline use
-- The site includes a web-app manifest and a service worker. Compatible browsers may offer **Add to Home Screen / Install** for an app-like experience.
-- The service worker caches the app shell and same-origin files as they are opened. Previously visited local reader content may remain available offline.
-- External catalogues, covers and dictionary lookups need a network connection. Offline caching is best-effort; users should open a book at least once while online before relying on it offline.
+**External Free** contains live catalogue records that have not been verified for local redistribution. Those cards open their official/source page in a new tab and explicitly state that OpenShelf's internal reader tools are unavailable for that source edition. Users can save the source record to My Library and manually record a completion percentage plus a page/reading note when they return.
 
-## Run locally
+A free-to-read source is not automatically a licence to copy or redistribute. Project Gutenberg and other providers may have different territorial copyright status, edition licences or access conditions. The word “Unlimited” describes the curated in-app shelf, not a promise that every book in every country is rights-free.
 
-Open `index.html` through a local web server rather than a `file://` URL if you want the service worker and fetch-based library index to work. No build step is required.
+### 2. Local reading shelf
 
-For example, with Python installed:
+The curated local catalogue currently has 10 English text editions:
+- *The Time Machine* — H. G. Wells
+- *The Call of the Wild* — Jack London
+- *The Jungle Book* — Rudyard Kipling
+- *Hamlet* — William Shakespeare
+- *The Adventures of Sherlock Holmes* — Arthur Conan Doyle
+- *Frankenstein* — Mary Shelley
+- *The Picture of Dorian Gray* — Oscar Wilde
+- *Dracula* — Bram Stoker
+- *Alice’s Adventures in Wonderland* — Lewis Carroll
+- *The Secret Garden* — Frances Hodgson Burnett
 
-```bash
-python3 -m http.server 8000
-```
+The local library manifest is at [content/library-index.json](content/library-index.json). Curated text data lives in [content/](content/), with the chapter-file map in <code>app.js</code>.
 
-Then open `http://localhost:8000/`.
+### 3. Kindle-style reader
 
-## Rights and limits
+For curated editions and private local imports, the fullscreen reader provides:
+- Four reading themes: Paperwhite, Sepia, Kindle Sage and Night E-Ink.
+- Paginated horizontal columns with next/previous buttons, left/right arrows and touch swipe; smooth-scroll mode is also available.
+- Serif, sans-serif and monospace type; font size, line spacing and reading-margin controls.
+- Progress percentage, estimated reading time remaining and saved reading position.
+- Bookmarks, private notes, text highlights, underlines and export of notes/bookmarks as JSON.
+- One-click offline storage with IndexedDB. A title can be removed from offline storage without deleting its separately saved reading-progress metadata.
+- Personal import for <code>.txt</code>, <code>.md</code>, <code>.markdown</code>, <code>.html</code> and <code>.htm</code> files. Imported text stays in the user's own browser storage and is not published or shared.
 
-OpenShelf is a **discovery layer plus a small local reading library**, not a mirror of every book online. Being free to read is not the same as permission to copy or redistribute. Each provider and edition can have different rules, and copyright status can differ by country.
+The reader sanitizes source chapter markup before inserting it into the page. The built-in content is loaded from this repository, avoiding cross-origin reader embedding for those editions.
 
-- Local full texts belong in the repository only when the underlying work and the source edition may lawfully be redistributed.
-- If rights are unclear, link to the authorised source instead of copying the book.
-- Project Gutenberg records should not be treated as globally public domain without checking the relevant country's rules.
-- Open Library is a discovery/catalogue service, not a blanket redistribution licence.
-- See [RIGHTS_POLICY.md](RIGHTS_POLICY.md), [catalog-registry.json](catalog-registry.json), and [CONTRIBUTING.md](CONTRIBUTING.md) before proposing content.
+### 4. Unified live search
 
-## What is not implemented yet
+After two or more characters, search runs with a 400 ms debounce against:
+- Project Gutenberg via Gutendex
+- Open Library
+- Tamil Wikisource
+- Open Textbook Library
+- Directory of Open Access Books (DOAB)
 
-- **No central user-upload server.** The site is static; visitors cannot publish a book to every user's library by uploading a file. A public contribution system needs a backend, storage, file validation, licence/rights evidence, abuse controls and a review process. Personal browser-only imports are a separate feature from public redistribution.
-- No user accounts, cloud sync, collaborative notes, paid subscription, or user analytics backend.
-- No guarantee of complete global book coverage or a deduplicated global count. Search results come from five live provider integrations (Gutendex/Project Gutenberg, Open Library, Tamil Wikisource, Open Textbook Library and DOAB) and can overlap. Search and publisher APIs can change or temporarily fail.
-- Tamil Wikisource is available through live source search, but this repository does not currently host a curated Tamil full-text shelf.
-- Pencil drawings and notes stay in this browser profile and are not backed up automatically. Export notes before clearing site data or moving to another device.
-- The page-turn and pencil experiences are an early web prototype; test them on the target phone/tablet before relying on them for long reading sessions.
+The app filters the local shelf immediately while showing loading skeletons for external results. Requests time out; stale searches are cancelled where supported; source failures are shown without hiding successful results. Provider APIs and CORS policies can change, so source discovery is best-effort. Unverified records stay external.
 
-## Project structure
+### 5. Offline and device storage
 
-- `index.html` — responsive home, local shelf and multi-source discovery.
-- `read/index.html` — local book reader and reading tools.
-- `content/` — hosted text editions and `library-index.json` manifest.
-- `books/` — book information/SEO landing pages.
-- `sources/` — directory of legitimate book collections.
-- `catalog-registry.json` — catalogue sources and ingestion rules.
-- `manifest.webmanifest` and `sw.js` — install metadata and offline caching.
+- Small preferences, saved-book metadata, progress, bookmarks and annotations are stored in <code>localStorage</code>.
+- Full saved book content and imported text are stored in the IndexedDB database **OpenShelfOfflineDB**.
+- The Device Storage panel displays offline-book count and approximate content size, along with the browser's reported storage quota when available.
+- The PWA manifest and service worker cache the home page, app script, stylesheet, reader shell and local catalogue index. A title should be saved offline before relying on it without a network.
 
-## Feedback and contributions
+Browser storage is finite and can be cleared by users or browser policy. “Unlimited” does not mean unlimited device disk space. Data is local to the current browser/profile and does not automatically sync to another device.
 
-For the current prototype, the safest useful contribution is a verified source suggestion with title, author, official URL, language, licence/rights evidence, and the country or jurisdiction reviewed. Please do not submit copyrighted book files unless permission to redistribute them is documented.
+## Deploy and run locally
+
+GitHub Pages deploys the static files directly from the repository. To run locally, use a local web server instead of opening the HTML as a <code>file://</code> URL:
+
+<pre><code>python3 -m http.server 8000</code></pre>
+
+Then open <code>http://localhost:8000/</code>.
+
+## Important product limitations
+
+- OpenShelf is a book discovery and reading app, not a subscription database containing every book on the internet.
+- Live catalogue search does not mean that every result can be hosted, downloaded or redistributed. The app only uses the built-in reader for curated local editions or files the user personally imports.
+- This GitHub Pages version has **no server-side public uploads, user accounts, cloud notes, cross-device sync, payment system or public contribution moderation**. A book a user imports is private to that device/browser; it is not sent to the repository or other users.
+- An external title's access, licence, reader UI and availability remain controlled by its source.
+- Offline storage depends on IndexedDB and the browser's site-storage quota. Back up exported notes if they matter to you.
+- Syntax and manifest/catalogue validation run through GitHub Actions; real-device interaction, browser-specific CORS and offline behavior should still be tested on target phones/tablets.
+
+## Main files
+
+- <code>index.html</code> — app shell, library filters, directory and fullscreen reader markup.
+- <code>styles.css</code> — responsive app and reader styling.
+- <code>app.js</code> — catalogue search, IndexedDB, reading position, themes, bookmarks, notes, annotations and imports.
+- <code>sw.js</code> — service worker and static-shell cache.
+- <code>manifest.webmanifest</code> — install metadata.
+- <code>content/library-index.json</code> — curated local shelf and source notes.
+- <code>catalog-registry.json</code> — sources and content-ingestion policy.
+- <code>read/index.html</code> — the earlier standalone reader page retained for compatibility.
+
+## Contribution guidance
+
+Suggest books by submitting the official source URL, title, author, language, exact licence/rights evidence, and jurisdiction reviewed. Do not add book files to the local hosted shelf unless redistribution permission is documented. Where terms are uncertain, link to the authorised source.
