@@ -288,7 +288,7 @@ async function waitForCards(page, minimum = 1) {
       null, { timeout: 20000 }
     );
     const fullPageCount = Number(await page.locator("#reader-page-slider").getAttribute("max"));
-    assert(fullPageCount >= 5, "The full text should be split into multiple approximately 260-word pages");
+    assert(fullPageCount >= 5, "The full text should be split into multiple approximately 260-word pages; max=" + fullPageCount + ", tocOptions=" + await page.locator("#reader-toc-select option").count() + ", label=" + await page.locator("#reader-page-label").innerText() + ", contentPreview=" + (await page.locator("#reader-content").innerText()).slice(0, 220));
     assert(await page.locator("#reader-toc-select option").count() >= 2, "Detected chapter headings should populate the TOC");
     await page.locator("#reader-page-number").fill("4");
     await page.locator("#reader-page-number").press("Enter");
