@@ -75,13 +75,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .book-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:24px 18px;max-width:1100px;margin:0 auto}
 .book-card{min-width:0;position:relative}
 .book-cover-button{position:relative;display:block;width:100%;aspect-ratio:2/3;padding:0;border:0;border-radius:5px;background:var(--accent-soft);box-shadow:0 5px 15px #1c241a1a;overflow:hidden;text-align:left;transition:transform .18s,box-shadow .18s}
-.book-card:hover .book-cover-button{transform:translateY(-3px);box-shadow:0 10px 22px #1c241a26}
+.book-card:hover .book-cover-button{transform:translateY(-3px);box-shadow:0 10px 22px #1c241a26}\n.book-card .save-button{top:39px}
 .book-cover-button img{display:block;width:100%;height:100%;object-fit:cover}
 .cover-fallback{display:grid;place-items:center;width:100%;height:100%;padding:15px;text-align:center;color:#fff;background:linear-gradient(145deg,#426b56,#1e3429);font:500 clamp(16px,1.6vw,22px)/1.2 Georgia,serif}
 .tier-badge{position:absolute;left:7px;top:7px;max-width:calc(100% - 14px);padding:5px 7px;border-radius:5px;background:#fffdf0ee;color:#38533f;font-size:9px;font-weight:950;letter-spacing:.025em;box-shadow:0 2px 6px #0001}
 .tier-badge.external{background:#f4eee3;color:#725030}
 .save-button{position:absolute;right:7px;top:7px;display:grid;place-items:center;width:32px;height:32px;border:1px solid #ffffffb8;border-radius:50%;background:#fffdf0ed;color:#44392d;font-size:18px;box-shadow:0 2px 7px #0002}
-.tier-badge+.save-button{top:35px}
+.tier-badge+.save-button{top:35px}\n .book-card .save-button{top:35px}
 .save-button[aria-pressed="true"]{background:#315b48;color:#fff;border-color:#315b48}
 .book-title{font:600 15px/1.3 Georgia,"Times New Roman",serif;margin:10px 0 3px;letter-spacing:-.01em}
 .book-author{font-size:11px;color:var(--muted);margin:0 0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -170,7 +170,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .hero h1{font-size:34px}.continue-card{grid-template-columns:49px minmax(0,1fr);padding:13px;margin:18px 0 25px;gap:12px}.continue-card .cover{width:49px;height:70px}.continue-card>.button{grid-column:1/-1;width:100%}.continue-card h2{font-size:15px}.continue-card p{font-size:11px}
  .book-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 11px}.book-title{font-size:13px}.tier-badge{font-size:8px;left:4px;top:4px;padding:4px 5px}.save-button{width:28px;height:28px;right:4px;top:4px}.tier-badge+.save-button{top:31px}
  .filter-bar{align-items:start}.filter-tabs{flex-wrap:nowrap;overflow:auto;max-width:100%;padding-bottom:5px}.filter-chip{flex:0 0 auto}
- .mobile-bottom-nav{position:fixed;z-index:50;display:grid;grid-template-columns:repeat(4,1fr);left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom));padding:7px;background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:17px;box-shadow:0 8px 30px #0002}.mobile-bottom-nav button{border:0;background:transparent;color:var(--muted);border-radius:10px;padding:5px 2px;font-size:10px;font-weight:750;display:flex;flex-direction:column;align-items:center;gap:2px}.mobile-bottom-nav button span{font-size:17px}.mobile-bottom-nav button.active{background:var(--accent-soft);color:var(--ink)}
+ .mobile-bottom-nav{position:fixed;z-index:50;display:grid;grid-template-columns:repeat(5,1fr);left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom));padding:7px;background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:17px;box-shadow:0 8px 30px #0002}.mobile-bottom-nav button{border:0;background:transparent;color:var(--muted);border-radius:10px;padding:5px 2px;font-size:10px;font-weight:750;display:flex;flex-direction:column;align-items:center;gap:2px}.mobile-bottom-nav button span{font-size:17px}.mobile-bottom-nav button.active{background:var(--accent-soft);color:var(--ink)}
  .directory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.reader-topbar{min-height:56px;gap:6px;padding:8px}.reader-title{font-size:15px}.reader-tools-row{gap:4px;flex-wrap:nowrap}.reader-tools-row .button{min-height:34px;padding:6px 8px;font-size:11px}.reader-tools-row .icon-button{min-width:34px;width:34px;height:34px}.reader-main{padding:20px 13px}.reader-page{font-size:20px;line-height:1.78}.reader-page.paginated{height:100%;min-height:280px;column-gap:26px}.reader-footer{padding-left:10px;padding-right:10px}
  .reader-nav .center-label{max-width:120px}.external-return{bottom:80px}
 }
