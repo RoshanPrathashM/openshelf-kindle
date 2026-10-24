@@ -1297,34 +1297,49 @@
     return progress;
   }
   function readScrollRatio() {
-    const reader = currentMode === "paginated" ? $("reader-content") : $("reader-main");
-    if (currentMode === "paginated") {
-      const max = Math.max(0, reader.scrollWidth - reader.clientWidth);
-      return max > 0 ? Math.max(0, Math.min(1, reader.scrollLeft / max)) : 0;
-    }
-    const max = Math.max(0, reader.scrollHeight - reader.clientHeight);
-    return max > 0 ? Math.max(0, Math.min(1, reader.scrollTop / max)) : 0;
+    const area = $("reader-main");
+    const max = Math.max(0, area.scrollHeight - area.clientHeight);
+    return max > 0 ? Math.max(0, Math.min(1, area.scrollTop / max)) : 0;
   }
   function pageCount() {
-    const reader = $("reader-content");
-    if (currentMode !== "paginated") return 1;
-    const gap = parseFloat(getComputedStyle(reader).columnGap) || 0;
-    return Math.max(1, Math.ceil((reader.scrollWidth + gap) / Math.max(1, reader.clientWidth + gap)));
+    return Math.max(1, currentChapters.length || 1);
   }
   function pageIndex() {
-    if (currentMode !== "paginated") return 0;
-    const reader = $("reader-content");
-    const gap = parseFloat(getComputedStyle(reader).columnGap) || 0;
-    return Math.max(0, Math.round(reader.scrollLeft / Math.max(1, reader.clientWidth + gap)));
+    return Math.max(0, Math.min(currentChapterIndex, pageCount() - 1));
   }
   function estimatePercentage() {
     if (!currentChapters.length) return 0;
     let priorWords = 0;
     for (let i = 0; i < currentChapterIndex; i += 1) priorWords += getChapterWordCount(currentChapters, i);
-    const chapterWords = getChapterWordCount(currentChapters, currentChapterIndex);
-    const ratio = readScrollRatio();
+    const pageWords = getChapterWordCount(currentChapters, currentChapterIndex);
+    const area = $("reader-main");
+    const ratio = Math.max(0, Math.min(1, readScrollRatio()));
+    const pageRatio = area.scrollHeight <= area.clientHeight ? 0.5 : ratio;
     const total = Math.max(1, getBookWords(currentChapters));
-    return Math.max(0, Math.min(100, Math.round((priorWords + chapterWords * ratio) / total * 100)));
+    return Math.max(0, Math.min(100, Math.round((priorWords + pageWords * pageRatio) / total * 100)));
+  }
+  function populateReaderTOC() {
+    const select = $("reader-toc-select");
+    if (!select) return;
+    select.innerHTML = currentTOC.map((item) =>
+      '<option value="' + Number(item.pageIndex) + '">' + escapeHTML(item.title || "Chapter") + '</option>'
+    ).join("");
+  }
+  function syncPageControls() {
+    const total = pageCount();
+    const page = Math.min(total, pageIndex() + 1);
+    const slider = $("reader-page-slider");
+    const number = $("reader-page-number");
+    const totalNode = $("reader-page-total");
+    if (slider) { slider.max = String(total); slider.value = String(page); slider.setAttribute("aria-valuetext", "Page " + page + " of " + total); }
+    if (number) { number.max = String(total); number.value = String(page); }
+    if (totalNode) totalNode.textContent = String(total);
+    if ($("reader-page-label")) $("reader-page-label").textContent = "Page " + page + " of " + total;
+    const toc = $("reader-toc-select");
+    if (toc && currentTOC.length) {
+      const current = currentTOC.slice().reverse().find((item) => Number(item.pageIndex) <= currentChapterIndex) || currentTOC[0];
+      toc.value = String(current.pageIndex);
+    }
   }
   function updateReaderProgressUI() {
     if (!currentBook || !currentChapters.length) return;
@@ -1334,17 +1349,14 @@
     $("reader-progress-label").textContent = percent + "% · " + (remainingMinutes ? remainingMinutes + " min left" : "Finished");
     $("reader-progress-fill").style.width = percent + "%";
     $("reader-progress-bar").setAttribute("aria-valuenow", String(percent));
-    $("reader-chapter-label").textContent = (currentChapters[currentChapterIndex] && currentChapters[currentChapterIndex].title ? currentChapters[currentChapterIndex].title : "Chapter " + (currentChapterIndex + 1));
-    $("reader-page-label").textContent = currentMode === "paginated"
-      ? "Page " + (pageIndex() + 1) + " of " + pageCount()
-      : "Chapter " + (currentChapterIndex + 1) + " of " + currentChapters.length;
-    const scrollArea = $("reader-main");
-    const atScrollStart = scrollArea.scrollTop <= 3;
-    const atScrollEnd = scrollArea.scrollTop >= Math.max(0, scrollArea.scrollHeight - scrollArea.clientHeight - 3);
-    const atStart = currentChapterIndex === 0 && (currentMode === "paginated" ? pageIndex() === 0 : atScrollStart);
-    const atEnd = currentChapterIndex === currentChapters.length - 1 && (currentMode === "paginated" ? pageIndex() >= pageCount() - 1 : atScrollEnd);
-    $("previous-page").disabled = atStart;
-    $("next-page").disabled = atEnd;
+    const pageRecord = currentChapters[currentChapterIndex];
+    $("reader-chapter-label").textContent = (pageRecord && (pageRecord.chapterTitle || pageRecord.title)) || "Chapter";
+    syncPageControls();
+    const area = $("reader-main");
+    const atScrollStart = area.scrollTop <= 3;
+    const atScrollEnd = area.scrollTop >= Math.max(0, area.scrollHeight - area.clientHeight - 3);
+    $("previous-page").disabled = currentChapterIndex === 0 && atScrollStart;
+    $("next-page").disabled = currentChapterIndex >= currentChapters.length - 1 && atScrollEnd;
   }
   function storeProgress() {
     if (!currentBook || !currentChapters.length) return;
@@ -1362,6 +1374,7 @@
       mode: currentMode,
       percent,
       words: getBookWords(currentChapters),
+      layout: "pages-v2",
       updatedAt: Date.now()
     };
     writeJSON(KEYS.progress, progress);
@@ -1375,17 +1388,16 @@
   }
   function restorePosition(progress) {
     if (!progress) return;
-    currentChapterIndex = Math.max(0, Math.min(Number(progress.chapter) || 0, currentChapters.length - 1));
+    let targetPage = Number(progress.chapter) || 0;
+    if (progress.layout !== "pages-v2" && currentTOC.length) {
+      const oldChapter = Math.max(0, Math.min(targetPage, currentTOC.length - 1));
+      targetPage = Number(currentTOC[oldChapter].pageIndex) || 0;
+    }
+    currentChapterIndex = Math.max(0, Math.min(targetPage, currentChapters.length - 1));
     renderReaderChapter(false);
     requestAnimationFrame(() => {
-      const reader = $("reader-content");
-      if (currentMode === "paginated") {
-        const gap = parseFloat(getComputedStyle(reader).columnGap) || 0;
-        reader.scrollLeft = (Number(progress.page) || 0) * (reader.clientWidth + gap);
-      } else {
-        const area = $("reader-main");
-        area.scrollTop = (Number(progress.scrollRatio) || 0) * Math.max(0, area.scrollHeight - area.clientHeight);
-      }
+      const area = $("reader-main");
+      area.scrollTop = (Number(progress.scrollRatio) || 0) * Math.max(0, area.scrollHeight - area.clientHeight);
       updateReaderProgressUI();
     });
   }
@@ -1444,35 +1456,47 @@
     currentBook = book;
     currentChapterIndex = 0;
     currentChapters = [];
+    currentTOC = [];
     currentMode = getCurrentSettings().mode || "paginated";
     $("reader-view").classList.remove("hidden");
     document.body.style.overflow = "hidden";
     $("reader-title").textContent = book.title || "Reading";
-    $("reader-author").textContent = (book.author || "Author not listed") + " · " + (book.tier === "import" ? "Private imported file" : "Curated edition; regional copyright status may vary");
-    $("reader-content").innerHTML = '<div class="empty-state"><strong>Opening your book…</strong><span>Loading a local reading edition or offline copy.</span></div>';
-    $("reader-offline-button").textContent = "Checking offline copy…";
+    const sourceLabel = book.tier === "import" ? "Private imported file" :
+      book.gutenbergId ? "Project Gutenberg plain text · copyright status may vary by country" :
+      "OpenShelf curated text · regional rights can vary";
+    $("reader-author").textContent = (book.author || "Author not listed") + " · " + sourceLabel;
+    const loadingLabel = book.gutenbergId
+      ? "Fetching full unabridged edition from Project Gutenberg…"
+      : "Preparing the complete reading edition…";
+    $("reader-content").innerHTML = '<div class="book-loading" role="status" aria-live="polite"><span class="loading-spinner" aria-hidden="true"></span><strong>' + escapeHTML(loadingLabel) + '</strong><p>Building navigable pages of about 260 words each. Your reading edition is cached on this device.</p><div class="loading-skeleton"></div><div class="loading-skeleton short"></div></div>';
+    $("reader-offline-button").textContent = "Preparing offline copy…";
     $("reader-offline-button").disabled = true;
     $("reader-offline-button").classList.remove("hidden");
+    hideSelectionToolbar();
     closeDrawer();
     applyReaderSettings();
     try {
       const loaded = await loadBookContent(book);
       if (!currentBook || currentBook.id !== book.id) return;
       currentChapters = loaded.chapters;
+      currentTOC = Array.isArray(loaded.toc) && loaded.toc.length ? loaded.toc : tocFromPages(loaded.chapters);
+      populateReaderTOC();
       recalculateReaderWordCounts();
       const position = getProgressMap()[book.id];
       if (position) restorePosition(position);
       else renderReaderChapter(false);
       $("reader-offline-button").disabled = false;
+      await refreshOfflineRecords();
       const offline = offlineRecords.some((item) => item.id === book.id);
       $("reader-offline-button").textContent = offline ? "✓ Saved Offline (Remove)" : "⬇ Save Offline";
       $("reader-offline-button").setAttribute("aria-pressed", String(offline));
-      if (!offline && !loaded.cached) setStatus("Ready to read " + book.title + ". Save it offline to keep the full text on this device.");
+      if (!loaded.cached) setStatus("Ready to read " + book.title + " · " + currentChapters.length + " pages at about 260 words per page.");
+      updateStorageIndicator();
       storeProgress();
     } catch (error) {
       $("reader-content").innerHTML = '<div class="empty-state"><strong>Could not load this edition</strong><span>' + escapeHTML(error.message) + '</span><p><button class="button" id="reader-retry" type="button">Try again</button> ' +
-        (book.sourceUrl ? '<a class="button" href="' + escapeHTML(book.sourceUrl) + '" target="_blank" rel="noopener noreferrer">Open source ↗</a>' : "") +
-        '</p><p>This reader only opens curated or user-imported content inside OpenShelf. Unverified live catalogue records open at their original source instead.</p></div>';
+        (book.sourceUrl || book.url ? '<a class="button" href="' + escapeHTML(book.sourceUrl || book.url) + '" target="_blank" rel="noopener noreferrer">Open official source ↗</a>' : "") +
+        '</p><p>OpenShelf caches a full-text edition after it can retrieve a plain-text or curated source. Source access and copyright status vary by region.</p></div>';
       const retry = $("reader-retry");
       if (retry) retry.addEventListener("click", () => openReader(book, readerReturnFocus));
       $("reader-offline-button").disabled = false;
@@ -1511,36 +1535,18 @@
 
   function turnPage(direction) {
     if (!currentChapters.length) return;
-    const reader = $("reader-content");
-    if (currentMode === "paginated") {
-      const gap = parseFloat(getComputedStyle(reader).columnGap) || 0;
-      const step = reader.clientWidth + gap;
-      const max = Math.max(0, reader.scrollWidth - reader.clientWidth);
-      if (direction > 0 && reader.scrollLeft < max - 3) {
-        animatePageTurn(1);
-        reader.classList.remove("anim-forward", "anim-back"); void reader.offsetWidth; reader.classList.add("anim-forward");
-        reader.scrollTo({ left: Math.min(max, reader.scrollLeft + step), behavior: "smooth" });
-        updateReaderProgressUI(); scheduleProgressSave(); return;
-      }
-      if (direction < 0 && reader.scrollLeft > 3) {
-        animatePageTurn(-1);
-        reader.classList.remove("anim-forward", "anim-back"); void reader.offsetWidth; reader.classList.add("anim-back");
-        reader.scrollTo({ left: Math.max(0, reader.scrollLeft - step), behavior: "smooth" });
-        updateReaderProgressUI(); scheduleProgressSave(); return;
-      }
-    } else {
-      const area = $("reader-main");
-      const max = Math.max(0, area.scrollHeight - area.clientHeight);
-      if (direction > 0 && area.scrollTop < max - 3) {
-        animatePageTurn(1);
-        area.scrollBy({ top: area.clientHeight * 0.88, behavior: "smooth" });
-        updateReaderProgressUI(); scheduleProgressSave(); return;
-      }
-      if (direction < 0 && area.scrollTop > 3) {
-        animatePageTurn(-1);
-        area.scrollBy({ top: -area.clientHeight * 0.88, behavior: "smooth" });
-        updateReaderProgressUI(); scheduleProgressSave(); return;
-      }
+    const area = $("reader-main");
+    const max = Math.max(0, area.scrollHeight - area.clientHeight);
+    // A logical 260-word page can overflow on narrow screens or with large type.
+    if (direction > 0 && area.scrollTop < max - 3) {
+      animatePageTurn(1);
+      area.scrollBy({ top: area.clientHeight * 0.88, behavior: "smooth" });
+      updateReaderProgressUI(); scheduleProgressSave(); return;
+    }
+    if (direction < 0 && area.scrollTop > 3) {
+      animatePageTurn(-1);
+      area.scrollBy({ top: -area.clientHeight * 0.88, behavior: "smooth" });
+      updateReaderProgressUI(); scheduleProgressSave(); return;
     }
     if (direction > 0 && currentChapterIndex < currentChapters.length - 1) {
       animatePageTurn(1);
@@ -1548,8 +1554,11 @@
     } else if (direction < 0 && currentChapterIndex > 0) {
       animatePageTurn(-1);
       goToChapter(currentChapterIndex - 1, "back");
-      if (currentMode === "paginated") requestAnimationFrame(() => { const el = $("reader-content"); el.scrollLeft = Math.max(0, el.scrollWidth - el.clientWidth); updateReaderProgressUI(); });
-      else requestAnimationFrame(() => { const el = $("reader-main"); el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight); updateReaderProgressUI(); });
+      requestAnimationFrame(() => {
+        const previousArea = $("reader-main");
+        previousArea.scrollTop = Math.max(0, previousArea.scrollHeight - previousArea.clientHeight);
+        updateReaderProgressUI();
+      });
     } else {
       toast(direction > 0 ? "End of this book." : "Beginning of this book.");
     }
