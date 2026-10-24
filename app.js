@@ -1903,6 +1903,9 @@
       genres: book.genres || [],
       language: book.language || "en",
       chapters: loaded.chapters,
+      toc: loaded.toc || currentTOC || [],
+      paged: true,
+      wordsPerPage: WORDS_PER_PAGE,
       savedAt: Date.now()
     };
     record.approxBytes = estimateJSONBytes(record);
@@ -2234,6 +2237,31 @@
     $("mode-scroll").addEventListener("click", () => saveReaderSetting("mode", "scroll"));
     $("previous-page").addEventListener("click", () => turnPage(-1));
     $("next-page").addEventListener("click", () => turnPage(1));
+    $("reader-toc-select").addEventListener("change", () => {
+      const targetPage = Number($("reader-toc-select").value);
+      goToChapter(targetPage, targetPage >= currentChapterIndex ? "forward" : "back");
+      storeProgress();
+    });
+    $("reader-page-slider").addEventListener("input", () => {
+      $("reader-page-number").value = $("reader-page-slider").value;
+      $("reader-page-label").textContent = "Page " + $("reader-page-slider").value + " of " + pageCount();
+    });
+    $("reader-page-slider").addEventListener("change", () => {
+      const targetPage = Number($("reader-page-slider").value) - 1;
+      goToChapter(targetPage, targetPage >= currentChapterIndex ? "forward" : "back");
+      storeProgress();
+    });
+    const jumpToEnteredPage = () => {
+      const value = Number($("reader-page-number").value);
+      if (!Number.isFinite(value) || value < 1) { syncPageControls(); return; }
+      const targetPage = Math.max(0, Math.min(pageCount() - 1, Math.round(value) - 1));
+      goToChapter(targetPage, targetPage >= currentChapterIndex ? "forward" : "back");
+      storeProgress();
+    };
+    $("reader-page-number").addEventListener("change", jumpToEnteredPage);
+    $("reader-page-number").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") { event.preventDefault(); jumpToEnteredPage(); }
+    });
     $("reader-content").addEventListener("scroll", () => {
       updateReaderProgressUI();
       scheduleProgressSave();
