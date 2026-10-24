@@ -1543,6 +1543,11 @@
       searchToken += 1;
       clearTimeout(searchTimer);
       searchRunning = query.trim().length >= 2;
+      if (!searchRunning) {
+        if (searchController) searchController.abort();
+        remoteBooks = [];
+        setStatus("Showing curated books. Enter at least two characters to search live sources.");
+      }
       renderShelf();
       searchTimer = setTimeout(() => runLiveSearch(query, searchToken), SEARCH_DEBOUNCE_MS);
     });
