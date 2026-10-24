@@ -1313,6 +1313,8 @@
     $("external-return-banner").classList.add("hidden");
     toast("External reading progress saved.");
     if (localStorage.getItem("openshelf.spa.pending-external.v1")) localStorage.removeItem("openshelf.spa.pending-external.v1");
+    pendingExternal = null;
+    lastExternalOpened = null;
   }
 
   function localPlainTextToChapters(text, filename) {
