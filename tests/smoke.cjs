@@ -5,6 +5,7 @@ const { chromium } = require("playwright");
 
 const BASE_URL = process.env.OPENSHELF_BASE_URL || "http://127.0.0.1:4173/";
 const pageErrors = [];
+const browserMessages = [];
 const passed = [];
 
 function pass(label) {
@@ -36,6 +37,8 @@ async function waitForCards(page, minimum = 1) {
     });
     const page = await desktop.newPage();
     page.on("pageerror", error => pageErrors.push("desktop: " + error.message));
+    page.on("console", message => { if (message.type() === "error") browserMessages.push("console: " + message.text()); });
+    page.on("requestfailed", request => browserMessages.push("request failed: " + request.url() + " · " + request.failure()?.errorText));
     await page.route("https://**/*", route => route.abort());
 
     const response = await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
@@ -60,13 +63,17 @@ async function waitForCards(page, minimum = 1) {
     await page.waitForFunction(
       () => {
         const content = document.getElementById("reader-content");
-        return content && content.innerText.trim().length > 150 &&
-          !content.innerText.includes("Opening your book…") &&
-          !content.innerText.includes("Could not load this edition");
+        return content && !content.innerText.includes("Opening your book…");
       },
       null,
       { timeout: 20000 }
     );
+    const firstReaderText = (await page.locator("#reader-content").innerText()).trim();
+    if (firstReaderText.includes("Could not load this edition")) {
+      throw new Error("Curated reader failed to open " + firstTitle + ": " + firstReaderText.slice(0, 1200) +
+        "\nBrowser diagnostics: " + browserMessages.slice(-12).join("\n"));
+    }
+    assert(firstReaderText.length > 50, "Reader should contain actual book text; diagnostics: " + browserMessages.slice(-12).join("\n"));
     assert.equal((await page.locator("#reader-title").innerText()).trim(), firstTitle);
     pass("a curated edition opens inside the built-in reader");
 
