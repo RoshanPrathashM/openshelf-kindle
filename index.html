@@ -101,7 +101,7 @@ const shelfCount=document.getElementById("shelfCount"),savedEmpty=document.getEl
 const externalSection=document.getElementById("external-section"),externalGrid=document.getElementById("external-grid");
 const externalTitle=document.getElementById("external-title"),externalCount=document.getElementById("external-count"),externalState=document.getElementById("external-state");
 const savedKey="openshelf-saved-library-v1";
-let books=[],booksLoaded=false,cat="all",view="home",searchTimer=null,searchRequest=0,lastExternalResults=[];
+let books=[],booksLoaded=false,cat="all",view="home",searchTimer=null,searchRequest=0,lastExternalResults=[],openTextbooksPromise=null;
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function safeUrl(s){try{const u=new URL(s,location.href);return ["http:","https:"].includes(u.protocol)?u.href:"#";}catch{return "#";}}
 function readSaved(){try{const v=JSON.parse(localStorage.getItem(savedKey)||"[]");return Array.isArray(v)?v:[];}catch{return [];}}
@@ -112,6 +112,53 @@ function bookHref(b){return b.kind==="external"?safeUrl(b.url):(String(b.reader|
 function cardHtml(b){const href=bookHref(b),saved=isSaved(b),cover=safeUrl(b.cover||"");
 return '<article class="book"><div class="coverwrap"><a href="'+esc(href)+'" '+(b.kind==="external"?'target="_blank" rel="noopener noreferrer"':'')+' aria-label="Open '+esc(b.title)+'"><img src="'+esc(cover)+'" alt="Cover of '+esc(b.title)+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.classList.remove(\'hidden\')"><div class="covertext hidden">'+esc(b.title)+'</div></a><button type="button" class="bookmark" data-save="'+esc(b.key)+'" aria-pressed="'+(saved?"true":"false")+'" aria-label="'+(saved?"Remove from":"Save to")+' My Library">'+(saved?"♥":"♡")+'</button><span class="badge">'+esc(b.badge||(b.kind==="external"?"SOURCE LINK":"READ HERE"))+'</span></div><h3><a href="'+esc(href)+'" '+(b.kind==="external"?'target="_blank" rel="noopener noreferrer"':'')+'>'+esc(b.title)+'</a></h3><p>'+esc(b.author||"Author not listed")+'</p>'+(b.kind==="external"?'<span class="source-tag">'+esc(b.source||"External catalogue")+'</span>':'<span class="source-tag">OpenShelf reader</span>')+'</article>';
 }
+
+function normalizeOpenTextbook(item){
+ const title=item.title||item.name||item.book_title||"Untitled textbook";
+ const av=item.authors||item.author||item.contributors||item.creator||[];
+ const authors=Array.isArray(av)?av.map(a=>typeof a==="string"?a:(a.name||a.full_name||a.display_name||"")).filter(Boolean).join(", "):String(av||"");
+ const id=item.id||item.textbook_id||item.textbookId||item.slug||title;
+ const url=item.textbook_url||item.textbookUrl||item.book_url||item.bookUrl||item.website||item.url||item.link||
+   (item.permalink?"https://open.umn.edu/opentextbooks/textbooks/"+encodeURIComponent(item.permalink):"https://open.umn.edu/opentextbooks/");
+ const cover=item.cover_url||item.coverUrl||item.cover_image||item.coverImage||item.thumbnail_url||item.image_url||item.image||"";
+ const subjects=item.subjects||item.subject||item.disciplines||item.categories||[];
+ return {key:"external:opentextbooks:"+String(id),kind:"external",title,author:authors||"Author not listed",cover:typeof cover==="string"?cover:"",url,source:"Open Textbook Library",category:"education",badge:"OPEN TEXTBOOK · CHECK LICENCE",subjects:Array.isArray(subjects)?subjects.join(" "):String(subjects||""),description:item.description||item.summary||item.about||""};
+}
+function searchOpenTextbooks(query){
+ if(!openTextbooksPromise){
+  openTextbooksPromise=fetch("https://open.umn.edu/opentextbooks/textbooks.json",{headers:{Accept:"application/json"}})
+   .then(r=>{if(!r.ok)throw Error("Open Textbook Library");return r.json();})
+   .then(raw=>{const items=Array.isArray(raw)?raw:(raw.textbooks||raw.results||raw.data||raw.items||[]);if(!Array.isArray(items))throw Error("Unexpected textbook catalogue response");return items;})
+   .catch(err=>{openTextbooksPromise=null;throw err;});
+ }
+ const tokens=query.toLowerCase().split(/\s+/).filter(Boolean);
+ return openTextbooksPromise.then(items=>items.map(normalizeOpenTextbook).filter(b=>{
+  const hay=(b.title+" "+b.author+" "+b.subjects+" "+b.description).toLowerCase();
+  return tokens.every(t=>hay.includes(t));
+ }).slice(0,8));
+}
+function doabField(item,keyPart){
+ const metadata=item.metadata;if(!metadata)return "";
+ if(Array.isArray(metadata)){const found=[];metadata.forEach(m=>{const k=String(m.key||m.name||m.element||"").toLowerCase();if(k.includes(keyPart.toLowerCase())){let v=m.value||m.values||m.text||"";if(Array.isArray(v))v=v.map(x=>typeof x==="string"?x:(x.value||"")).join(", ");if(v)found.push(String(v));}});return found.join("; ");}
+ const v=metadata[keyPart];return Array.isArray(v)?String(v[0]?.value||v[0]||""):String(v||"");
+}
+function normalizeDoabItem(item){
+ const title=doabField(item,"dc.title")||item.title||item.name||"Open-access book";
+ const author=doabField(item,"dc.contributor.author")||doabField(item,"dc.creator");
+ const handle=item.handle||item.identifier||item.id||"";
+ const url=item.link||item.url||(handle&&String(handle).startsWith("http")?handle:(handle?"https://directory.doabooks.org/handle/"+handle:"https://www.doabooks.org/"));
+ const subjects=doabField(item,"dc.subject");
+ const rawCategory=(title+" "+subjects).toLowerCase();
+ const category=/history|historical|archaeology/.test(rawCategory)?"history":/science|engineering|technology|computer|mathemat|physics|biology|medicine/.test(rawCategory)?"science":"education";
+ return {key:"external:doab:"+String(item.uuid||item.id||handle||title),kind:"external",title,author:author||"Academic publisher / contributor",cover:"",url,source:"Directory of Open Access Books",category,badge:"OPEN ACCESS · CHECK LICENCE",subjects,description:doabField(item,"dc.description.abstract")||doabField(item,"dc.description")||""};
+}
+function searchDoab(query){
+ const params=new URLSearchParams({query:query,limit:"8",start:"0",expand:"metadata,bitstreams"});
+ return fetch("https://directory.doabooks.org/rest/search?"+params.toString(),{headers:{Accept:"application/json"}})
+  .then(r=>{if(!r.ok)throw Error("Directory of Open Access Books");return r.json();})
+  .then(data=>{const sr=data.searchResults||data.search_results||data;let rows=sr.results||sr.searchResult||sr.search_result||data.results||data.items||[];if(!Array.isArray(rows)&&Array.isArray(rows.searchResult))rows=rows.searchResult;return Array.isArray(rows)?rows.map(normalizeDoabItem):[];});
+}
+
 function renderShelf(){
  let list=books.map(b=>({...b,key:"local:"+b.slug,kind:"local",category:categoryFor(b)}));
  const query=search.value.trim().toLowerCase();
@@ -128,19 +175,23 @@ function renderExternal(results,q,token){
  for(const b of results){const k=normalTitle(b.title);if(!k||seen.has(k))continue;seen.add(k);deduped.push(b);}
  const final=deduped.filter(b=>!localNames.has(normalTitle(b.title)));
  lastExternalResults=final;
- externalSection.classList.remove("hidden");externalTitle.textContent="More books for “"+q+"”";externalCount.textContent=final.length+" source results";externalGrid.innerHTML=final.map(cardHtml).join("");
- externalState.classList.toggle("hidden",final.length>0);externalState.textContent=final.length?"":"No external matches were returned. Try another title or search the source collections directly.";
+ const visible=cat==="all"?final:final.filter(b=>b.category===cat);
+ externalSection.classList.remove("hidden");externalTitle.textContent="More books for “"+q+"”";externalCount.textContent=visible.length+" source results"+(cat==="all"?"":" in this category");externalGrid.innerHTML=visible.map(cardHtml).join("");
+ externalState.classList.toggle("hidden",visible.length>0);
+ externalState.textContent=visible.length?"":(final.length?"Search results exist, but none match the selected category. Choose All books to see every source result.":"No external matches were returned. Try another title or search the source collections directly.");
 }
 async function runGlobalSearch(q){
  const token=++searchRequest;
  if(q.length<2){externalSection.classList.add("hidden");externalGrid.innerHTML="";externalState.classList.add("hidden");return;}
- externalSection.classList.remove("hidden");externalTitle.textContent="Searching open collections…";externalCount.textContent="";externalGrid.innerHTML="";externalState.textContent="Checking Project Gutenberg, Open Library and Tamil Wikisource…";externalState.classList.remove("hidden");
+ externalSection.classList.remove("hidden");externalTitle.textContent="Searching open collections…";externalCount.textContent="";externalGrid.innerHTML="";externalState.textContent="Checking Project Gutenberg, Open Library, Tamil Wikisource, open textbooks and academic books…";externalState.classList.remove("hidden");
  const results=[];
  const enc=encodeURIComponent(q);
  const tasks=[
   fetch("https://gutendex.com/books/?search="+enc).then(r=>{if(!r.ok)throw Error("Gutendex");return r.json();}).then(d=>(d.results||[]).slice(0,8).map(b=>({key:"external:gutenberg:"+b.id,kind:"external",title:b.title,author:(b.authors||[]).map(a=>a.name).join(", ")||"Author not listed",cover:"https://www.gutenberg.org/cache/epub/"+b.id+"/pg"+b.id+".cover.medium.jpg",url:"https://www.gutenberg.org/ebooks/"+b.id,source:"Project Gutenberg",category:"classics",badge:"CHECK LOCAL RIGHTS"}))),
   fetch("https://openlibrary.org/search.json?q="+enc+"&limit=8").then(r=>{if(!r.ok)throw Error("Open Library");return r.json();}).then(d=>(d.docs||[]).slice(0,8).map(b=>({key:"external:openlibrary:"+b.key,kind:"external",title:b.title,author:(b.author_name||[]).slice(0,2).join(", "),cover:b.cover_i?"https://covers.openlibrary.org/b/id/"+b.cover_i+"-M.jpg":"",url:"https://openlibrary.org"+b.key,source:"Open Library catalogue",category:"classics",badge:"ACCESS VARIES"}))),
-  fetch("https://ta.wikisource.org/w/api.php?action=query&generator=search&gsrsearch="+enc+"&gsrnamespace=0&gsrlimit=8&prop=info&inprop=url&format=json&origin=*").then(r=>{if(!r.ok)throw Error("Tamil Wikisource");return r.json();}).then(d=>Object.values(d.query?.pages||{}).map(p=>({key:"external:tawikisource:"+p.pageid,kind:"external",title:p.title,author:"Tamil Wikisource",cover:"",url:p.fullurl||("https://ta.wikisource.org/wiki/"+encodeURIComponent(p.title.replace(/ /g,"_"))),source:"Tamil Wikisource",category:"tamil",badge:"READ AT SOURCE"})))
+  fetch("https://ta.wikisource.org/w/api.php?action=query&generator=search&gsrsearch="+enc+"&gsrnamespace=0&gsrlimit=8&prop=info&inprop=url&format=json&origin=*").then(r=>{if(!r.ok)throw Error("Tamil Wikisource");return r.json();}).then(d=>Object.values(d.query?.pages||{}).map(p=>({key:"external:tawikisource:"+p.pageid,kind:"external",title:p.title,author:"Tamil Wikisource",cover:"",url:p.fullurl||("https://ta.wikisource.org/wiki/"+encodeURIComponent(p.title.replace(/ /g,"_"))),source:"Tamil Wikisource",category:"tamil",badge:"READ AT SOURCE"}))),
+  searchOpenTextbooks(q),
+  searchDoab(q)
  ];
  const settled=await Promise.allSettled(tasks);
  if(token!==searchRequest)return;
