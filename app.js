@@ -477,7 +477,7 @@
     });
   }
   async function searchTamilWikisource(query, signal) {
-    const data = await timeoutFetch("https://ta.wikisource.org/w/api.php?action=query&generator=search&gsrsearch=" + encodeURIComponent(query) + "&gsrnamespace=0&gsrlimit=8&prop=info&inprop=url&format=json&origin=*");
+    const data = await timeoutFetch("https://ta.wikisource.org/w/api.php?action=query&generator=search&gsrsearch=" + encodeURIComponent(query) + "&gsrnamespace=0&gsrlimit=8&prop=info&inprop=url&format=json&origin=*", { signal });
     return Object.values((data.query && data.query.pages) || {}).map((page) => externalBook({
       id: "external:tawikisource:" + page.pageid, sourceKey: "tawikisource:" + page.pageid,
       title: page.title, author: "Tamil Wikisource", coverUrl: "", sourceName: "Tamil Wikisource",
