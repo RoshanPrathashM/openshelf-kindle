@@ -64,6 +64,8 @@
   let currentView = "library";
   let currentBook = null;
   let currentChapters = [];
+  let currentChapterWordCounts = [];
+  let currentTotalWords = 0;
   let currentChapterIndex = 0;
   let currentMode = "paginated";
   let lastProgressWrite = 0;
@@ -673,7 +675,19 @@
     if (!chapters.length) throw new Error("This reading edition contains no chapters.");
     return { chapters, cached: false, record: null };
   }
+  function recalculateReaderWordCounts() {
+    currentChapterWordCounts = currentChapters.map((chapter) => wordCountFromHTML(chapter.html || ""));
+    currentTotalWords = currentChapterWordCounts.reduce((total, count) => total + count, 0);
+  }
+  function getChapterWordCount(chapters, index) {
+    if (chapters === currentChapters && currentChapterWordCounts.length === chapters.length) {
+      return currentChapterWordCounts[index] || 0;
+    }
+    const chapter = chapters[index];
+    return chapter ? wordCountFromHTML(chapter.html || "") : 0;
+  }
   function getBookWords(chapters) {
+    if (chapters === currentChapters && currentChapterWordCounts.length === chapters.length) return currentTotalWords;
     return chapters.reduce((total, chapter) => total + wordCountFromHTML(chapter.html || ""), 0);
   }
   function readerProgressRecord() {
@@ -705,8 +719,8 @@
   function estimatePercentage() {
     if (!currentChapters.length) return 0;
     let priorWords = 0;
-    for (let i = 0; i < currentChapterIndex; i += 1) priorWords += wordCountFromHTML(currentChapters[i].html || "");
-    const chapterWords = wordCountFromHTML(currentChapters[currentChapterIndex] && currentChapters[currentChapterIndex].html || "");
+    for (let i = 0; i < currentChapterIndex; i += 1) priorWords += getChapterWordCount(currentChapters, i);
+    const chapterWords = getChapterWordCount(currentChapters, currentChapterIndex);
     const ratio = readScrollRatio();
     const total = Math.max(1, getBookWords(currentChapters));
     return Math.max(0, Math.min(100, Math.round((priorWords + chapterWords * ratio) / total * 100)));
@@ -844,6 +858,7 @@
       const loaded = await loadBookContent(book);
       if (!currentBook || currentBook.id !== book.id) return;
       currentChapters = loaded.chapters;
+      recalculateReaderWordCounts();
       const position = getProgressMap()[book.id];
       restorePosition(position);
       $("reader-offline-button").disabled = false;
@@ -870,6 +885,8 @@
     closeDrawer();
     currentBook = null;
     currentChapters = [];
+    currentChapterWordCounts = [];
+    currentTotalWords = 0;
     currentChapterIndex = 0;
     renderShelf();
     renderContinueCard();
@@ -948,13 +965,12 @@
     $("header-theme-button").textContent = settings.theme === "night" ? "☀" : "☾";
   }
   function saveReaderSetting(name, value) {
+    const oldRatio = currentBook && currentChapters.length ? readScrollRatio() : 0;
     const settings = getCurrentSettings();
     settings[name] = value;
     writeJSON(KEYS.settings, settings);
-    const oldRatio = readScrollRatio();
     applyReaderSettings();
     if (currentBook && currentChapters.length) {
-      renderReaderChapter(false);
       requestAnimationFrame(() => {
         const reader = $("reader-content");
         if (currentMode === "paginated") {
@@ -966,6 +982,7 @@
           area.scrollTop = oldRatio * Math.max(0, area.scrollHeight - area.clientHeight);
         }
         updateReaderProgressUI();
+        storeProgress();
       });
     }
   }
