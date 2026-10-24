@@ -49,16 +49,18 @@ jobs:
               raise SystemExit("index.html must load styles.css")
           if '<script defer src="./app.js"></script>' not in app:
               raise SystemExit("index.html must load app.js")
-          if re.search(r'href=["\\']\\./(books|sources)/["\\']', app):
+          if 'href="./books/"' in app or 'href="./sources/"' in app:
               raise SystemExit("Found a broken legacy books/ or sources/ relative link")
-          if re.search(r'<script[^>]*>\\s*\\[', app, re.IGNORECASE):
+          if re.search(r"<script[^>]*>\s*\[", app, re.IGNORECASE):
               raise SystemExit("Found a raw array expression inside an inline script")
+          if not Path("styles.css").is_file():
+              raise SystemExit("styles.css is missing")
 
           check_js(Path("app.js").read_text(encoding="utf-8"), "app.js")
           check_js(Path("sw.js").read_text(encoding="utf-8"), "sw.js")
 
           reader = Path("read/index.html").read_text(encoding="utf-8")
-          for match in re.finditer(r"<script([^>]*)>([\\s\\S]*?)</script>", reader, re.IGNORECASE):
+          for match in re.finditer(r"<script([^>]*)>([\s\S]*?)</script>", reader, re.IGNORECASE):
               attributes, body = match.groups()
               if "application/ld+json" not in attributes.lower() and body.strip():
                   check_js(body, "read/index.html inline script")
