@@ -65,8 +65,8 @@ jobs:
               raise SystemExit("styles.css contains an unmatched CSS brace")
           print("PASS CSS brace balance")
 
-          html_ids = set(re.findall(r'\\bid=["\\']([^"\\']+)["\\']', app))
-          script_refs = set(re.findall(r'\\$\\(["\\']([^"\\']+)["\\']\\)', script))
+          html_ids = set(re.findall(r'\bid="([^"]+)"', app))
+          script_refs = set(re.findall(r'\$\("([^"]+)"\)', script))
           missing_ids = sorted(script_refs - html_ids)
           if missing_ids:
               raise SystemExit("app.js references missing HTML IDs: " + ", ".join(missing_ids))
