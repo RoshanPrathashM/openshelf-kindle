@@ -374,8 +374,8 @@
   function buildDisplayPool() {
     const unique = new Map();
     const titleToBook = new Map();
-    const add = (book, personal) => {
-      if (!book || (!(personal) && !["external", "unlimited"].includes(book.tier))) return;
+    const addBook = (book, personal) => {
+      if (!book || (!(personal) && !["external", "unlimited", "import"].includes(book.tier))) return;
       const key = normalizeText(book.title);
       if (!key) return;
       const existing = titleToBook.get(key);
@@ -390,12 +390,13 @@
       titleToBook.set(key, book);
       if (!unique.has(book.id)) unique.set(book.id, book);
     };
+    const addMany = (records, personal) => (Array.isArray(records) ? records : []).forEach((book) => addBook(book, personal));
     localBooks.forEach((book) => { unique.set(book.id, book); titleToBook.set(normalizeText(book.title), book); });
     importedBooks.forEach((book) => { unique.set(book.id, book); titleToBook.set(normalizeText(book.title), book); });
-    add(featuredExternalBooks, false);
-    add(expandedExternalBooks, false);
-    add(remoteBooks, false);
-    getSavedBooks().forEach((book) => add(book, true));
+    addMany(featuredExternalBooks, false);
+    addMany(expandedExternalBooks, false);
+    addMany(remoteBooks, false);
+    addMany(getSavedBooks(), true);
     return Array.from(unique.values());
   }
   function mapGutendexRecord(item) {
