@@ -428,9 +428,11 @@
     }
     const cached = readJSON(KEYS.freeCatalogue, []);
     expandedExternalBooks = (Array.isArray(cached) ? cached : [])
-      .filter((book) => book && book.tier === "external")
+      .filter((book) => book && ["external", "unlimited"].includes(book.tier))
       .map(externalBook);
     freeCatalogueLoaded = expandedExternalBooks.length >= Math.max(0, 100 - localBooks.length - featuredExternalBooks.length);
+    gutendexBrowsePage = Math.max(1, Number(readJSON(KEYS.gutendexPage, expandedExternalBooks.length ? 6 : 1)) || 1);
+    openLibraryBrowsePage = Math.max(1, Number(readJSON(KEYS.openLibraryPage, 1)) || 1);
     const button = $("load-free-catalogue");
     if (button && freeCatalogueLoaded) button.textContent = "✓ 100 books loaded";
     renderShelf();
@@ -489,6 +491,8 @@
       if (!popular.length) throw new Error("Project Gutenberg is unavailable right now.");
       expandedExternalBooks = popular.slice(0, targetCount);
       freeCatalogueLoaded = expandedExternalBooks.length >= targetCount;
+      gutendexBrowsePage = 6;
+      writeJSON(KEYS.gutendexPage, gutendexBrowsePage);
       writeJSON(KEYS.freeCatalogue, expandedExternalBooks);
       currentGenre = "all";
       $("global-search").value = "";
@@ -522,6 +526,65 @@
     } finally {
       loadingFreeCatalogue = false;
       if (button) button.disabled = false;
+      renderShelf();
+    }
+  }
+
+  async function loadMoreFreeBooks() {
+    if (loadingMoreBooks) return;
+    loadingMoreBooks = true;
+    const button = $("load-more-free-books");
+    if (button) { button.disabled = true; button.textContent = "Loading more books…"; }
+    setStatus("Loading the next Gutendex page and publicly readable Open Library editions…");
+    try {
+      const gutendexPage = gutendexBrowsePage;
+      const openLibraryPage = openLibraryBrowsePage;
+      const outcomes = await Promise.allSettled([
+        timeoutFetch("https://gutendex.com/books/?page=" + gutendexPage + "&languages=en"),
+        searchOpenLibrary("classic literature", null, openLibraryPage)
+      ]);
+      const incoming = [];
+      if (outcomes[0].status === "fulfilled") {
+        incoming.push(...(outcomes[0].value.results || []).map(mapGutendexRecord));
+        gutendexBrowsePage = outcomes[0].value.next ? gutendexPage + 1 : gutendexPage;
+        writeJSON(KEYS.gutendexPage, gutendexBrowsePage);
+      }
+      if (outcomes[1].status === "fulfilled") {
+        incoming.push(...outcomes[1].value);
+        openLibraryBrowsePage = openLibraryPage + 1;
+        writeJSON(KEYS.openLibraryPage, openLibraryBrowsePage);
+      }
+      const known = new Set(buildDisplayPool().map((book) => normalizeText(book.title)));
+      const additions = [];
+      incoming.forEach((book) => {
+        const key = normalizeText(book.title);
+        if (!key || known.has(key)) return;
+        known.add(key);
+        additions.push(book);
+      });
+      if (!additions.length) {
+        if (outcomes.every((result) => result.status === "rejected")) throw new Error("Both catalogues are unavailable right now.");
+        toast("No new titles were found on those catalogue pages. Try Load More again.");
+      } else {
+        expandedExternalBooks = expandedExternalBooks.concat(additions);
+        writeJSON(KEYS.freeCatalogue, expandedExternalBooks);
+        currentGenre = "all";
+        $("global-search").value = "";
+        remoteBooks = [];
+        searchRunning = false;
+        searchToken += 1;
+        if (searchController) searchController.abort();
+        setFilter("all");
+        const readable = additions.filter((book) => book.tier === "unlimited").length;
+        setStatus("Added " + additions.length + " titles (" + readable + " with a listed plain-text reader edition). Total catalogue: " +
+          buildDisplayPool().length + ". External access and reuse rights vary by source and country.");
+      }
+    } catch (error) {
+      setStatus("Could not load more catalogue records: " + error.message);
+      toast("Load More failed. Your current library is still available.");
+    } finally {
+      loadingMoreBooks = false;
+      if (button) { button.disabled = false; button.textContent = "Load More Free Books ↓"; }
       renderShelf();
     }
   }
@@ -745,10 +808,11 @@
     const data = await timeoutFetch("https://gutendex.com/books/?search=" + encodeURIComponent(query) + "&page=1", { signal });
     return (data.results || []).slice(0, 12).map(mapGutendexRecord);
   }
-  async function searchOpenLibrary(query, signal) {
+  async function searchOpenLibrary(query, signal, pageNumber = 1) {
     const params = new URLSearchParams({
       q: query,
       limit: "24",
+      page: String(Math.max(1, Number(pageNumber) || 1)),
       fields: "key,title,author_name,cover_i,first_publish_year,subject,has_fulltext,public_scan_b,editions,editions.key,editions.title,editions.ebook_access,editions.cover_i"
     });
     const data = await timeoutFetch("https://openlibrary.org/search.json?" + params.toString(), { signal });
