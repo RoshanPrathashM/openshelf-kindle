@@ -10,6 +10,8 @@ on:
       - "read/index.html"
       - "sw.js"
       - "manifest.webmanifest"
+      - "manifest.json"
+      - "app-icon.svg"
       - "content/library-index.json"
       - "content/featured-free.json"
       - "catalog-registry.json"
@@ -81,12 +83,12 @@ jobs:
               if "application/ld+json" not in attributes.lower() and body.strip():
                   check_js(body, "read/index.html inline script")
 
-          for json_path in (Path("manifest.webmanifest"), Path("content/library-index.json"), Path("content/featured-free.json"), Path("catalog-registry.json")):
+          for json_path in (Path("manifest.webmanifest"), Path("manifest.json"), Path("content/library-index.json"), Path("content/featured-free.json"), Path("catalog-registry.json")):
               json.loads(json_path.read_text(encoding="utf-8"))
               print(f"PASS JSON: {json_path}")
 
           sw = Path("sw.js").read_text(encoding="utf-8")
-          for cached in ('"./index.html"', '"./styles.css"', '"./app.js"', '"./manifest.webmanifest"', '"./content/featured-free.json"'):
+          for cached in ('"./index.html"', '"./styles.css"', '"./app.js"', '"./manifest.webmanifest"', '"./manifest.json"', '"./app-icon.svg"', '"./content/featured-free.json"'):
               if cached not in sw:
                   raise SystemExit(f"Service-worker install shell does not cache {cached}")
           print("PASS PWA shell includes the homepage, stylesheet, app script and manifest")
