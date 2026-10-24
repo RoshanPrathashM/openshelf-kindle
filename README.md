@@ -1,88 +1,75 @@
 # OpenShelf
 
-**A Kindle-inspired reading workspace for discovering open books, preparing your own ebook files, translating excerpts, and keeping private reading notes.**
+**A free, Kindle-inspired reading library for discovering open books and reading supported editions inside one calm workspace.**
 
-OpenShelf v0.5 is a static open-source discovery and reading prototype. It federates live search across Project Gutenberg via Gutendex, Open Textbook Library, DOAB, and Open Library public-access records. Catalogue totals belong to the selected source and current filters; the site shows the count returned by each source at runtime. OpenShelf does not have a single master index of all books on the internet and does not store the entire catalogues or full book files.
+Live site: https://roshanprathashm.github.io/openshelf-kindle/  
+Repository: https://github.com/RoshanPrathashM/openshelf-kindle
 
-## What's new in v0.5
+OpenShelf is an open-source prototype designed for phones, tablets and laptops. The current build focuses on a clean cover-first homepage, local reading, external book discovery, and lightweight reading tools that run in the browser.
 
-- Kindle-inspired desktop sidebar, responsive cover shelves, and a right-hand book details/tools panel.
-- A dedicated **Read inside OpenShelf** shelf is populated from [content/library-index.json](content/library-index.json), with covers, author/year metadata, source links, local-reader links and a count of full-text editions hosted by this repository.
-- The full-text shelf shares the main search and language filters; opening a supported cover routes to the first-party OpenShelf reader instead of sending the reader to an external website.
-- The floating Tools drawer now targets only the real tool workspaces (Book Studio, Translate, Notes and Kindle help), so it cannot hide the book shelves because their descriptions happen to mention notes or reading tools.
-- Covers use the original source cover when available, or a generated typographic placeholder that does not copy external artwork.
-- Clicking a book opens a side panel with book details, subjects, authorised source links, Save to shelf, notes, translation, and Send to Kindle guidance. “Read full book” opens the source reading page in a new tab so the full text does not get trapped in a blank embedded frame.
-- The reader has a top toolbar and a side note/tools panel where the original source permits embedding.
-- Multi-collection selector for Project Gutenberg, Open Textbook Library, DOAB and Open Library public-access records.
-- Source-aware cover/format links, public-access filters where the source exposes them, and local reading-history recommendations ranked by matching authors, subjects and languages.
-- Twenty crawlable classic-book title pages with source-linked cover images, book summaries, canonical URLs, Open Graph metadata, Book/Breadcrumb structured data and a generated XML sitemap.
-- Stable book guide index, source directory, engineering textbook page, Tamil book page and public-domain guide.
-- Featured book covers and “Read full book” buttons open the official Project Gutenberg book page. “Open book tools in OpenShelf” returns to the matching title panel.
+## Current build
 
-## Current features
+### Library and discovery
+- Responsive cover grid, book search, categories, a **Continue Reading** card and a device-local **My Library** shelf.
+- Search supported locally hosted titles and live results from Project Gutenberg via Gutendex, Open Library and Tamil Wikisource.
+- Local full-text editions open in the OpenShelf reader. Results that are not hosted here open at their source/catalogue, where access and rights vary.
+- Cards can be saved to the user's local library. Saved items, reading history and reading settings are not synced between devices.
+- **OpenShelf Unlimited** is a discovery concept: one search across legitimate catalogues. It is not a subscription and does not make every result free to redistribute or readable inside OpenShelf.
 
-### Live catalogue and book reading
+### Reader
+- Local reader editions currently include 10 English works: *The Time Machine*, *The Call of the Wild*, *The Jungle Book*, *Hamlet*, *The Adventures of Sherlock Holmes*, *Frankenstein*, *The Picture of Dorian Gray*, *Dracula*, *Alice's Adventures in Wonderland*, and *The Secret Garden*.
+- Reading controls for font size, line spacing, typeface, warm-paper/sepia/dark themes, and a page-turn mode with horizontal swiping and transition animation. Continuous scrolling remains available.
+- English dictionary lookup through a public dictionary API; an internet connection is required for definitions.
+- Select text to highlight or underline it, add private notes, save notes/highlights on this browser, and export notes to a text file.
+- Pencil mode lets touch and pointer users draw over the visible reading area. Drawings are stored locally on the device, separated by book/chapter and the current page or scroll region.
+- Reading position and reader settings are saved locally.
 
-- Queries Gutendex for Project Gutenberg books, Open Textbook Library’s public JSON API for textbooks, DOAB’s REST API for open-access scholarly records, and Open Library’s Search API for public-access editions. Availability and response formats depend on each provider’s live API and CORS settings.
-- Supports title/author/topic search, language filtering where supported, pagination, source-format links and title/author/recommendation sorting (recommendations are local and heuristic, not AI).
-- The built-in reader currently includes 10 English full-text editions: *The Time Machine*, *The Call of the Wild*, *The Jungle Book*, *Hamlet*, *The Adventures of Sherlock Holmes*, *Frankenstein*, *The Picture of Dorian Gray*, *Dracula*, *Alice’s Adventures in Wonderland*, and *The Secret Garden*. Other search results may still open at their original source.
-- Tamil and additional educational collections are listed in the source directory/registry, but this release does not yet have a locally hosted Tamil full-text collection. A source being listed does not mean its API is integrated into live search.
-- The API is paginated; the first page contains at most 32 records. The count badge is the total matches for the selected live source and current filters, not the number downloaded into this repository. OpenShelf has four live searchable integrations today; the repository’s curated source registry also includes sources that are link-only rather than API-integrated.
-- Full text opens on the authorised publisher/archive reading page. Project Gutenberg asks independent sites to use plain links rather than embedding its books, so its official page opens in a new tab; keep OpenShelf open for private notes and reading tools.
-- OpenStax, Standard Ebooks, Tamil Wikisource, Project Madurai and other collections are linked in the source directory where the best experience is still the publisher/archive page.
-- SEO pages are maintained at [`/books/`](books/index.html), [`/sources/`](sources/index.html), and [`/sitemap.xml`](sitemap.xml). Search engines decide when and whether they index these pages; a sitemap helps discovery but does not guarantee ranking.
-- The library is not a list of every book in the world and does not have one deduplicated global total. The built-in count is for local full-text editions; live counts belong to the selected source and can overlap across providers. Check rights and source conditions before downloading or redistributing an edition.
+### Install and offline use
+- The site includes a web-app manifest and a service worker. Compatible browsers may offer **Add to Home Screen / Install** for an app-like experience.
+- The service worker caches the app shell and same-origin files as they are opened. Previously visited local reader content may remain available offline.
+- External catalogues, covers and dictionary lookups need a network connection. Offline caching is best-effort; users should open a book at least once while online before relying on it offline.
 
-### OpenShelf Book Studio
+## Run locally
 
-- Inspect a locally selected EPUB's package structure, title/author/language metadata, manifest-to-spine references, chapter count/approximate words, navigation hints, and missing image alt text.
-- Edit title/author/language metadata, then create a rebuilt EPUB with the mimetype entry written first and uncompressed.
-- Preview an extracted chapter as plain text.
-- Clean line endings and whitespace in TXT/Markdown files you choose locally.
+Open `index.html` through a local web server rather than a `file://` URL if you want the service worker and fetch-based library index to work. No build step is required.
 
-Book Studio processes the selected file in the browser; it does not upload the file to an OpenShelf server. It is a **quick structural review**, not complete EPUB conformance testing and not a guarantee of clean OCR, correct rendering, or Kindle compatibility. Use the official [W3C/DAISY EPUBCheck project](https://github.com/w3c/epubcheck) for full format validation. Re-inspect any rebuilt file and test it on an actual reader.
+For example, with Python installed:
 
-### Translation
+```bash
+python3 -m http.server 8000
+```
 
-- Works with a user-selected LibreTranslate-compatible endpoint.
-- The default is a community mirror, which may be rate-limited, change, or go offline. Use **Check languages** first.
-- A managed server may require an API key. The key is entered for a session and is not written to local storage; text is sent to the endpoint you select.
-- This prototype has no built-in offline LLM and does not provide a translation server itself.
+Then open `http://localhost:8000/`.
 
-### Notes and bookshelf
+## Rights and limits
 
-- Notes and saved book IDs are stored in the browser's local storage.
-- Export notes as JSON or Markdown and export the bookshelf as JSON.
-- Data is local to one browser/profile/device and does not sync automatically. Export backups before clearing site data.
+OpenShelf is a **discovery layer plus a small local reading library**, not a mirror of every book online. Being free to read is not the same as permission to copy or redistribute. Each provider and edition can have different rules, and copyright status can differ by country.
 
-## Run and publish
+- Local full texts belong in the repository only when the underlying work and the source edition may lawfully be redistributed.
+- If rights are unclear, link to the authorised source instead of copying the book.
+- Project Gutenberg records should not be treated as globally public domain without checking the relevant country's rules.
+- Open Library is a discovery/catalogue service, not a blanket redistribution licence.
+- See [RIGHTS_POLICY.md](RIGHTS_POLICY.md), [catalog-registry.json](catalog-registry.json), and [CONTRIBUTING.md](CONTRIBUTING.md) before proposing content.
 
-Open `index.html` in a modern browser. No build step is required. Catalogue search needs an internet connection and the Gutendex API. EPUB inspection loads JSZip from a CDN only when requested.
+## What is not implemented yet
 
-For GitHub Pages settings, see [DEPLOYMENT.md](DEPLOYMENT.md). Recommended settings: **Settings → Pages → Deploy from a branch → `main` → `/(root)`**.
+- **No central user-upload server.** The site is static; visitors cannot publish a book to every user's library by uploading a file. A public contribution system needs a backend, storage, file validation, licence/rights evidence, abuse controls and a review process. Personal browser-only imports are a separate feature from public redistribution.
+- No user accounts, cloud sync, collaborative notes, paid subscription, or user analytics backend.
+- No guarantee of complete global book coverage or a deduplicated global count. Search results come from a few live providers and can overlap.
+- Tamil Wikisource is available through live source search, but this repository does not currently host a curated Tamil full-text shelf.
+- Pencil drawings and notes stay in this browser profile and are not backed up automatically. Export notes before clearing site data or moving to another device.
+- The page-turn and pencil experiences are an early web prototype; test them on the target phone/tablet before relying on them for long reading sessions.
 
+## Project structure
 
-### Search indexing and SEO
+- `index.html` — responsive home, local shelf and multi-source discovery.
+- `read/index.html` — local book reader and reading tools.
+- `content/` — hosted text editions and `library-index.json` manifest.
+- `books/` — book information/SEO landing pages.
+- `sources/` — directory of legitimate book collections.
+- `catalog-registry.json` — catalogue sources and ingestion rules.
+- `manifest.webmanifest` and `sw.js` — install metadata and offline caching.
 
-- The root page has a canonical URL, title/description metadata, social-preview metadata and `WebSite` structured data.
-- The 20 featured classic-book guides have stable URLs, source-linked cover images, unique descriptions, canonical URLs and `Book`/breadcrumb structured data. The sitemap lists the home page, collection indexes and guide pages.
-- After deployment, add the GitHub Pages URL-prefix property in [Google Search Console](https://search.google.com/search-console/about), complete the verification method it gives you, then submit `https://roshanprathashm.github.io/openshelf-kindle/sitemap.xml`. Add the same site to [Bing Webmaster Tools](https://www.bing.com/webmasters/) if desired.
-- A sitemap improves discovery but cannot guarantee indexing, immediate ranking or a particular search position. Review Search Console coverage and API health as the catalogue grows.
+## Feedback and contributions
 
-## Privacy and copyright
-
-Read [PRIVACY.md](PRIVACY.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [RIGHTS_POLICY.md](RIGHTS_POLICY.md). The current version links out to source sites; it does not accept public uploads or host visitor-submitted book files. The MIT licence in [LICENSE](LICENSE) applies to OpenShelf software only and grants no rights in third-party books, images, or metadata.
-
-## Not implemented yet
-
-- Bulk mirroring of all catalogues, hosting the full text and binaries for every book, per-title licence evidence collection, crawl monitoring/Search Console submission, server-side index/sitemap generation, or guaranteed search-engine ranking.
-
-- Server-side uploads, user accounts, moderated contributor submissions with file storage, malware scanning, OCR, conversion jobs, synchronized notes, or hosted AI/LLM translation.
-- Full EPUBCheck integration, PDF/OCR repair, or guaranteed in-page embedding for every source.
-- Automatic delivery into a Kindle account.
-
-Those require a backend and careful design for permission checks, file quarantine, service costs, secret/API-key handling, privacy, takedown requests, and abuse prevention. Never publish a book file unless its rightsholder authorizes it or the relevant licence/public-domain status permits it.
-
-## Licence
-
-OpenShelf software is licensed under the MIT License in [LICENSE](LICENSE). Third-party books remain governed by their own rights and terms.
+For the current prototype, the safest useful contribution is a verified source suggestion with title, author, official URL, language, licence/rights evidence, and the country or jurisdiction reviewed. Please do not submit copyrighted book files unless permission to redistribute them is documented.
