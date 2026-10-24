@@ -283,8 +283,13 @@ async function waitForCards(page, minimum = 1) {
     );
     await page.locator('#book-grid [data-open-book="external:gutenberg:123"]').first().click();
     await page.waitForFunction(
-      () => document.getElementById("reader-title").innerText.includes("Full Text Smoke Novel") &&
-        document.getElementById("reader-content").innerText.includes("unabridged"),
+      () => {
+        const readerText = document.getElementById("reader-content").innerText;
+        return document.getElementById("reader-title").innerText.includes("Full Text Smoke Novel") &&
+          readerText.includes("unabridged") &&
+          !readerText.includes("Fetching full unabridged edition") &&
+          !readerText.includes("Could not load this edition");
+      },
       null, { timeout: 20000 }
     );
     const fullPageCount = Number(await page.locator("#reader-page-slider").getAttribute("max"));
