@@ -399,24 +399,6 @@
     addMany(getSavedBooks(), true);
     return Array.from(unique.values());
   }
-  function mapGutendexRecord(item) {
-    const authors = (item.authors || []).map((person) => person.name).filter(Boolean).join(", ") || "Author not listed";
-    const subjects = (item.subjects || []).concat(item.bookshelves || []).join(" ");
-    return externalBook({
-      id: "external:gutenberg:" + item.id,
-      sourceKey: "gutenberg:" + item.id,
-      title: item.title || "Untitled",
-      author: authors,
-      sourceName: "Project Gutenberg",
-      url: "https://www.gutenberg.org/ebooks/" + item.id,
-      coverUrl: "",
-      year: "",
-      genres: inferGenres(item.title || "", subjects, ""),
-      searchableText: subjects,
-      sourceNote: "Free to read at the source. Project Gutenberg's public-domain status is US-based; local copyright and reuse rules may differ."
-    });
-  }
-
   async function loadFeaturedFreeCatalogue() {
     try {
       const response = await fetch(ROOT + "content/featured-free.json", { cache: "default" });
