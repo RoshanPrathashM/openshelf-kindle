@@ -41,6 +41,7 @@ body.offline .offline-pill{display:inline-block}
 }
 
 </style>
+<link rel="stylesheet" href="./kindle-theme.css">
 </head>
 <body>
 <div class="app">
@@ -167,4 +168,5 @@ const grid=document.getElementById('grid'),search=document.getElementById('searc
 function render(){const q=search.value.trim().toLowerCase();const list=books.filter(b=>(cat==='all'||b[2]===cat)&&(b[0]+' '+b[1]).toLowerCase().includes(q));grid.innerHTML=list.map(b=>`<article class="book" data-title="${b[0]}"><div class="coverwrap" onclick="location.href='./read/?book=${b[4]}'"><img src="https://www.gutenberg.org/cache/epub/${b[3]}/pg${b[3]}.cover.medium.jpg" alt="Cover of ${b[0]}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"><div class="covertext hidden">${b[0]}</div><span class="badge">OPEN EDITION</span></div><h3>${b[0]}</h3><p>${b[1]}</p></article>`).join('');empty.classList.toggle('hidden',list.length>0)}
 search.addEventListener('input',render);document.querySelectorAll('.filter').forEach(x=>x.onclick=()=>{document.querySelectorAll('.filter').forEach(y=>y.classList.remove('active'));x.classList.add('active');cat=x.dataset.cat;document.getElementById('sectionTitle').textContent=cat==='all'?'Popular classics':x.textContent;render()});document.querySelectorAll('.navitem').forEach(x=>x.onclick=()=>{document.querySelectorAll('.navitem').forEach(y=>y.classList.remove('active'));x.classList.add('active');const f=x.dataset.filter;if(f==='saved'){search.value='';cat='all';document.getElementById('sectionTitle').textContent='My Library';document.getElementById('grid').innerHTML='<div class="empty" style="grid-column:1/-1">Your personal library will appear here as you save books. Reading position remains on this device.</div>';empty.classList.add('hidden')}else{cat=f==='all'?'all':f;document.querySelectorAll('.filter').forEach(y=>y.classList.toggle('active',y.dataset.cat===cat));document.getElementById('sectionTitle').textContent=f==='all'?'Popular classics':x.textContent;render()}});document.getElementById('dark').onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('openshelf-dark',document.body.classList.contains('dark')?'1':'0')};if(localStorage.getItem('openshelf-dark')==='1')document.body.classList.add('dark');document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();search.focus()}});render();
 </script>
+<script defer src="./kindle-tools.js"></script>
 </body></html>
