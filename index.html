@@ -14,7 +14,7 @@
   <meta property="og:url" content="https://roshanprathashm.github.io/openshelf-kindle/">
   <meta name="twitter:card" content="summary">
   <title>OpenShelf — Your Open Reading Library</title>
-  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -31,6 +31,7 @@
   </div>
   <div class="header-actions">
     <span id="network-status" class="status-badge" role="status" aria-live="polite"><span class="status-dot"></span><span id="network-label">Online</span></span>
+    <button class="button desktop-action hidden" id="install-app-button" type="button" title="Install OpenShelf" aria-label="Install OpenShelf">⬇ Install app</button>
     <button class="button desktop-action" id="import-button" type="button" title="Import a local TXT, Markdown or HTML book" aria-label="Import local book">📂 Import book</button>
     <button class="icon-button" id="header-theme-button" type="button" title="Change reading theme" aria-label="Change theme">☾</button>
   </div>
@@ -72,7 +73,7 @@
     </section>
 
     <section class="continue-card hidden" id="continue-card" aria-label="Continue reading">
-      <img id="continue-cover" class="cover" src="" alt="">
+      <img id="continue-cover" class="cover" alt="Cover of the book you are reading" loading="lazy">
       <div class="continue-meta">
         <h2 id="continue-title">Continue reading</h2>
         <p id="continue-description"></p>
@@ -127,6 +128,7 @@
       <p class="status-line" id="result-status" role="status" aria-live="polite">Loading your local library…</p>
       <div class="catalogue-callout"><div><strong>Discover about 100 free books</strong><span>10 in-app editions + featured and popular books from legitimate source pages. External books open at the original source; rights vary by country.</span></div><button class="button primary" id="load-free-catalogue" type="button">Browse 100 free books ↗</button></div>
       <div class="book-grid" id="book-grid" aria-live="polite"></div>
+      <div class="catalogue-more"><p>Explore beyond the featured shelf. Each new catalogue page is loaded live; full-text reading is enabled when Gutendex lists a plain-text edition, while other books open at their source.</p><button class="button primary" id="load-more-free-books" type="button">Load More Free Books ↓</button></div>
       <div class="empty-state hidden" id="empty-state"><strong id="empty-title">No books found</strong><span id="empty-message">Try another search or category.</span></div>
       <div class="app-footer">
         OpenShelf is a free independent reading project, not an Amazon product. “Free to read” does not always mean “free to redistribute.” Local editions have source and rights notes; external titles open at their official source.
@@ -193,12 +195,34 @@
   <footer class="reader-footer">
     <div class="reader-progress-top"><span id="reader-chapter-label">Chapter 1</span><span id="reader-progress-label">0% · Calculating time</span></div>
     <div class="reader-progress-track" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="reader-progress-bar"><span id="reader-progress-fill"></span></div>
+    <div class="reader-jump-controls">
+      <label for="reader-toc-select">Contents</label>
+      <select id="reader-toc-select" aria-label="Jump to chapter"><option value="0">Table of contents</option></select>
+      <label for="reader-page-slider">Page</label>
+      <input id="reader-page-slider" type="range" min="1" max="1" value="1" step="1" aria-label="Jump to page">
+      <label class="sr-only" for="reader-page-number">Go to page number</label>
+      <input id="reader-page-number" type="number" min="1" max="1" value="1" inputmode="numeric" aria-label="Go to page number">
+      <span class="reader-page-total">of <span id="reader-page-total">1</span></span>
+    </div>
     <div class="reader-nav">
       <button class="button subtle" id="previous-page" type="button">← Previous</button>
-      <span class="center-label" id="reader-page-label">Page 1</span>
+      <span class="center-label" id="reader-page-label">Page 1 of 1</span>
       <button class="button primary" id="next-page" type="button">Next →</button>
     </div>
   </footer>
+  <div id="reader-selection-toolbar" class="reader-selection-toolbar hidden" role="toolbar" aria-label="Selected text actions">
+    <div class="selection-colors" aria-label="Highlight colors">
+      <button type="button" data-selection-highlight="yellow" title="Yellow highlight" aria-label="Yellow highlight"><span class="highlight-swatch yellow"></span>Yellow</button>
+      <button type="button" data-selection-highlight="green" title="Green highlight" aria-label="Green highlight"><span class="highlight-swatch green"></span>Green</button>
+      <button type="button" data-selection-highlight="pink" title="Pink highlight" aria-label="Pink highlight"><span class="highlight-swatch pink"></span>Pink</button>
+    </div>
+    <div class="selection-actions">
+      <button type="button" id="selection-add-note">＋ Note</button>
+      <button type="button" id="selection-define-word">Define word</button>
+      <button type="button" id="selection-copy-quote">Copy quote</button>
+    </div>
+    <div id="selection-definition" class="selection-definition" aria-live="polite"></div>
+  </div>
   <div class="reader-overlay" id="reader-overlay"></div>
   <aside class="reader-drawer" id="reader-drawer" aria-label="Reader tools" aria-hidden="true">
     <div class="drawer-header"><h2 id="drawer-heading">Reading appearance</h2><button class="icon-button" id="close-drawer" type="button" aria-label="Close reader tools">×</button></div>
