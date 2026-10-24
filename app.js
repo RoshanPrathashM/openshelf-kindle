@@ -331,6 +331,8 @@
     writeJSON("openshelf.spa.migrated.v1", true);
     const settings = getCurrentSettings();
     document.documentElement.dataset.theme = themes.includes(settings.theme) ? settings.theme : "paperwhite";
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.content = ({ paperwhite: "#fbf8f1", sepia: "#f4ecd8", sage: "#e3eddf", night: "#121316" })[settings.theme] || "#fbf8f1";
     $("header-theme-button").textContent = settings.theme === "night" ? "☀" : "☾";
   }
 
@@ -1030,6 +1032,8 @@
   function applyReaderSettings() {
     const settings = getCurrentSettings();
     document.documentElement.dataset.theme = themes.includes(settings.theme) ? settings.theme : "paperwhite";
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.content = ({ paperwhite: "#fbf8f1", sepia: "#f4ecd8", sage: "#e3eddf", night: "#121316" })[settings.theme] || "#fbf8f1";
     const reader = $("reader-content");
     reader.style.fontSize = settings.fontSize + "px";
     reader.style.lineHeight = String(settings.lineSpacing);
