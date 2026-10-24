@@ -115,8 +115,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .reader-page .os-highlight{background:#ffe49a;color:#28251e;border-radius:2px}
 .reader-page .os-underline{text-decoration:underline;text-decoration-color:#30855d;text-decoration-thickness:2px;text-underline-offset:3px}
 :root[data-theme="night"] .reader-page .os-highlight{background:#766126;color:#fff3ca}
-.reader-page.paginated{height:100%;min-height:300px;overflow-x:auto;overflow-y:hidden;column-width:100%;column-gap:clamp(28px,5vw,62px);column-fill:auto;scroll-behavior:smooth;overscroll-behavior-x:contain;touch-action:pan-x;padding-bottom:15px}
-.reader-page.paginated>*{break-inside:avoid-column}
+.reader-page.paginated{height:100%;min-height:300px;overflow-x:auto;overflow-y:hidden;column-width:100%;column-gap:clamp(28px,5vw,62px);column-fill:auto;scroll-behavior:smooth;overscroll-behavior-x:contain;touch-action:pan-y;padding-bottom:15px}
+.reader-page.paginated>*{break-inside:auto}
 .reader-page.anim-forward{animation:pageInForward .18s ease-out}
 .reader-page.anim-back{animation:pageInBack .18s ease-out}
 @keyframes pageInForward{from{opacity:.65;transform:translateX(9px)}to{opacity:1;transform:translateX(0)}}
