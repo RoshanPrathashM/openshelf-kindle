@@ -1,0 +1,36 @@
+{
+  "id": "./",
+  "name": "OpenShelf — Open Reading Library",
+  "short_name": "OpenShelf",
+  "description": "Discover and read public-domain and openly licensed books in a distraction-free reader.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
+  "orientation": "any",
+  "background_color": "#fbf8f1",
+  "theme_color": "#5b4632",
+  "categories": [
+    "books",
+    "education",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
