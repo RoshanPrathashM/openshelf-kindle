@@ -339,6 +339,7 @@
     document.querySelectorAll("[data-view]").forEach((button) => button.classList.toggle("active", false));
     document.querySelectorAll("[data-mobile-view]").forEach((button) => button.classList.toggle("active", button.dataset.mobileView === "home"));
     renderShelf();
+    updateStorageIndicator();
   }
   function setGenre(genre) {
     currentGenre = genre;
