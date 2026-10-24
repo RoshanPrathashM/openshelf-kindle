@@ -1033,7 +1033,7 @@
     const reader = $("reader-content");
     reader.style.fontSize = settings.fontSize + "px";
     reader.style.lineHeight = String(settings.lineSpacing);
-    reader.style.maxWidth = settings.margin === 0 ? "100%" : settings.margin === 2 ? "600px" : "760px";
+    reader.style.maxWidth = settings.margin === 0 ? "600px" : settings.margin === 2 ? "100%" : "760px";
     reader.style.fontFamily = settings.font === "sans"
       ? 'Arial, Helvetica, sans-serif'
       : settings.font === "mono"
