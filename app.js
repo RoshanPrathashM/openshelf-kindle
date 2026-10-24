@@ -2267,10 +2267,10 @@
       scheduleProgressSave();
     }, { passive: true });
     $("reader-main").addEventListener("scroll", () => {
-      if (currentMode === "scroll") {
-        updateReaderProgressUI();
-        scheduleProgressSave();
-      }
+      // Logical 260-word pages use the main reading viewport for overflow in
+      // both modes; progress must follow manual scroll as well as key presses.
+      updateReaderProgressUI();
+      scheduleProgressSave();
     }, { passive: true });
     $("reader-content").addEventListener("mouseup", rememberReaderSelection);
     $("reader-content").addEventListener("keyup", rememberReaderSelection);
