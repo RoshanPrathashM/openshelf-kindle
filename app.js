@@ -1218,7 +1218,13 @@
   }
   async function updateStorageIndicator() {
     const totalBytes = offlineRecords.reduce((sum, record) => sum + (record.approxBytes || estimateJSONBytes(record)), 0);
-    $("storage-summary").textContent = offlineRecords.length + " offline book" + (offlineRecords.length === 1 ? "" : "s") + " · " + bytesLabel(totalBytes);
+    const storageSummary = offlineRecords.length + " offline book" + (offlineRecords.length === 1 ? "" : "s") + " · " + bytesLabel(totalBytes);
+    $("storage-summary").textContent = storageSummary;
+    const mobileSummary = $("mobile-storage-summary");
+    if (mobileSummary) {
+      mobileSummary.textContent = "Device storage: " + storageSummary + ". Stored locally in this browser; quota is limited.";
+      mobileSummary.classList.toggle("hidden", currentFilter !== "downloaded" && currentFilter !== "saved");
+    }
     let quotaText = "Stored in this browser with IndexedDB.";
     try {
       if (navigator.storage && navigator.storage.estimate) {
