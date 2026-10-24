@@ -162,19 +162,6 @@ async function waitForCards(page, minimum = 1) {
     assert.equal((await page.locator("#reader-title").innerText()).trim(), firstTitle);
     pass("a curated edition opens inside the built-in reader");
 
-    const forwardAnimationApplied = await page.evaluate(() => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", bubbles: true, cancelable: true }));
-      return document.getElementById("reader-view").classList.contains("page-turn-forward");
-    });
-    assert.equal(forwardAnimationApplied, true, "Page Down should apply the forward turn class synchronously");
-    pass("Page Down applies the forward page-turn animation");
-    await page.waitForTimeout(400);
-    const backwardAnimationApplied = await page.evaluate(() => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", bubbles: true, cancelable: true }));
-      return document.getElementById("reader-view").classList.contains("page-turn-back");
-    });
-    assert.equal(backwardAnimationApplied, true, "Page Up should apply the backward turn class synchronously");
-    pass("Page Up applies the backward page-turn animation");
     await page.waitForTimeout(400);
 
     await page.locator("#reader-offline-button").click();
@@ -306,6 +293,20 @@ async function waitForCards(page, minimum = 1) {
     await page.locator("#reader-page-number").fill("4");
     await page.locator("#reader-page-number").press("Enter");
     await page.waitForFunction(() => document.getElementById("reader-page-number").value === "4", null, { timeout: 5000 });
+
+    const forwardAnimationApplied = await page.evaluate(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", bubbles: true, cancelable: true }));
+      return document.getElementById("reader-view").classList.contains("page-turn-forward");
+    });
+    assert.equal(forwardAnimationApplied, true, "Page Down should animate a multi-page full-text edition");
+    await page.waitForTimeout(400);
+    const backwardAnimationApplied = await page.evaluate(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", bubbles: true, cancelable: true }));
+      return document.getElementById("reader-view").classList.contains("page-turn-back");
+    });
+    assert.equal(backwardAnimationApplied, true, "Page Up should animate a multi-page full-text edition");
+    pass("Page Down and Page Up animate real full-text page navigation");
+    await page.waitForTimeout(400);
     pass("Gutendex text/plain books open as paginated full text with chapter and page navigation");
 
     await page.evaluate(() => {
