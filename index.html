@@ -1,237 +1,240 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="paperwhite">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f7f5ef">
-<meta name="description" content="OpenShelf — a calm, free reading library for public-domain and open books.">
-<meta name="robots" content="index,follow,max-image-preview:large">
-<link rel="canonical" href="https://roshanprathashm.github.io/openshelf-kindle/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="OpenShelf">
-<meta property="og:title" content="OpenShelf — Free Books, Beautifully Read">
-<meta property="og:description" content="Discover open books and read supported editions in a calm, Kindle-inspired reader.">
-<meta property="og:url" content="https://roshanprathashm.github.io/openshelf-kindle/">
-<meta property="og:image" content="https://roshanprathashm.github.io/openshelf-kindle/social-card.svg">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="OpenShelf — Free Books, Beautifully Read">
-<meta name="twitter:description" content="Discover public-domain and open books in one reading space.">
-<meta name="twitter:image" content="https://roshanprathashm.github.io/openshelf-kindle/social-card.svg">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"OpenShelf","url":"https://roshanprathashm.github.io/openshelf-kindle/","description":"A responsive discovery and reading workspace for public-domain books and openly licensed works.","inLanguage":["en","ta"]}</script>
-<title>OpenShelf — Free Books, Beautifully Read</title>
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./favicon.svg" type="image/svg+xml">
-<style>
-:root{--bg:#f7f5ef;--paper:#fffdf8;--ink:#22251f;--muted:#77776d;--line:#ddd9cf;--accent:#5a4632;--accent2:#eadfce;--dark:#24241f;--darkink:#f4f0e8;--shadow:0 10px 30px rgba(45,38,27,.08)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.55}button,input,select{font:inherit}.app{min-height:100vh}.topbar{height:74px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:26px;padding:0 34px;background:rgba(247,245,239,.96);position:sticky;top:0;z-index:20}.brand{font-size:25px;font-weight:700;letter-spacing:-.03em;white-space:nowrap}.brand span{font-size:12px;font-family:system-ui,sans-serif;color:var(--muted);display:block;font-weight:600;letter-spacing:.08em;text-transform:uppercase}.search{flex:1;max-width:690px;position:relative}.search input{width:100%;height:45px;border:1px solid var(--line);background:#fffdf9;border-radius:24px;padding:0 48px 0 18px;outline:none;font-family:system-ui,sans-serif;font-size:14px}.search input:focus{border-color:#9d8b76;box-shadow:0 0 0 3px #eadfce}.search kbd{position:absolute;right:13px;top:12px;font:11px system-ui,sans-serif;color:#999;background:#f0eee8;border-radius:5px;padding:2px 6px}.top-actions{margin-left:auto;display:flex;gap:8px}.iconbtn{border:0;background:transparent;width:40px;height:40px;border-radius:50%;font-family:system-ui,sans-serif;font-size:19px;cursor:pointer}.iconbtn:hover{background:#ebe7dd}.layout{display:grid;grid-template-columns:230px minmax(0,1fr);max-width:1450px;margin:auto}.side{padding:31px 18px;border-right:1px solid var(--line);min-height:calc(100vh - 74px);font-family:system-ui,sans-serif}.side h4{margin:0 12px 12px;color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.13em}.navitem{display:flex;gap:11px;align-items:center;width:100%;border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:9px;color:#55564e;cursor:pointer;font-size:14px}.navitem:hover,.navitem.active{background:#eae5db;color:#29271f;font-weight:700}.navitem .ico{width:20px;text-align:center}.main{padding:34px 42px 70px;max-width:1160px;width:100%;margin:auto}.welcome{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:32px}.welcome h1{font-size:43px;line-height:1.05;letter-spacing:-.055em;margin:0 0 8px;font-weight:600}.welcome p{margin:0;color:var(--muted);font-family:system-ui,sans-serif;font-size:14px}.continue{background:var(--dark);color:var(--darkink);border-radius:14px;padding:20px 22px;display:flex;gap:18px;align-items:center;margin-bottom:42px;box-shadow:var(--shadow)}.continue .mini-cover{width:52px;height:76px;border-radius:3px;object-fit:cover;background:#75634d}.continue h3{margin:0 0 4px;font-size:17px;font-weight:500}.continue p{margin:0;color:#bcb8ae;font:12px system-ui,sans-serif}.continue button{margin-left:auto;border:1px solid #777269;background:transparent;color:#eee7dc;border-radius:20px;padding:8px 14px;cursor:pointer}.section{margin-top:34px}.section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}.section-head h2{font-size:24px;margin:0;font-weight:600;letter-spacing:-.035em}.section-head a{font:12px system-ui,sans-serif;color:#6d5a45;text-decoration:none}.bookgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}.book{min-width:0;cursor:pointer}.coverwrap{position:relative;aspect-ratio:2/3;border-radius:5px;overflow:hidden;background:#ddd4c5;box-shadow:0 5px 14px rgba(45,38,27,.13);transition:transform .2s,box-shadow .2s}.book:hover .coverwrap{transform:translateY(-4px);box-shadow:0 10px 22px rgba(45,38,27,.18)}.coverwrap img{width:100%;height:100%;display:block;object-fit:cover}.covertext{height:100%;display:grid;place-items:center;text-align:center;padding:14px;font-size:19px;color:#fff;background:linear-gradient(145deg,#755f49,#312a22)}.badge{position:absolute;left:8px;top:8px;background:#fffdf0e8;border-radius:5px;padding:4px 7px;font:10px system-ui,sans-serif;font-weight:800;color:#5b4a39}.book h3{font-size:15px;line-height:1.25;margin:10px 0 2px;font-weight:600}.book p{font:12px system-ui,sans-serif;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.filters{display:flex;gap:8px;overflow:auto;padding-bottom:5px;margin-bottom:20px}.filter{border:1px solid var(--line);background:transparent;border-radius:20px;padding:7px 13px;white-space:nowrap;font:12px system-ui,sans-serif;color:#68685f;cursor:pointer}.filter.active,.filter:hover{background:#e9e3d8;color:#332c24;border-color:#d3ccbf}.empty{padding:45px;text-align:center;color:var(--muted);font-family:system-ui,sans-serif;background:#fffdf8;border:1px dashed var(--line);border-radius:12px}.hidden{display:none!important}.footer{margin-top:70px;padding-top:25px;border-top:1px solid var(--line);font:12px system-ui,sans-serif;color:var(--muted)}
-body.dark{--bg:#171713;--paper:#201f1a;--ink:#eee9df;--muted:#aaa69c;--line:#3b3932;--accent2:#3b342a;--shadow:0 10px 30px rgba(0,0,0,.3)}body.dark .topbar{background:#171713ee}body.dark .search input{background:#201f1a;color:#eee9df;border-color:#454238}body.dark .search kbd{background:#34322c;color:#bbb}body.dark .iconbtn:hover,body.dark .navitem:hover,body.dark .navitem.active,body.dark .filter.active,body.dark .filter:hover{background:#302e28;color:#eee9df}body.dark .continue{background:#0f0f0d}body.dark .empty{background:#201f1a}
-@media(max-width:1000px){.bookgrid{grid-template-columns:repeat(4,minmax(0,1fr))}.layout{grid-template-columns:190px 1fr}.main{padding:30px}}
-@media(max-width:760px){.topbar{padding:0 15px;gap:10px}.topbar .brand span,.side{display:none}.layout{display:block}.main{padding:24px 16px 50px}.welcome{display:block}.welcome h1{font-size:34px}.top-actions{display:none}.bookgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.continue{padding:15px}.continue button{display:none}.search{max-width:none}.search kbd{display:none}}
-@media(max-width:480px){.bookgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-head h2{font-size:21px}}
-
-/* OpenShelf mobile/PWA and shelf usability improvements */
-body{padding-bottom:0}
-.book h3 a{color:inherit;text-decoration:none}
-.book h3 a:hover{text-decoration:underline;text-underline-offset:3px}
-.book .coverwrap{display:block}
-.bookmark{position:absolute;right:7px;top:7px;z-index:2;border:1px solid #ffffffaa;background:#fffdf0ed;color:#43392c;border-radius:50%;width:32px;height:32px;display:grid;place-items:center;font:19px system-ui,sans-serif;box-shadow:0 2px 8px #0002}
-.bookmark[aria-pressed="true"]{background:#5a4632;color:#fff;border-color:#5a4632}
-.external-section{margin-top:48px}
-.external-info{font:12px/1.5 system-ui,sans-serif;color:var(--muted);margin:-5px 0 16px}
-.catalog-state{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper);font:13px/1.5 system-ui,sans-serif;color:var(--muted);margin:12px 0}
-.book .source-tag{display:inline-block;font:10px system-ui,sans-serif;color:#6e5c48;border:1px solid var(--line);padding:3px 6px;border-radius:5px;margin-top:8px}
-.mobile-nav{display:none}
-.offline-pill{display:none;font:11px system-ui,sans-serif;padding:3px 8px;border-radius:99px;background:#efe3ca;color:#55422d}
-body.offline .offline-pill{display:inline-block}
-@media(max-width:760px){
- body{padding-bottom:76px}
- .mobile-nav{position:fixed;z-index:60;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:7px;background:color-mix(in srgb,var(--paper) 94%,transparent);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 30px #18140d22;backdrop-filter:blur(14px)}
- .mobile-nav button{border:0;background:transparent;color:var(--ink);border-radius:11px;padding:7px 2px;font:11px system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px}
- .mobile-nav button span{font-size:18px;line-height:1.1}
- .mobile-nav button:active,.mobile-nav button.active{background:var(--accent2)}
- .main{padding-bottom:30px}
- .continue{margin-bottom:28px}
-}
-
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fbf8f1">
+  <meta name="description" content="Discover public-domain and openly licensed books. Read curated editions in OpenShelf's distraction-free reader, save books offline, and keep private notes.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://roshanprathashm.github.io/openshelf-kindle/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OpenShelf">
+  <meta property="og:title" content="OpenShelf — Your Open Reading Library">
+  <meta property="og:description" content="A calm, Kindle-inspired place to discover and read free, open books.">
+  <meta property="og:url" content="https://roshanprathashm.github.io/openshelf-kindle/">
+  <meta name="twitter:card" content="summary">
+  <title>OpenShelf — Your Open Reading Library</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<div class="app">
-<header class="topbar">
-  <div class="brand">OpenShelf<span>Open reading library</span></div>
-  <div class="search"><input id="search" type="search" placeholder="Search your books" aria-label="Search books"><kbd>⌘ K</kbd></div>
-  <div class="top-actions"><span class="offline-pill" id="offline-pill">Offline</span><button class="iconbtn" id="dark" title="Toggle dark mode" aria-label="Toggle dark mode">☾</button></div>
+<header class="app-header" id="app-header">
+  <a class="brand" href="./" id="brand-home" aria-label="OpenShelf home">
+    <span class="brand-mark" aria-hidden="true">O</span>
+    <span><span class="brand-name">OpenShelf</span><span class="brand-tag">Open reading library</span></span>
+  </a>
+  <div class="search-wrap">
+    <label class="sr-only" for="global-search">Search books and authors</label>
+    <input id="global-search" type="search" placeholder="Search titles, authors, subjects…" autocomplete="off" enterkeyhint="search">
+    <span class="search-shortcut" aria-hidden="true">Ctrl K</span>
+  </div>
+  <div class="header-actions">
+    <span id="network-status" class="status-badge" role="status" aria-live="polite"><span class="status-dot"></span><span id="network-label">Online</span></span>
+    <button class="icon-button desktop-action" id="import-button" type="button" title="Import a local TXT, Markdown or HTML book" aria-label="Import a local book">＋</button>
+    <button class="icon-button" id="header-theme-button" type="button" title="Change reading theme" aria-label="Change theme">☾</button>
+  </div>
 </header>
-<div class="layout">
-<aside class="side">
-  <h4>Library</h4>
-  <button class="navitem active" data-filter="all"><span class="ico">⌂</span>Home</button>
-  <button class="navitem" data-filter="saved"><span class="ico">▱</span>My Library</button>
-  <button class="navitem" data-filter="classics"><span class="ico">▤</span>Classics</button>
-  <button class="navitem" data-filter="tamil"><span class="ico">அ</span>Tamil</button>
-  <button class="navitem" data-filter="education"><span class="ico">▥</span>Education</button>
-  <h4 style="margin-top:32px">Discover</h4>
-  <button class="navitem" data-filter="science"><span class="ico">⌬</span>Science & Tech</button>
-  <button class="navitem" data-filter="history"><span class="ico">◷</span>History</button>
-  <button class="navitem" data-filter="all"><span class="ico">＋</span>More collections</button>
-</aside>
-<main class="main">
-<section class="welcome"><div><h1>What will you read?</h1><p>Free and open books, brought together in one quiet reading space.</p></div></section>
-<section class="continue" id="continueCard"><img class="mini-cover" id="continue-cover" src="https://www.gutenberg.org/cache/epub/35/pg35.cover.medium.jpg" alt="The Time Machine cover"><div id="continue-copy"><h3 id="continue-heading">Continue reading</h3><p id="continue-description">The Time Machine · H. G. Wells · Your reading position is saved locally.</p></div><button id="continue-btn" type="button">Continue →</button></section>
-<div class="filters" aria-label="Book categories">
-<button class="filter active" data-cat="all">All books</button><button class="filter" data-cat="classics">Classics</button><button class="filter" data-cat="tamil">Tamil</button><button class="filter" data-cat="education">Education</button><button class="filter" data-cat="science">Science & Technology</button><button class="filter" data-cat="history">History</button>
+
+<div class="app-layout" id="app-layout">
+  <aside class="sidebar" aria-label="Library navigation">
+    <div>
+      <div class="nav-heading">Your library</div>
+      <nav class="side-nav">
+        <button class="nav-button active" type="button" data-filter="all"><span class="nav-icon">⌂</span>All books</button>
+        <button class="nav-button" type="button" data-filter="unlimited"><span class="nav-icon">∞</span>OpenShelf Unlimited</button>
+        <button class="nav-button" type="button" data-filter="external"><span class="nav-icon">↗</span>External free books</button>
+        <button class="nav-button" type="button" data-filter="saved"><span class="nav-icon">♡</span>My Library</button>
+        <button class="nav-button" type="button" data-filter="downloaded"><span class="nav-icon">✓</span>Downloaded offline</button>
+      </nav>
+    </div>
+    <div>
+      <div class="nav-heading">Discover</div>
+      <nav class="side-nav">
+        <button class="nav-button" type="button" data-view="categories"><span class="nav-icon">▦</span>Browse all categories</button>
+        <button class="nav-button" type="button" data-view="sources"><span class="nav-icon">⌕</span>Legal sources & rights</button>
+      </nav>
+    </div>
+    <section class="storage-card" aria-label="Offline storage">
+      <strong>Device storage</strong>
+      <p id="storage-summary">Checking offline books…</p>
+      <div class="storage-bar" aria-hidden="true"><span id="storage-meter"></span></div>
+      <p id="storage-quota">Your offline books stay on this device.</p>
+      <button class="text-button" id="manage-downloads" type="button">Manage downloads →</button>
+    </section>
+  </aside>
+
+  <main class="main" id="main-content">
+    <section class="hero">
+      <p class="hero-kicker">Your next chapter starts here</p>
+      <h1>Make room for a good book.</h1>
+      <p>Discover open editions, return to your reading, and keep the tools you need inside one quiet space.</p>
+    </section>
+
+    <section class="continue-card hidden" id="continue-card" aria-label="Continue reading">
+      <img id="continue-cover" class="cover" src="" alt="">
+      <div class="continue-meta">
+        <h2 id="continue-title">Continue reading</h2>
+        <p id="continue-description"></p>
+        <div class="progress-track" aria-label="Reading progress"><span id="continue-progress"></span></div>
+      </div>
+      <button class="button" id="resume-button" type="button">Resume reading →</button>
+    </section>
+
+    <div id="external-return-banner" class="inline-notice hidden" role="region" aria-label="External reading follow-up">
+      <strong id="external-return-title">Back from an external book?</strong>
+      <p id="external-return-text">You can record your progress here.</p>
+      <div class="notice-actions">
+        <label class="sr-only" for="external-percent">Estimated completion percentage</label>
+        <input id="external-percent" type="number" min="0" max="100" value="10" style="width:104px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);padding:8px" aria-label="Estimated completion percentage">
+        <span style="font-size:12px;color:var(--muted);align-self:center">% complete</span>
+        <button class="button primary" id="save-external-progress" type="button">Save progress</button>
+        <button class="button subtle" id="bookmark-external" type="button">♡ Save book</button>
+        <button class="button subtle" id="dismiss-external" type="button" aria-label="Dismiss">Dismiss</button>
+      </div>
+    </div>
+
+    <section id="library-view">
+      <div class="filter-bar">
+        <div class="filter-tabs" role="group" aria-label="Filter book collection">
+          <button class="filter-chip active" type="button" data-filter="all">All books</button>
+          <button class="filter-chip" type="button" data-filter="unlimited">∞ Unlimited</button>
+          <button class="filter-chip" type="button" data-filter="external">↗ External free</button>
+          <button class="filter-chip" type="button" data-filter="saved">♡ My Library</button>
+          <button class="filter-chip" type="button" data-filter="downloaded">✓ Offline</button>
+        </div>
+        <button class="button subtle" type="button" data-view="categories">Browse categories</button>
+      </div>
+      <div class="genre-wrap">
+        <div class="nav-heading">Explore by genre</div>
+        <div class="genre-chips" id="genre-chips" role="group" aria-label="Filter by genre">
+          <button class="genre-chip active" type="button" data-genre="all">All genres</button>
+          <button class="genre-chip" type="button" data-genre="classics">Classics</button>
+          <button class="genre-chip" type="button" data-genre="scifi">Science fiction</button>
+          <button class="genre-chip" type="button" data-genre="mystery">Mystery</button>
+          <button class="genre-chip" type="button" data-genre="horror">Horror & gothic</button>
+          <button class="genre-chip" type="button" data-genre="adventure">Adventure</button>
+          <button class="genre-chip" type="button" data-genre="philosophy">Philosophy</button>
+        </div>
+      </div>
+      <div class="section-head">
+        <div><h2 id="shelf-heading">Your reading shelf</h2><p id="shelf-description">Curated editions plus live search from legitimate catalogues.</p></div>
+        <button class="text-button" id="clear-search" type="button">Clear search</button>
+      </div>
+      <p class="status-line" id="result-status" role="status" aria-live="polite">Loading your local library…</p>
+      <div class="book-grid" id="book-grid" aria-live="polite"></div>
+      <div class="empty-state hidden" id="empty-state"><strong id="empty-title">No books found</strong><span id="empty-message">Try another search or category.</span></div>
+      <div class="app-footer">
+        OpenShelf is a free independent reading project, not an Amazon product. “Free to read” does not always mean “free to redistribute.” Local editions have source and rights notes; external titles open at their official source.
+        <p><button class="text-button" type="button" data-view="sources">Legal sources & rights directory →</button></p>
+      </div>
+    </section>
+
+    <section id="directory-view" class="directory-view hidden" aria-labelledby="directory-heading">
+      <div class="section-head">
+        <div><p class="hero-kicker">Explore the collection</p><h2 id="directory-heading">Browse categories</h2><p>Choose a genre or open a trusted source. Source availability and reuse rights vary by title.</p></div>
+        <button id="back-to-library" class="button subtle" type="button">← Back to library</button>
+      </div>
+      <div class="directory-grid" id="directory-categories">
+        <article class="directory-card"><h3>Classics</h3><p>Literary works and enduring stories.</p><button class="text-button" data-genre-jump="classics" type="button">Explore classics →</button></article>
+        <article class="directory-card"><h3>Science fiction</h3><p>Time travel, invention and speculative worlds.</p><button class="text-button" data-genre-jump="scifi" type="button">Explore science fiction →</button></article>
+        <article class="directory-card"><h3>Mystery</h3><p>Detectives, puzzles and investigations.</p><button class="text-button" data-genre-jump="mystery" type="button">Explore mysteries →</button></article>
+        <article class="directory-card"><h3>Horror & gothic</h3><p>Gothic novels, suspense and dark fiction.</p><button class="text-button" data-genre-jump="horror" type="button">Explore horror →</button></article>
+        <article class="directory-card"><h3>Adventure</h3><p>Journeys, survival and coming-of-age stories.</p><button class="text-button" data-genre-jump="adventure" type="button">Explore adventure →</button></article>
+        <article class="directory-card"><h3>Philosophy</h3><p>Ideas, drama and works of reflection.</p><button class="text-button" data-genre-jump="philosophy" type="button">Explore philosophy →</button></article>
+      </div>
+      <hr class="section-divider">
+      <div class="section-head"><div><p class="hero-kicker">Rights-aware discovery</p><h2>Legal sources & rights directory</h2><p>OpenShelf searches only selected public catalogues. Verify the licence and your country's copyright status before reusing a work.</p></div></div>
+      <div class="directory-grid">
+        <article class="directory-card"><h3>Project Gutenberg</h3><p>Classic ebooks and public-domain-focused editions. Its terms and public-domain status can differ by country.</p><a href="https://www.gutenberg.org/" target="_blank" rel="noopener noreferrer">Open source ↗</a></article>
+        <article class="directory-card"><h3>Open Library</h3><p>Book discovery and edition availability. A catalogue record is not a blanket redistribution licence.</p><a href="https://openlibrary.org/" target="_blank" rel="noopener noreferrer">Open source ↗</a></article>
+        <article class="directory-card"><h3>Tamil Wikisource</h3><p>Tamil source texts; respect the rights and licence notices on individual pages.</p><a href="https://ta.wikisource.org/" target="_blank" rel="noopener noreferrer">Open source ↗</a></article>
+        <article class="directory-card"><h3>Open Textbook Library</h3><p>Openly licensed educational books. Check each work's licence and attribution requirements.</p><a href="https://open.umn.edu/opentextbooks/" target="_blank" rel="noopener noreferrer">Open source ↗</a></article>
+        <article class="directory-card"><h3>Directory of Open Access Books</h3><p>Scholarly books from academic publishers; open access terms still need individual verification.</p><a href="https://www.doabooks.org/" target="_blank" rel="noopener noreferrer">Open source ↗</a></article>
+        <article class="directory-card"><h3>Project Madurai</h3><p>Tamil literary editions subject to the project's terms and title-specific rights.</p><a href="https://www.projectmadurai.org/" target="_blank" rel="noopener noreferrer">Open source ↗</a></article>
+        <article class="directory-card"><h3>Standard Ebooks</h3><p>Carefully formatted public-domain ebooks with edition-level rights and provenance information.</p><a href="https://standardebooks.org/ebooks" target="_blank" rel="noopener noreferrer">Open source ↗</a></article>
+        <article class="directory-card"><h3>OpenStax</h3><p>Free textbooks with specific licence and attribution terms; some licences impose non-commercial or share-alike conditions.</p><a href="https://openstax.org/subjects" target="_blank" rel="noopener noreferrer">Open source ↗</a></article>
+        <article class="directory-card"><h3>Rights policy</h3><p>OpenShelf hosts only curated editions with recorded source-rights notes. Unverified live catalogue records remain external links.</p><a href="https://github.com/RoshanPrathashM/openshelf-kindle/blob/main/RIGHTS_POLICY.md" target="_blank" rel="noopener noreferrer">Read policy ↗</a></article>
+      </div>
+      <div class="app-footer">OpenShelf is not a subscription service and does not grant access to paid or DRM-protected books. Public sharing of user-uploaded books is not provided by this static site.</div>
+    </section>
+  </main>
 </div>
-<section class="section" id="shelf-section"><div class="section-head"><div><h2 id="sectionTitle">Your reading shelf</h2><p class="small-note" id="shelfCount">Loading locally readable books…</p></div><a href="./books/">Browse book guides →</a></div><div class="bookgrid" id="grid"></div><div class="empty hidden" id="empty">No books match this filter yet. Search above to discover more editions.</div><div class="catalog-state hidden" id="saved-empty">Your saved books will appear here. Tap the ♡ on any book cover to add it to My Library.</div></section>
-<section class="section external-section hidden" id="external-section" aria-live="polite"><div class="section-head"><div><h2 id="external-title">More from open collections</h2><p class="small-note" id="external-count"></p></div><a href="./sources/">All sources →</a></div><p class="external-info">These results come from external catalogues. Availability and reuse rights vary; books that are not hosted inside OpenShelf open at their legitimate source.</p><div class="bookgrid" id="external-grid"></div><div class="catalog-state hidden" id="external-state"></div></section>
-<section class="section"><div class="section-head"><h2>OpenShelf Unlimited</h2><a href="./sources/">Explore sources →</a></div><div class="continue" style="margin-bottom:0;background:#e9e3d8;color:#332c24;box-shadow:none"><div style="font-size:30px">∞</div><div><h3 style="color:#332c24">One search. Many legitimate collections.</h3><p style="color:#6f6a60">OpenShelf can connect discovery to public-domain, openly licensed and authorised sources. Books that can be hosted can open here; others can open at their legitimate source.</p></div></div></section>
-<footer class="footer">OpenShelf is an independent open-source project. Free-to-read does not automatically mean free to redistribute. Each title should retain its source and rights information.</footer>
-</main></div></div>
-<nav class="mobile-nav" aria-label="Main navigation">
-<button type="button" data-mobile="home" class="active"><span>⌂</span>Home</button>
-<button type="button" data-mobile="saved"><span>▱</span>My Library</button>
-<button type="button" data-mobile="search"><span>⌕</span>Search</button>
-<button type="button" data-mobile="dark"><span>☾</span>Appearance</button>
+
+<nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+  <button class="active" type="button" data-mobile-view="home"><span>⌂</span>Home</button>
+  <button type="button" data-filter="saved"><span>♡</span>My Library</button>
+  <button type="button" data-mobile-view="search"><span>⌕</span>Search</button>
+  <button type="button" data-mobile-view="sources"><span>§</span>Sources</button>
 </nav>
-<script>
-(function(){
-"use strict";
-const search=document.getElementById("search"),grid=document.getElementById("grid"),empty=document.getElementById("empty");
-const shelfCount=document.getElementById("shelfCount"),savedEmpty=document.getElementById("saved-empty");
-const externalSection=document.getElementById("external-section"),externalGrid=document.getElementById("external-grid");
-const externalTitle=document.getElementById("external-title"),externalCount=document.getElementById("external-count"),externalState=document.getElementById("external-state");
-const savedKey="openshelf-saved-library-v1";
-let books=[],booksLoaded=false,cat="all",view="home",searchTimer=null,searchRequest=0,lastExternalResults=[],openTextbooksPromise=null;
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function safeUrl(s){try{const u=new URL(s,location.href);return ["http:","https:"].includes(u.protocol)?u.href:"#";}catch{return "#";}}
-function readSaved(){try{const v=JSON.parse(localStorage.getItem(savedKey)||"[]");return Array.isArray(v)?v:[];}catch{return [];}}
-function isSaved(b){return readSaved().some(x=>x.key===b.key);}
-function toggleSaved(b){let a=readSaved();if(a.some(x=>x.key===b.key))a=a.filter(x=>x.key!==b.key);else a.push({key:b.key,title:b.title,author:b.author,cover:b.cover||"",reader:b.reader||"",url:b.url||"",source:b.source||"",kind:b.kind||"local",category:b.category||"classics"});localStorage.setItem(savedKey,JSON.stringify(a));renderShelf();if(lastExternalResults.length)externalGrid.innerHTML=lastExternalResults.map(cardHtml).join("");}
-function categoryFor(b){if(b.language==="ta")return"tamil";const v=(b.category||"").toLowerCase();if(/education|textbook|course|engineering|mathematics|programming/.test(v))return"education";if(/science|technology|computing|physics|biology/.test(v))return"science";if(/history|historical/.test(v))return"history";return"classics";}
-function bookHref(b){return b.kind==="external"?safeUrl(b.url):(String(b.reader||"").startsWith("./read/")?b.reader:"./read/?book="+encodeURIComponent(b.slug));}
-function cardHtml(b){const href=bookHref(b),saved=isSaved(b),cover=safeUrl(b.cover||"");
-return '<article class="book"><div class="coverwrap"><a href="'+esc(href)+'" '+(b.kind==="external"?'target="_blank" rel="noopener noreferrer"':'')+' aria-label="Open '+esc(b.title)+'"><img src="'+esc(cover)+'" alt="Cover of '+esc(b.title)+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.classList.remove(\'hidden\')"><div class="covertext hidden">'+esc(b.title)+'</div></a><button type="button" class="bookmark" data-save="'+esc(b.key)+'" aria-pressed="'+(saved?"true":"false")+'" aria-label="'+(saved?"Remove from":"Save to")+' My Library">'+(saved?"♥":"♡")+'</button><span class="badge">'+esc(b.badge||(b.kind==="external"?"SOURCE LINK":"READ HERE"))+'</span></div><h3><a href="'+esc(href)+'" '+(b.kind==="external"?'target="_blank" rel="noopener noreferrer"':'')+'>'+esc(b.title)+'</a></h3><p>'+esc(b.author||"Author not listed")+'</p>'+(b.kind==="external"?'<span class="source-tag">'+esc(b.source||"External catalogue")+'</span>':'<span class="source-tag">OpenShelf reader</span>')+'</article>';
-}
 
-function normalizeOpenTextbook(item){
- const title=item.title||item.name||item.book_title||"Untitled textbook";
- const av=item.authors||item.author||item.contributors||item.creator||[];
- const authors=Array.isArray(av)?av.map(a=>typeof a==="string"?a:(a.name||a.full_name||a.display_name||"")).filter(Boolean).join(", "):String(av||"");
- const id=item.id||item.textbook_id||item.textbookId||item.slug||title;
- const url=item.textbook_url||item.textbookUrl||item.book_url||item.bookUrl||item.website||item.url||item.link||
-   (item.permalink?"https://open.umn.edu/opentextbooks/textbooks/"+encodeURIComponent(item.permalink):"https://open.umn.edu/opentextbooks/");
- const cover=item.cover_url||item.coverUrl||item.cover_image||item.coverImage||item.thumbnail_url||item.image_url||item.image||"";
- const subjects=item.subjects||item.subject||item.disciplines||item.categories||[];
- return {key:"external:opentextbooks:"+String(id),kind:"external",title,author:authors||"Author not listed",cover:typeof cover==="string"?cover:"",url,source:"Open Textbook Library",category:"education",badge:"OPEN TEXTBOOK · CHECK LICENCE",subjects:Array.isArray(subjects)?subjects.join(" "):String(subjects||""),description:item.description||item.summary||item.about||""};
-}
-function searchOpenTextbooks(query){
- if(!openTextbooksPromise){
-  openTextbooksPromise=fetch("https://open.umn.edu/opentextbooks/textbooks.json",{headers:{Accept:"application/json"}})
-   .then(r=>{if(!r.ok)throw Error("Open Textbook Library");return r.json();})
-   .then(raw=>{const items=Array.isArray(raw)?raw:(raw.textbooks||raw.results||raw.data||raw.items||[]);if(!Array.isArray(items))throw Error("Unexpected textbook catalogue response");return items;})
-   .catch(err=>{openTextbooksPromise=null;throw err;});
- }
- const tokens=query.toLowerCase().split(/\s+/).filter(Boolean);
- return openTextbooksPromise.then(items=>items.map(normalizeOpenTextbook).filter(b=>{
-  const hay=(b.title+" "+b.author+" "+b.subjects+" "+b.description).toLowerCase();
-  return tokens.every(t=>hay.includes(t));
- }).slice(0,8));
-}
-function doabField(item,keyPart){
- const metadata=item.metadata;if(!metadata)return "";
- if(Array.isArray(metadata)){const found=[];metadata.forEach(m=>{const k=String(m.key||m.name||m.element||"").toLowerCase();if(k.includes(keyPart.toLowerCase())){let v=m.value||m.values||m.text||"";if(Array.isArray(v))v=v.map(x=>typeof x==="string"?x:(x.value||"")).join(", ");if(v)found.push(String(v));}});return found.join("; ");}
- const v=metadata[keyPart];return Array.isArray(v)?String(v[0]?.value||v[0]||""):String(v||"");
-}
-function normalizeDoabItem(item){
- const title=doabField(item,"dc.title")||item.title||item.name||"Open-access book";
- const author=doabField(item,"dc.contributor.author")||doabField(item,"dc.creator");
- const handle=item.handle||item.identifier||item.id||"";
- const url=item.link||item.url||(handle&&String(handle).startsWith("http")?handle:(handle?"https://directory.doabooks.org/handle/"+handle:"https://www.doabooks.org/"));
- const subjects=doabField(item,"dc.subject");
- const rawCategory=(title+" "+subjects).toLowerCase();
- const category=/history|historical|archaeology/.test(rawCategory)?"history":/science|engineering|technology|computer|mathemat|physics|biology|medicine/.test(rawCategory)?"science":"education";
- return {key:"external:doab:"+String(item.uuid||item.id||handle||title),kind:"external",title,author:author||"Academic publisher / contributor",cover:"",url,source:"Directory of Open Access Books",category,badge:"OPEN ACCESS · CHECK LICENCE",subjects,description:doabField(item,"dc.description.abstract")||doabField(item,"dc.description")||""};
-}
-function searchDoab(query){
- const params=new URLSearchParams({query:query,limit:"8",start:"0",expand:"metadata,bitstreams"});
- return fetch("https://directory.doabooks.org/rest/search?"+params.toString(),{headers:{Accept:"application/json"}})
-  .then(r=>{if(!r.ok)throw Error("Directory of Open Access Books");return r.json();})
-  .then(data=>{const sr=data.searchResults||data.search_results||data;let rows=sr.results||sr.searchResult||sr.search_result||data.results||data.items||[];if(!Array.isArray(rows)&&Array.isArray(rows.searchResult))rows=rows.searchResult;return Array.isArray(rows)?rows.map(normalizeDoabItem):[];});
-}
+<input class="import-input" id="import-file" type="file" accept=".txt,.md,.markdown,.html,.htm,text/plain,text/markdown,text/html">
 
-function renderShelf(){
- let list=books.map(b=>({...b,key:"local:"+b.slug,kind:"local",category:categoryFor(b)}));
- const query=search.value.trim().toLowerCase();
- if(view==="saved"){list=readSaved();document.getElementById("sectionTitle").textContent="My Library";shelfCount.textContent=list.length+" saved books on this device";}
- else {if(cat!=="all")list=list.filter(b=>b.category===cat);if(query)list=list.filter(b=>(b.title+" "+b.author).toLowerCase().includes(query));document.getElementById("sectionTitle").textContent=cat==="all"?(query?"Matches in your shelf":"Your reading shelf"):({classics:"Classics",tamil:"Tamil books",education:"Education",science:"Science & Technology",history:"History"}[cat]||"Your reading shelf");shelfCount.textContent=list.length+" locally readable book"+(list.length===1?"":"s");}
- grid.innerHTML=list.map(cardHtml).join("");empty.classList.toggle("hidden",list.length>0||!booksLoaded);savedEmpty.classList.toggle("hidden",!(view==="saved"&&list.length===0));grid.classList.toggle("hidden",view==="saved"&&list.length===0);
-}
-function renderContinue(){if(!books.length)return;let progress={};try{progress=JSON.parse(localStorage.getItem("openshelf.reader.progress.v1")||"{}")||{};}catch(e){}const latest=Object.keys(progress).filter(slug=>books.some(b=>b.slug===slug)).sort((a,b)=>(progress[b].at||0)-(progress[a].at||0))[0];const book=books.find(b=>b.slug===latest)||books.find(b=>b.slug==="the-time-machine")||books[0];const p=latest?progress[latest]:null;const cover=document.getElementById("continue-cover"),heading=document.getElementById("continue-heading"),desc=document.getElementById("continue-description"),btn=document.getElementById("continue-btn");cover.src=safeUrl(book.cover||"");cover.alt="Cover of "+book.title;heading.textContent=latest?"Pick up where you left off":"Start reading";desc.textContent=book.title+" · "+book.author+(book.year?" · "+book.year:"")+(p?" · Saved on this device":"");btn.onclick=function(){location.href=book.reader||("./read/?book="+encodeURIComponent(book.slug));};}
-function normalTitle(s){return String(s||"").toLowerCase().replace(/[^a-z0-9\u0B80-\u0BFF]+/g," ").trim();}
-function renderExternal(results,q,token,unavailable){
- if(token!==searchRequest)return;
- const localNames=new Set(books.map(b=>normalTitle(b.title)));
- const seen=new Set(),deduped=[];
- for(const b of results){const k=normalTitle(b.title);if(!k||seen.has(k))continue;seen.add(k);deduped.push(b);}
- const final=deduped.filter(b=>!localNames.has(normalTitle(b.title)));
- lastExternalResults=final;
- const visible=cat==="all"?final:final.filter(b=>b.category===cat);
- externalSection.classList.remove("hidden");externalTitle.textContent="More books for “"+q+"”";externalCount.textContent=visible.length+" source results"+(cat==="all"?"":" in this category")+(unavailable?" · "+unavailable+" source"+(unavailable===1?"":"s")+" unavailable":"");externalGrid.innerHTML=visible.map(cardHtml).join("");
- externalState.classList.toggle("hidden",visible.length>0);
- externalState.textContent=visible.length?"":(unavailable?"Some open collections could not be reached. Try again later or browse all listed sources.":final.length?"Search results exist, but none match the selected category. Choose All books to see every source result.":"No external matches were returned. Try another title or search the source collections directly.");
-}
-async function runGlobalSearch(q){
- const token=++searchRequest;
- if(q.length<2){externalSection.classList.add("hidden");externalGrid.innerHTML="";externalState.classList.add("hidden");return;}
- externalSection.classList.remove("hidden");externalTitle.textContent="Searching open collections…";externalCount.textContent="";externalGrid.innerHTML="";externalState.textContent="Checking Project Gutenberg, Open Library, Tamil Wikisource, open textbooks and academic books…";externalState.classList.remove("hidden");
- const results=[];
- const enc=encodeURIComponent(q);
- const tasks=[
-  fetch("https://gutendex.com/books/?search="+enc).then(r=>{if(!r.ok)throw Error("Gutendex");return r.json();}).then(d=>(d.results||[]).slice(0,8).map(b=>({key:"external:gutenberg:"+b.id,kind:"external",title:b.title,author:(b.authors||[]).map(a=>a.name).join(", ")||"Author not listed",cover:"https://www.gutenberg.org/cache/epub/"+b.id+"/pg"+b.id+".cover.medium.jpg",url:"https://www.gutenberg.org/ebooks/"+b.id,source:"Project Gutenberg",category:"classics",badge:"CHECK LOCAL RIGHTS"}))),
-  fetch("https://openlibrary.org/search.json?q="+enc+"&limit=8").then(r=>{if(!r.ok)throw Error("Open Library");return r.json();}).then(d=>(d.docs||[]).slice(0,8).map(b=>({key:"external:openlibrary:"+b.key,kind:"external",title:b.title,author:(b.author_name||[]).slice(0,2).join(", "),cover:b.cover_i?"https://covers.openlibrary.org/b/id/"+b.cover_i+"-M.jpg":"",url:"https://openlibrary.org"+b.key,source:"Open Library catalogue",category:"classics",badge:"ACCESS VARIES"}))),
-  fetch("https://ta.wikisource.org/w/api.php?action=query&generator=search&gsrsearch="+enc+"&gsrnamespace=0&gsrlimit=8&prop=info&inprop=url&format=json&origin=*").then(r=>{if(!r.ok)throw Error("Tamil Wikisource");return r.json();}).then(d=>Object.values(d.query?.pages||{}).map(p=>({key:"external:tawikisource:"+p.pageid,kind:"external",title:p.title,author:"Tamil Wikisource",cover:"",url:p.fullurl||("https://ta.wikisource.org/wiki/"+encodeURIComponent(p.title.replace(/ /g,"_"))),source:"Tamil Wikisource",category:"tamil",badge:"READ AT SOURCE"}))),
-  searchOpenTextbooks(q),
-  searchDoab(q)
- ];
- const settled=await Promise.allSettled(tasks);
- if(token!==searchRequest)return;
- settled.forEach(x=>{if(x.status==="fulfilled")results.push(...x.value);});
- const unavailable=settled.filter(x=>x.status==="rejected").length;
- if(!settled.some(x=>x.status==="fulfilled")){externalSection.classList.remove("hidden");externalTitle.textContent="External search unavailable";externalCount.textContent="";externalGrid.innerHTML="";externalState.innerHTML='Could not reach the external catalogues right now. You can still browse <a href="./sources/">all listed collections</a>.';externalState.classList.remove("hidden");return;}
- renderExternal(results,q,token,unavailable);
-}
-function syncCategoryButtons(){
- document.querySelectorAll(".filter").forEach(b=>b.classList.toggle("active",view==="home"&&b.dataset.cat===cat));
- document.querySelectorAll(".navitem").forEach(b=>b.classList.toggle("active",b.dataset.filter===(view==="saved"?"saved":cat==="all"?"all":cat)));
- document.querySelectorAll("[data-mobile]").forEach(b=>b.classList.toggle("active",b.dataset.mobile===(view==="saved"?"saved":"home")));
-}
-function goHome(){view="home";cat="all";renderShelf();syncCategoryButtons();}
-document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{view="home";cat=b.dataset.cat;renderShelf();syncCategoryButtons();}));
-document.querySelectorAll(".navitem").forEach(b=>b.addEventListener("click",()=>{const f=b.dataset.filter;if(f==="saved"){view="saved";renderShelf();}else{view="home";cat=f==="all"?"all":f;renderShelf();}syncCategoryButtons();}));
-document.addEventListener("click",e=>{const b=e.target.closest("[data-save]");if(!b)return;e.preventDefault();e.stopPropagation();let item=[...books.map(x=>({...x,key:"local:"+x.slug,kind:"local",category:categoryFor(x)}))];let saveThis=item.find(x=>x.key===b.dataset.save);if(!saveThis){const external=[...document.querySelectorAll("#external-grid .book")].find(el=>el.querySelector("[data-save]")?.dataset.save===b.dataset.save);if(external){const title=external.querySelector("h3")?.innerText||"";const auth=external.querySelector("p")?.innerText||"";const link=external.querySelector("h3 a");const img=external.querySelector("img");saveThis={key:b.dataset.save,kind:"external",title,author:auth,url:link?.href||"",cover:img?.src||"",source:external.querySelector(".source-tag")?.innerText||"External catalogue",category:"classics"};}}if(saveThis)toggleSaved(saveThis);});
-search.addEventListener("input",()=>{view="home";renderShelf();clearTimeout(searchTimer);const q=search.value.trim();searchTimer=setTimeout(()=>runGlobalSearch(q),450);syncCategoryButtons();});
-document.getElementById("dark").addEventListener("click",()=>{document.body.classList.toggle("dark");const dark=document.body.classList.contains("dark");localStorage.setItem("openshelf-dark",dark?"1":"0");document.querySelectorAll('[data-mobile="dark"] span').forEach(s=>s.textContent=dark?"☀":"☾");});
-if(localStorage.getItem("openshelf-dark")==="1")document.body.classList.add("dark");
-document.querySelectorAll("[data-mobile]").forEach(b=>b.addEventListener("click",()=>{const action=b.dataset.mobile;if(action==="home"){search.value="";goHome();}else if(action==="saved"){view="saved";renderShelf();syncCategoryButtons();}else if(action==="search"){search.focus();window.scrollTo({top:0,behavior:"smooth"});}else if(action==="dark"){document.getElementById("dark").click();}}));
-document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();search.focus();}});
-window.addEventListener("online",()=>document.body.classList.remove("offline"));window.addEventListener("offline",()=>document.body.classList.add("offline"));if(!navigator.onLine)document.body.classList.add("offline");
-fetch("./content/library-index.json").then(r=>{if(!r.ok)throw Error("Library index not found");return r.json();}).then(d=>{books=d.books||[];booksLoaded=true;renderShelf();renderContinue();syncCategoryButtons();}).catch(()=>{booksLoaded=true;shelfCount.textContent="The local shelf could not be loaded. Try refreshing when online.";empty.classList.remove("hidden");});
-if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("./sw.js").catch(()=>{});}
-renderShelf();syncCategoryButtons();
-})();
-</script>
-['Alice’s Adventures in Wonderland','Lewis Carroll','classics','11','alice-adventures-in-wonderland'],
-['Pride and Prejudice','Jane Austen','classics','1342','pride-and-prejudice'],
-['Frankenstein','Mary Shelley','classics','84','frankenstein'],
-['Dracula','Bram Stoker','classics','345','dracula'],
-['The Adventures of Sherlock Holmes','Arthur Conan Doyle','classics','1661','adventures-of-sherlock-holmes'],
-['The Picture of Dorian Gray','Oscar Wilde','classics','174','picture-of-dorian-gray'],
-['Moby-Dick','Herman Melville','classics','2701','moby-dick'],
-['The Time Machine','H. G. Wells','classics','35','the-time-machine'],
-['The War of the Worlds','H. G. Wells','classics','36','the-war-of-the-worlds'],
-['Jane Eyre','Charlotte Brontë','classics','1260','jane-eyre']
-];
-const grid=document.getElementById('grid'),search=document.getElementById('search'),empty=document.getElementById('empty');let cat='all';
-function render(){const q=search.value.trim().toLowerCase();const list=books.filter(b=>(cat==='all'||b[2]===cat)&&(b[0]+' '+b[1]).toLowerCase().includes(q));grid.innerHTML=list.map(b=>`<article class="book" data-title="${b[0]}"><div class="coverwrap" onclick="location.href='./read/?book=${b[4]}'"><img src="https://www.gutenberg.org/cache/epub/${b[3]}/pg${b[3]}.cover.medium.jpg" alt="Cover of ${b[0]}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"><div class="covertext hidden">${b[0]}</div><span class="badge">OPEN EDITION</span></div><h3>${b[0]}</h3><p>${b[1]}</p></article>`).join('');empty.classList.toggle('hidden',list.length>0)}
-search.addEventListener('input',render);document.querySelectorAll('.filter').forEach(x=>x.onclick=()=>{document.querySelectorAll('.filter').forEach(y=>y.classList.remove('active'));x.classList.add('active');cat=x.dataset.cat;document.getElementById('sectionTitle').textContent=cat==='all'?'Popular classics':x.textContent;render()});document.querySelectorAll('.navitem').forEach(x=>x.onclick=()=>{document.querySelectorAll('.navitem').forEach(y=>y.classList.remove('active'));x.classList.add('active');const f=x.dataset.filter;if(f==='saved'){search.value='';cat='all';document.getElementById('sectionTitle').textContent='My Library';document.getElementById('grid').innerHTML='<div class="empty" style="grid-column:1/-1">Your personal library will appear here as you save books. Reading position remains on this device.</div>';empty.classList.add('hidden')}else{cat=f==='all'?'all':f;document.querySelectorAll('.filter').forEach(y=>y.classList.toggle('active',y.dataset.cat===cat));document.getElementById('sectionTitle').textContent=f==='all'?'Popular classics':x.textContent;render()}});document.getElementById('dark').onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('openshelf-dark',document.body.classList.contains('dark')?'1':'0')};if(localStorage.getItem('openshelf-dark')==='1')document.body.classList.add('dark');document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();search.focus()}});render();
-</script>
-</body></html>
+<section class="reader-shell hidden" id="reader-view" aria-label="OpenShelf Kindle Reader" role="dialog" aria-modal="true">
+  <header class="reader-topbar">
+    <button class="icon-button" id="exit-reader" type="button" aria-label="Back to library" title="Back to library">←</button>
+    <div class="reader-titlebox"><h1 id="reader-title" class="reader-title">Book title</h1><p id="reader-author" class="reader-author"></p></div>
+    <div class="reader-tools-row">
+      <button class="icon-button" id="reader-theme-button" type="button" title="Cycle reading theme" aria-label="Cycle reading theme">☾</button>
+      <button class="button" id="open-appearance" type="button" title="Text and page settings">Aa <span class="text-control">Appearance</span></button>
+      <button class="icon-button" id="bookmark-page" type="button" title="Bookmark this page" aria-label="Bookmark this page">🔖</button>
+      <button class="icon-button" id="open-notes" type="button" title="Notes and highlights" aria-label="Notes and highlights">✎</button>
+      <button class="button primary" id="reader-offline-button" type="button">⬇ Save Offline</button>
+    </div>
+  </header>
+  <main class="reader-main" id="reader-main">
+    <div id="reader-content" class="reader-page" tabindex="0" aria-label="Book text"><p>Choose a book to begin reading.</p></div>
+  </main>
+  <footer class="reader-footer">
+    <div class="reader-progress-top"><span id="reader-chapter-label">Chapter 1</span><span id="reader-progress-label">0% · Calculating time</span></div>
+    <div class="reader-progress-track" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="reader-progress-bar"><span id="reader-progress-fill"></span></div>
+    <div class="reader-nav">
+      <button class="button subtle" id="previous-page" type="button">← Previous</button>
+      <span class="center-label" id="reader-page-label">Page 1</span>
+      <button class="button primary" id="next-page" type="button">Next →</button>
+    </div>
+  </footer>
+  <div class="reader-overlay" id="reader-overlay"></div>
+  <aside class="reader-drawer" id="reader-drawer" aria-label="Reader tools" aria-hidden="true">
+    <div class="drawer-header"><h2 id="drawer-heading">Reading appearance</h2><button class="icon-button" id="close-drawer" type="button" aria-label="Close reader tools">×</button></div>
+    <div class="filter-tabs" role="tablist" aria-label="Reader tool sections">
+      <button class="filter-chip active" type="button" data-drawer-tab="appearance" role="tab" aria-selected="true">Appearance</button>
+      <button class="filter-chip" type="button" data-drawer-tab="notes" role="tab" aria-selected="false">Notes & bookmarks</button>
+    </div>
+    <section id="appearance-panel" style="margin-top:20px">
+      <div class="control-group">
+        <span class="field-label">Reading theme</span>
+        <div class="filter-tabs" id="theme-choices">
+          <button class="filter-chip active" type="button" data-theme-choice="paperwhite">Paperwhite</button>
+          <button class="filter-chip" type="button" data-theme-choice="sepia">Sepia</button>
+          <button class="filter-chip" type="button" data-theme-choice="sage">Kindle Sage</button>
+          <button class="filter-chip" type="button" data-theme-choice="night">Night E-Ink</button>
+        </div>
+      </div>
+      <div class="control-group"><label for="font-family">Font family</label><select id="font-family"><option value="serif">Serif / Bookerly-style</option><option value="sans">Sans-serif</option><option value="mono">Monospace</option></select></div>
+      <div class="control-group"><label for="font-size">Font size <span id="font-size-value">21 px</span></label><div class="control-row"><button class="button" type="button" id="font-decrease">A−</button><button class="button" type="button" id="font-increase">A+</button></div><input id="font-size" type="range" min="16" max="34" step="1" value="21"></div>
+      <div class="control-group"><label for="line-spacing">Line spacing <span id="line-spacing-value">1.8</span></label><input id="line-spacing" type="range" min="1.3" max="2.3" step=".1" value="1.8"></div>
+      <div class="control-group"><label for="reader-margin">Reading margins <span id="reader-margin-value">wide</span></label><input id="reader-margin" type="range" min="0" max="2" step="1" value="1"></div>
+      <div class="control-group"><span class="field-label">Page behavior</span><div class="filter-tabs"><button class="filter-chip active" id="mode-paginated" type="button">Paginated</button><button class="filter-chip" id="mode-scroll" type="button">Smooth scroll</button></div></div>
+    </section>
+    <section id="notes-panel" class="hidden" style="margin-top:20px">
+      <form id="note-form" class="note-form">
+        <label for="note-input" class="field-label">Add a private note</label>
+        <textarea id="note-input" class="note-input" rows="3" maxlength="3000" placeholder="What would you like to remember?"></textarea>
+        <div class="control-row"><button class="button primary" type="submit">Save note</button><button class="button" type="button" id="add-highlight">Highlight selection</button></div>
+        <button class="button subtle" type="button" id="add-underline">Underline selection</button>
+        <button class="button subtle" type="button" id="export-notes">Export notes & bookmarks</button>
+      </form>
+      <div class="section-head"><div><h2 style="font-size:18px">Bookmarks</h2></div><button class="text-button" id="bookmark-current" type="button">＋ Add bookmark</button></div>
+      <div id="bookmarks-list" class="notes-list"></div>
+      <hr class="section-divider">
+      <div class="section-head"><div><h2 style="font-size:18px">Notes & highlights</h2></div><span class="reader-badge">Private to this browser</span></div>
+      <div id="notes-list" class="notes-list"></div>
+    </section>
+  </aside>
+</section>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script defer src="./app.js"></script>
+</body>
+</html>
