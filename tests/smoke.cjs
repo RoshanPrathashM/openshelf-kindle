@@ -345,9 +345,47 @@ async function waitForCards(page, minimum = 1) {
       () => document.getElementById("toast").innerText.includes("Private note saved"),
       null, { timeout: 5000 }
     );
+    await page.evaluate(() => {
+      const reader = document.getElementById("reader-content");
+      const walker = document.createTreeWalker(reader, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.textContent.includes("unabridged") && !(node.parentElement && node.parentElement.closest(".os-highlight"))) break;
+      }
+      if (!node) throw new Error("No text remains for a second selection");
+      const offset = node.textContent.indexOf("unabridged");
+      const range = document.createRange();
+      range.setStart(node, offset); range.setEnd(node, offset + "unabridged".length);
+      const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+      reader.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    });
+    await page.waitForFunction(
+      () => !document.getElementById("reader-selection-toolbar").classList.contains("hidden"),
+      null, { timeout: 5000 }
+    );
     await page.locator('[data-selection-highlight="green"]').click();
     await page.waitForFunction(() => document.querySelector("#reader-content .os-highlight-green"), null, { timeout: 5000 });
-    pass("selection toolbar supports dictionary definitions, selected-text notes and colored highlighting");
+    await page.evaluate(() => {
+      const reader = document.getElementById("reader-content");
+      const walker = document.createTreeWalker(reader, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.textContent.includes("unabridged") && !(node.parentElement && node.parentElement.closest(".os-highlight"))) break;
+      }
+      if (!node) throw new Error("No text remains for quote-copy selection");
+      const offset = node.textContent.indexOf("unabridged");
+      const range = document.createRange();
+      range.setStart(node, offset); range.setEnd(node, offset + "unabridged".length);
+      const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+      reader.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    });
+    await page.waitForFunction(
+      () => !document.getElementById("reader-selection-toolbar").classList.contains("hidden"),
+      null, { timeout: 5000 }
+    );
+    await page.locator("#selection-copy-quote").click();
+    await page.waitForFunction(() => document.getElementById("toast").innerText.includes("Quote copied"), null, { timeout: 5000 });
+    pass("selection toolbar supports dictionary definitions, selected-text notes, colored highlights and quote copying");
     await page.locator("#exit-reader").click();
     await desktop.close();
 
