@@ -12,7 +12,9 @@
     notes: "openshelf.spa.notes.v1",
     externalProgress: "openshelf.spa.external-progress.v1",
     imports: "openshelf.spa.imports.v1",
-    freeCatalogue: "openshelf.spa.free-catalogue.v1"
+    freeCatalogue: "openshelf.spa.free-catalogue.v1",
+    gutendexPage: "openshelf.spa.gutendex-page.v1",
+    openLibraryPage: "openshelf.spa.openlibrary-page.v1"
   };
   const DB_NAME = "OpenShelfOfflineDB";
   const DB_VERSION = 1;
@@ -20,6 +22,8 @@
   const READING_SPEED_WPM = 220;
   const SEARCH_DEBOUNCE_MS = 400;
   const API_TIMEOUT_MS = 12000;
+  const TEXT_FETCH_TIMEOUT_MS = 7000;
+  const WORDS_PER_PAGE = 260;
   const themes = ["paperwhite", "sepia", "sage", "night"];
   const themeLabels = {
     paperwhite: "Paperwhite",
@@ -38,6 +42,12 @@
     "dracula": ["content/dracula-part-01.json", "content/dracula-part-02.json"],
     "alice-adventures-in-wonderland": ["content/alice-adventures-in-wonderland.json"],
     "the-secret-garden": ["content/the-secret-garden-part-01.json", "content/the-secret-garden-part-02.json"]
+  };
+  const gutenbergIdsBySlug = {
+    "the-time-machine": 35, "the-call-of-the-wild": 215, "the-jungle-book": 236,
+    "hamlet": 1524, "adventures-of-sherlock-holmes": 1661, "frankenstein": 84,
+    "picture-of-dorian-gray": 174, "dracula": 345, "alice-adventures-in-wonderland": 11,
+    "the-secret-garden": 113
   };
   const localGenres = {
     "the-time-machine": ["classics", "scifi"],
@@ -63,6 +73,13 @@
   let freeCatalogueLoaded = false;
   let loadingFreeCatalogue = false;
   let pageAnimationTimer = null;
+  let currentTOC = [];
+  let gutendexBrowsePage = 1;
+  let openLibraryBrowsePage = 1;
+  let loadingMoreBooks = false;
+  let selectionToolbarTimer = null;
+  let selectionHideTimer = null;
+  let deferredInstallPrompt = null;
   let importedBooks = [];
   let offlineRecords = [];
   let currentFilter = "all";
@@ -227,7 +244,9 @@
       licenseNote: record.rights || "Review the source edition's rights before reusing it.",
       genres: localGenres[slug] || ["classics"],
       contentFiles: readerFiles[slug] || [],
-      readerAvailable: Boolean((readerFiles[slug] || []).length),
+      gutenbergId: gutenbergIdsBySlug[slug] || null,
+      sourceUrl: safeHTTPURL(record.source_url || ""),
+      readerAvailable: Boolean((readerFiles[slug] || []).length || gutenbergIdsBySlug[slug]),
       local: true,
       searchableText: [record.title, record.author, record.category, record.language].join(" ")
     };
@@ -354,24 +373,29 @@
   }
   function buildDisplayPool() {
     const unique = new Map();
-    const localTitleKeys = new Set(localBooks.map((book) => normalizeText(book.title)));
-    localBooks.forEach((book) => unique.set(book.id, book));
-    importedBooks.forEach((book) => unique.set(book.id, book));
-
-    // Keep externally hosted books distinct from locally readable editions and
-    // deduplicate the featured, popular, live-search and saved-source lists.
-    const seenExternalTitles = new Set(localTitleKeys);
-    const addExternalBooks = (records) => (records || []).forEach((book) => {
-      if (!book || book.tier !== "external") return;
-      const titleKey = normalizeText(book.title);
-      if (!titleKey || seenExternalTitles.has(titleKey)) return;
-      seenExternalTitles.add(titleKey);
+    const titleToBook = new Map();
+    const add = (book, personal) => {
+      if (!book || (!(personal) && !["external", "unlimited"].includes(book.tier))) return;
+      const key = normalizeText(book.title);
+      if (!key) return;
+      const existing = titleToBook.get(key);
+      if (existing) {
+        if (existing.tier === "external" && book.tier === "unlimited") {
+          unique.delete(existing.id);
+          unique.set(book.id, book);
+          titleToBook.set(key, book);
+        }
+        return;
+      }
+      titleToBook.set(key, book);
       if (!unique.has(book.id)) unique.set(book.id, book);
-    });
-    addExternalBooks(featuredExternalBooks);
-    addExternalBooks(expandedExternalBooks);
-    addExternalBooks(remoteBooks);
-    addExternalBooks(getSavedBooks());
+    };
+    localBooks.forEach((book) => { unique.set(book.id, book); titleToBook.set(normalizeText(book.title), book); });
+    importedBooks.forEach((book) => { unique.set(book.id, book); titleToBook.set(normalizeText(book.title), book); });
+    add(featuredExternalBooks, false);
+    add(expandedExternalBooks, false);
+    add(remoteBooks, false);
+    getSavedBooks().forEach((book) => add(book, true));
     return Array.from(unique.values());
   }
   function mapGutendexRecord(item) {
@@ -677,27 +701,49 @@
   }
   function externalBook(data) {
     const safeURL = safeHTTPURL(data.url || data.sourceUrl || "");
+    const textUrl = safeHTTPURL(data.textUrl || "");
+    const gutenbergId = /^\d+$/.test(String(data.gutenbergId || "")) ? Number(data.gutenbergId) : null;
+    const canReadText = Boolean(gutenbergId && textUrl && data.tier === "unlimited");
+    const tier = canReadText ? "unlimited" : "external";
     return Object.assign({
       id: "external:" + (data.sourceKey || normalizeText(data.title) + ":" + normalizeText(data.author)),
-      tier: "external", tierLabel: "↗ EXTERNAL FREE", local: false,
+      tier, tierLabel: tier === "unlimited" ? "∞ UNLIMITED" : "↗ EXTERNAL FREE", local: false,
       title: "Untitled", author: "Author not listed", coverUrl: "", sourceName: "External source",
       url: safeURL, genres: ["classics"]
-    }, data, { url: safeURL, tier: "external", tierLabel: "↗ EXTERNAL FREE" });
+    }, data, {
+      url: safeURL, sourceUrl: safeHTTPURL(data.sourceUrl || safeURL), textUrl: canReadText ? textUrl : "",
+      gutenbergId, tier, tierLabel: tier === "unlimited" ? "∞ UNLIMITED" : "↗ EXTERNAL FREE",
+      local: false, fullTextAvailable: canReadText
+    });
+  }
+  function getPlainTextFormat(formats) {
+    if (!formats || typeof formats !== "object") return "";
+    const match = Object.entries(formats).find(([format, url]) =>
+      /text\/plain/i.test(format) && typeof url === "string" && /^https?:\/\//i.test(url)
+    );
+    return match ? safeHTTPURL(match[1]) : "";
+  }
+  function mapGutendexRecord(item) {
+    const formats = item.formats || {};
+    const textUrl = getPlainTextFormat(formats);
+    const id = Number(item.id) || null;
+    const subjects = (item.subjects || []).concat(item.bookshelves || []).join(" ");
+    return externalBook({
+      id: "external:gutenberg:" + item.id, sourceKey: "gutenberg:" + item.id,
+      title: item.title || "Untitled",
+      author: (item.authors || []).map((person) => person.name).filter(Boolean).join(", ") || "Author not listed",
+      sourceName: "Project Gutenberg", url: "https://www.gutenberg.org/ebooks/" + item.id,
+      sourceUrl: "https://www.gutenberg.org/ebooks/" + item.id, textUrl, gutenbergId: id,
+      tier: textUrl && id ? "unlimited" : "external",
+      coverUrl: safeHTTPURL(formats["image/jpeg"] || ""),
+      genres: inferGenres(item.title || "", subjects, ""),
+      searchableText: subjects,
+      sourceNote: "Plain-text reader availability is based on the listed Gutendex format. Project Gutenberg follows US copyright law; check the individual ebook notice and local copyright status before reuse."
+    });
   }
   async function searchGutendex(query, signal) {
     const data = await timeoutFetch("https://gutendex.com/books/?search=" + encodeURIComponent(query) + "&page=1", { signal });
-    return (data.results || []).slice(0, 12).map((item) => {
-      const formats = item.formats || {};
-      const cover = formats["image/jpeg"] || "";
-      return externalBook({
-        id: "external:gutenberg:" + item.id, sourceKey: "gutenberg:" + item.id, title: item.title,
-        author: (item.authors || []).map((person) => person.name).filter(Boolean).join(", ") || "Author not listed",
-        coverUrl: cover, sourceName: "Project Gutenberg", url: "https://www.gutenberg.org/ebooks/" + item.id,
-        genres: inferGenres(item.title, (item.subjects || []).join(" "), ""),
-        searchableText: (item.subjects || []).join(" ") + " " + (item.bookshelves || []).join(" "),
-        sourceNote: "Project Gutenberg entry. Territory-specific copyright rules may apply; this live record has not been approved for local redistribution."
-      });
-    });
+    return (data.results || []).slice(0, 12).map(mapGutendexRecord);
   }
   async function searchOpenLibrary(query, signal) {
     const params = new URLSearchParams({
