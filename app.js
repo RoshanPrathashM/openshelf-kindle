@@ -358,7 +358,7 @@
     let list = pool;
     if (currentFilter === "unlimited") list = list.filter((book) => book.tier === "unlimited");
     if (currentFilter === "external") list = list.filter((book) => book.tier === "external");
-    if (currentFilter === "saved") list = list.filter((book) => saved.includes(book.id));
+    if (currentFilter === "saved") list = list.filter((book) => saved.includes(book.id) || book.tier === "import");
     if (currentFilter === "downloaded") list = list.filter((book) => offlineIds.has(book.id));
     if (currentGenre !== "all") list = list.filter((book) => (book.genres || []).includes(currentGenre));
     const query = normalizeText($("global-search").value);
