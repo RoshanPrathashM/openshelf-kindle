@@ -244,6 +244,96 @@
       $("empty-state").classList.remove("hidden");
     }
   }
+  function migrateLegacyData() {
+    if (readJSON("openshelf.spa.migrated.v1", false)) return;
+    const legacySettings = readJSON("openshelf.reader.settings.v1", null);
+    if (!localStorage.getItem(KEYS.settings)) {
+      if (legacySettings && typeof legacySettings === "object") {
+        const oldTheme = legacySettings.theme || "paper";
+        const oldFont = legacySettings.font || "book";
+        writeJSON(KEYS.settings, {
+          theme: oldTheme === "dark" ? "night" : oldTheme === "sepia" ? "sepia" : "paperwhite",
+          font: oldFont === "sans" ? "sans" : oldFont === "mono" ? "mono" : "serif",
+          fontSize: Number(legacySettings.size) || 21,
+          lineSpacing: Number(legacySettings.spacing) ? Number(legacySettings.spacing) / 10 : 1.8,
+          margin: 1,
+          mode: "paginated"
+        });
+      } else if (localStorage.getItem("openshelf-dark") === "1") {
+        writeJSON(KEYS.settings, Object.assign(getCurrentSettings(), { theme: "night" }));
+      }
+    }
+
+    const saved = getSavedBooks();
+    const savedIds = new Set(saved.map((book) => book.id));
+    const legacyShelf = readJSON("openshelf-saved-library-v1", []);
+    if (Array.isArray(legacyShelf)) {
+      legacyShelf.forEach((entry) => {
+        if (!entry || !entry.key || savedIds.has(entry.key)) return;
+        const local = localBooks.find((book) => book.id === entry.key || ("local:" + book.slug) === entry.key);
+        const legacyGenres = entry.category && genreLabels[entry.category] ? [entry.category] : [];
+        const migrated = local || {
+          id: entry.key,
+          title: entry.title || "Saved external book",
+          author: entry.author || "Author not listed",
+          tier: "external",
+          tierLabel: "↗ EXTERNAL FREE",
+          coverUrl: safeHTTPURL(entry.cover || ""),
+          url: safeHTTPURL(entry.url || ""),
+          sourceName: entry.source || "External source",
+          genres: legacyGenres,
+          local: false
+        };
+        saved.push({
+          id: migrated.id, title: migrated.title, author: migrated.author, tier: migrated.tier,
+          coverUrl: migrated.coverUrl || "", url: migrated.url || "", sourceName: migrated.sourceName || "",
+          sourceUrl: migrated.sourceUrl || "", genres: migrated.genres || [], slug: migrated.slug || "",
+          contentFiles: migrated.contentFiles || [], year: migrated.year || "", language: migrated.language || "en"
+        });
+        savedIds.add(migrated.id);
+      });
+      writeJSON(KEYS.saved, saved);
+    }
+
+    const legacyProgress = readJSON("openshelf.reader.progress.v1", {});
+    const progress = getProgressMap();
+    if (legacyProgress && typeof legacyProgress === "object") {
+      localBooks.forEach((book) => {
+        const old = legacyProgress[book.slug];
+        if (!old || progress[book.id]) return;
+        progress[book.id] = {
+          id: book.id, title: book.title, author: book.author, coverUrl: book.coverUrl || "",
+          tier: "unlimited", chapter: Math.max(0, Number(old.chapter) || 0), scrollRatio: 0, page: 0,
+          mode: "paginated", percent: 0, words: 0, updatedAt: Number(old.at) || Date.now()
+        };
+      });
+      writeJSON(KEYS.progress, progress);
+    }
+
+    const legacyNotes = readJSON("openshelf.reader.notes.v1", {});
+    const notes = readJSON(KEYS.notes, {});
+    if (legacyNotes && typeof legacyNotes === "object") {
+      localBooks.forEach((book) => {
+        const oldItems = legacyNotes[book.slug];
+        if (!Array.isArray(oldItems) || notes[book.id]) return;
+        notes[book.id] = oldItems.map((item, index) => ({
+          id: (item.kind || "note") + ":legacy:" + index,
+          kind: ["highlight", "underline", "note"].includes(item.kind) ? item.kind : "note",
+          text: String(item.text || "").slice(0, 1200),
+          body: String(item.body || "").slice(0, 3000),
+          chapter: Math.max(0, Number(item.chapter) || 0),
+          page: 0,
+          createdAt: Number(item.at) || Date.now()
+        }));
+      });
+      writeJSON(KEYS.notes, notes);
+    }
+    writeJSON("openshelf.spa.migrated.v1", true);
+    const settings = getCurrentSettings();
+    document.documentElement.dataset.theme = themes.includes(settings.theme) ? settings.theme : "paperwhite";
+    $("header-theme-button").textContent = settings.theme === "night" ? "☀" : "☾";
+  }
+
   function addImportedMetadata(item) {
     const all = readJSON(KEYS.imports, []);
     const next = Array.isArray(all) ? all.filter((entry) => entry.id !== item.id) : [];
@@ -1633,6 +1723,7 @@
     wireEvents();
     await refreshOfflineRecords();
     await loadLocalCatalogue();
+    migrateLegacyData();
     await updateStorageIndicator();
     renderShelf();
     renderContinueCard();
