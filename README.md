@@ -40,18 +40,18 @@ OpenShelf now features 10 additional source-linked classics: *Pride and Prejudic
 These 20 featured source-linked titles and the larger popular list are **external**: they open at the source's official eBook page; OpenShelf does not host their full text and does not enable in-app notes or offline copies for them. The locally readable shelf remains the 10 curated full-text books plus files a person imports. Project Gutenberg says its public-domain determination is US-based and that copyright status can differ outside the US; therefore the app labels these as free at source, not as universally public-domain or licensed for redistribution. See [Project Gutenberg's permission guidance](https://www.gutenberg.org/policy/permission.html).
 
 
-### 3. Kindle-style reader
+### 3. Full-text Kindle reader
 
-For curated editions and private local imports, the fullscreen reader provides:
-- Four reading themes: Paperwhite, Sepia, Kindle Sage and Night E-Ink.
-- Paginated horizontal columns with animated page turns, next/previous buttons, left/right arrows, Page Up/Page Down, Space/Shift+Space and touch swipe; smooth-scroll mode is also available.
-- Serif, sans-serif and monospace type; font size, line spacing and reading-margin controls.
-- Progress percentage, estimated reading time remaining and saved reading position.
-- Bookmarks, private notes, text highlights, underlines and export of notes/bookmarks as JSON.
-- One-click offline storage with IndexedDB. A title can be removed from offline storage without deleting its separately saved reading-progress metadata.
+For curated editions, Gutendex books with a listed <code>text/plain</code> format, and private local imports, the reader provides:
+- An IndexedDB-first full-edition cache, then an optional repository file at <code>books/pg&lt;ID&gt;.txt</code>, then source plain text and a sequential CORS-proxy fallback chain.
+- Project Gutenberg header/footer removal, chapter-heading detection, an interactive table of contents, and logical page chunks of approximately 260 words each.
+- A page slider and a Go to Page number input, plus previous/next, Page Up/Page Down, arrow-key and Space/Shift+Space controls.
+- A loading skeleton while the full text is retrieved and automatic local caching of the parsed reading edition. Once cached, a title can reopen without refetching while its browser storage remains available.
+- Four reading themes, font-family/size, line-spacing and margin settings, progress percentage, estimated remaining time, bookmarks and private notes.
+- Selection toolbar actions for yellow/green/pink highlighting, a note attached to selected text, a free Dictionary API lookup for one English word, and copying the selected quote.
 - Personal import for <code>.txt</code>, <code>.md</code>, <code>.markdown</code>, <code>.html</code> and <code>.htm</code> files. Imported text stays in the user's own browser storage and is not published or shared.
 
-The reader sanitizes source chapter markup before inserting it into the page. The built-in content is loaded from this repository, avoiding cross-origin reader embedding for those editions.
+The reader sanitizes bundled chapter markup before inserting it into the page. Full-text source access and public-domain status are not guaranteed in every jurisdiction; a listed text URL is not a redistribution licence. Project Gutenberg states that its public-domain assessment follows US law, so users outside the US need to check local copyright rules and the individual ebook's notice.
 
 ### 4. Unified live search
 
@@ -62,14 +62,14 @@ After two or more characters, search runs with a 400 ms debounce against:
 - Open Textbook Library
 - Directory of Open Access Books (DOAB)
 
-The app filters the local shelf immediately while showing loading skeletons for external results. Requests time out; stale searches are cancelled where supported; source failures are shown without hiding successful results. Provider APIs and CORS policies can change, so source discovery is best-effort. Unverified records stay external.
+The app filters the local shelf immediately while showing loading skeletons for external results. “Browse 100 free books” loads a starter catalogue, and “Load More Free Books” advances through Gutendex pages and publicly readable Open Library records. Gutendex records with a listed plain-text format can open in the in-app full-text reader; other entries remain source links. Requests time out; stale searches are cancelled where supported; source failures are shown without hiding successful results. Provider APIs and CORS policies can change, so source discovery and proxy availability are best-effort.
 
 ### 5. Offline and device storage
 
 - Small preferences, saved-book metadata, progress, bookmarks and annotations are stored in <code>localStorage</code>.
 - Full saved book content and imported text are stored in the IndexedDB database **OpenShelfOfflineDB**.
 - The Device Storage panel displays offline-book count and approximate content size, along with the browser's reported storage quota when available.
-- The PWA manifest and service worker cache the home page, app script, stylesheet, reader shell and local catalogue index. A title should be saved offline before relying on it without a network.
+- The PWA manifest and service worker cache the home page, app script, stylesheet, icons, manifests, reader shell and local catalogue index. Full-text editions are cached in IndexedDB after a successful fetch; a title should be saved offline before relying on it without a network. The app can be installed from a compatible browser using Install app or Add to Home Screen.
 
 Browser storage is finite and can be cleared by users or browser policy. “Unlimited” does not mean unlimited device disk space. Data is local to the current browser/profile and does not automatically sync to another device.
 
@@ -96,7 +96,8 @@ Then open <code>http://localhost:8000/</code>.
 - <code>styles.css</code> — responsive app and reader styling.
 - <code>app.js</code> — catalogue search, IndexedDB, reading position, themes, bookmarks, notes, annotations and imports.
 - <code>sw.js</code> — service worker and static-shell cache.
-- <code>manifest.webmanifest</code> — install metadata.
+- <code>manifest.json</code> and <code>manifest.webmanifest</code> — install metadata.
+- <code>app-icon.svg</code> — installable OpenShelf icon.
 - <code>content/library-index.json</code> — curated local shelf and source notes.
 - <code>content/featured-free.json</code> — 10 featured Project Gutenberg source links; popular catalogue results are cached locally as metadata only.
 - <code>catalog-registry.json</code> — sources and content-ingestion policy.
@@ -105,3 +106,10 @@ Then open <code>http://localhost:8000/</code>.
 ## Contribution guidance
 
 Suggest books by submitting the official source URL, title, author, language, exact licence/rights evidence, and jurisdiction reviewed. Do not add book files to the local hosted shelf unless redistribution permission is documented. Where terms are uncertain, link to the authorised source.
+
+
+## Full text, page caching and legal scope
+
+OpenShelf fetches one full-text edition when a reader opens a title; it does not bulk-download or republish the entire Gutendex catalogue. The loader checks IndexedDB, an optional repository-hosted `books/pg<ID>.txt`, the source `text/plain` URL and a sequential proxy fallback. It strips Project Gutenberg's start/end boilerplate, detects common chapter headings and caches the parsed 260-word logical pages plus table of contents in the user's browser. Proxy services and upstream URLs can change or be unavailable; in that case bundled curated editions still fall back to their local chapter JSON when available.
+
+A Gutendex `text/plain` format is a reading-source signal, not proof that a book is public domain worldwide or that redistribution is authorised. Project Gutenberg's rights assessment follows US law; check the ebook notice and local copyright law before reusing or redistributing any text. OpenShelf leaves source attribution visible and does not bulk mirror live catalogue books.
