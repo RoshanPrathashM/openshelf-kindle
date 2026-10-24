@@ -1,6 +1,6 @@
 "use strict";
 const CACHE_PREFIX = "openshelf-shell-";
-const CACHE_NAME = CACHE_PREFIX + "v1";
+const CACHE_NAME = CACHE_PREFIX + "v2";
 const APP_SHELL = [
   "./",
   "./index.html",
