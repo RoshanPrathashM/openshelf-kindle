@@ -11,18 +11,18 @@ OpenShelf is an open-source prototype designed for phones, tablets and laptops. 
 
 ### Library and discovery
 - Responsive cover grid, book search, categories, a **Continue Reading** card and a device-local **My Library** shelf.
-- Search supported locally hosted titles and live results from Project Gutenberg via Gutendex, Open Library and Tamil Wikisource.
+- Search supported local titles and live results from Project Gutenberg via Gutendex, Open Library, Tamil Wikisource, Open Textbook Library and DOAB (Directory of Open Access Books). The provider APIs are best-effort and a failed source is shown as unavailable instead of silently counted.
 - Local full-text editions open in the OpenShelf reader. Results that are not hosted here open at their source/catalogue, where access and rights vary.
 - Cards can be saved to the user's local library. Saved items, reading history and reading settings are not synced between devices.
 - **OpenShelf Unlimited** is a discovery concept: one search across legitimate catalogues. It is not a subscription and does not make every result free to redistribute or readable inside OpenShelf.
 
 ### Reader
 - Local reader editions currently include 10 English works: *The Time Machine*, *The Call of the Wild*, *The Jungle Book*, *Hamlet*, *The Adventures of Sherlock Holmes*, *Frankenstein*, *The Picture of Dorian Gray*, *Dracula*, *Alice's Adventures in Wonderland*, and *The Secret Garden*.
-- Reading controls for font size, line spacing, typeface, warm-paper/sepia/dark themes, and a page-turn mode with horizontal swiping and transition animation. Continuous scrolling remains available.
+- Reading controls for font size, line spacing, typeface, warm-paper/sepia/dark themes, a one-tap reader theme switch, and page-turn mode with horizontal swiping and transition animation. Continuous scrolling remains available.
 - English dictionary lookup through a public dictionary API; an internet connection is required for definitions.
-- Select text to highlight or underline it, add private notes, save notes/highlights on this browser, and export notes to a text file.
-- Pencil mode lets touch and pointer users draw over the visible reading area. Drawings are stored locally on the device, separated by book/chapter and the current page or scroll region.
-- Reading position and reader settings are saved locally.
+- Select text to highlight or underline it, add private notes, delete saved note/highlight entries, and export notes to a text file.
+- Pencil mode lets touch and pointer users draw over the visible reading area. Drawings are stored locally by book/chapter/page or scroll region; the current drawing can be cleared or exported as PNG.
+- Reading position and reader settings are saved locally, including the current page in page-turn mode.
 
 ### Install and offline use
 - The site includes a web-app manifest and a service worker. Compatible browsers may offer **Add to Home Screen / Install** for an app-like experience.
@@ -55,7 +55,7 @@ OpenShelf is a **discovery layer plus a small local reading library**, not a mir
 
 - **No central user-upload server.** The site is static; visitors cannot publish a book to every user's library by uploading a file. A public contribution system needs a backend, storage, file validation, licence/rights evidence, abuse controls and a review process. Personal browser-only imports are a separate feature from public redistribution.
 - No user accounts, cloud sync, collaborative notes, paid subscription, or user analytics backend.
-- No guarantee of complete global book coverage or a deduplicated global count. Search results come from a few live providers and can overlap.
+- No guarantee of complete global book coverage or a deduplicated global count. Search results come from five live provider integrations (Gutendex/Project Gutenberg, Open Library, Tamil Wikisource, Open Textbook Library and DOAB) and can overlap. Search and publisher APIs can change or temporarily fail.
 - Tamil Wikisource is available through live source search, but this repository does not currently host a curated Tamil full-text shelf.
 - Pencil drawings and notes stay in this browser profile and are not backed up automatically. Export notes before clearing site data or moving to another device.
 - The page-turn and pencil experiences are an early web prototype; test them on the target phone/tablet before relying on them for long reading sessions.
