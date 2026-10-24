@@ -558,19 +558,37 @@
     });
   }
   async function searchOpenLibrary(query, signal) {
-    const data = await timeoutFetch("https://openlibrary.org/search.json?q=" + encodeURIComponent(query) + "&limit=12", { signal });
-    return (data.docs || []).slice(0, 12).map((item) => {
-      const key = item.key || "";
-      const cover = item.cover_i ? "https://covers.openlibrary.org/b/id/" + item.cover_i + "-M.jpg" : "";
+    const params = new URLSearchParams({
+      q: query,
+      limit: "24",
+      fields: "key,title,author_name,cover_i,first_publish_year,subject,has_fulltext,public_scan_b,editions,editions.key,editions.title,editions.ebook_access,editions.cover_i"
+    });
+    const data = await timeoutFetch("https://openlibrary.org/search.json?" + params.toString(), { signal });
+    return (data.docs || []).map((item) => {
+      const editions = item.editions && Array.isArray(item.editions.docs) ? item.editions.docs : [];
+      const publicEdition = editions.find((edition) => String(edition.ebook_access || "").toLowerCase() === "public");
+      const publicScan = item.public_scan_b === true;
+      if (!publicEdition && !publicScan) return null;
+      const workKey = String(item.key || "");
+      const editionKey = publicEdition && String(publicEdition.key || "");
+      const key = editionKey || workKey;
+      const coverId = (publicEdition && publicEdition.cover_i) || item.cover_i || "";
+      const cover = coverId ? "https://covers.openlibrary.org/b/id/" + coverId + "-M.jpg" : "";
       return externalBook({
-        id: "external:openlibrary:" + key, sourceKey: "openlibrary:" + key, title: item.title || "Untitled",
+        id: "external:openlibrary:" + key,
+        sourceKey: "openlibrary:" + key,
+        title: (publicEdition && publicEdition.title) || item.title || "Untitled",
         author: (item.author_name || []).slice(0, 3).join(", ") || "Author not listed",
-        coverUrl: cover, sourceName: "Open Library", url: key.startsWith("/works/") ? "https://openlibrary.org" + key : "https://openlibrary.org/search?q=" + encodeURIComponent(item.title || query),
+        coverUrl: cover,
+        sourceName: "Open Library",
+        url: key.startsWith("/") ? "https://openlibrary.org" + key : "https://openlibrary.org/search?q=" + encodeURIComponent(item.title || query),
         genres: inferGenres(item.title, (item.subject || []).join(" "), item.first_publish_year),
         searchableText: (item.subject || []).slice(0, 8).join(" "),
-        sourceNote: "Open Library discovery record. Edition access and permission to redistribute vary."
+        sourceNote: publicEdition
+          ? "Open Library marks an edition as publicly readable. This is an external edition and is not copied into OpenShelf."
+          : "Open Library indicates a public scan. Read it at the source; access and reuse terms remain controlled by the source."
       });
-    });
+    }).filter(Boolean).slice(0, 12);
   }
   async function searchTamilWikisource(query, signal) {
     const data = await timeoutFetch("https://ta.wikisource.org/w/api.php?action=query&generator=search&gsrsearch=" + encodeURIComponent(query) + "&gsrnamespace=0&gsrlimit=8&prop=info&inprop=url&format=json&origin=*", { signal });
