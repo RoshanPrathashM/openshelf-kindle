@@ -167,7 +167,7 @@ function renderShelf(){
 }
 function renderContinue(){if(!books.length)return;let progress={};try{progress=JSON.parse(localStorage.getItem("openshelf.reader.progress.v1")||"{}")||{};}catch(e){}const latest=Object.keys(progress).filter(slug=>books.some(b=>b.slug===slug)).sort((a,b)=>(progress[b].at||0)-(progress[a].at||0))[0];const book=books.find(b=>b.slug===latest)||books.find(b=>b.slug==="the-time-machine")||books[0];const p=latest?progress[latest]:null;const cover=document.getElementById("continue-cover"),heading=document.getElementById("continue-heading"),desc=document.getElementById("continue-description"),btn=document.getElementById("continue-btn");cover.src=safeUrl(book.cover||"");cover.alt="Cover of "+book.title;heading.textContent=latest?"Pick up where you left off":"Start reading";desc.textContent=book.title+" · "+book.author+(book.year?" · "+book.year:"")+(p?" · Saved on this device":"");btn.onclick=function(){location.href=book.reader||("./read/?book="+encodeURIComponent(book.slug));};}
 function normalTitle(s){return String(s||"").toLowerCase().replace(/[^a-z0-9\u0B80-\u0BFF]+/g," ").trim();}
-function renderExternal(results,q,token){
+function renderExternal(results,q,token,unavailable){
  if(token!==searchRequest)return;
  const localNames=new Set(books.map(b=>normalTitle(b.title)));
  const seen=new Set(),deduped=[];
@@ -175,9 +175,9 @@ function renderExternal(results,q,token){
  const final=deduped.filter(b=>!localNames.has(normalTitle(b.title)));
  lastExternalResults=final;
  const visible=cat==="all"?final:final.filter(b=>b.category===cat);
- externalSection.classList.remove("hidden");externalTitle.textContent="More books for “"+q+"”";externalCount.textContent=visible.length+" source results"+(cat==="all"?"":" in this category");externalGrid.innerHTML=visible.map(cardHtml).join("");
+ externalSection.classList.remove("hidden");externalTitle.textContent="More books for “"+q+"”";externalCount.textContent=visible.length+" source results"+(cat==="all"?"":" in this category")+(unavailable?" · "+unavailable+" source"+(unavailable===1?"":"s")+" unavailable":"");externalGrid.innerHTML=visible.map(cardHtml).join("");
  externalState.classList.toggle("hidden",visible.length>0);
- externalState.textContent=visible.length?"":(final.length?"Search results exist, but none match the selected category. Choose All books to see every source result.":"No external matches were returned. Try another title or search the source collections directly.");
+ externalState.textContent=visible.length?"":(unavailable?"Some open collections could not be reached. Try again later or browse all listed sources.":final.length?"Search results exist, but none match the selected category. Choose All books to see every source result.":"No external matches were returned. Try another title or search the source collections directly.");
 }
 async function runGlobalSearch(q){
  const token=++searchRequest;
@@ -195,8 +195,9 @@ async function runGlobalSearch(q){
  const settled=await Promise.allSettled(tasks);
  if(token!==searchRequest)return;
  settled.forEach(x=>{if(x.status==="fulfilled")results.push(...x.value);});
+ const unavailable=settled.filter(x=>x.status==="rejected").length;
  if(!settled.some(x=>x.status==="fulfilled")){externalSection.classList.remove("hidden");externalTitle.textContent="External search unavailable";externalCount.textContent="";externalGrid.innerHTML="";externalState.innerHTML='Could not reach the external catalogues right now. You can still browse <a href="./sources/">all listed collections</a>.';externalState.classList.remove("hidden");return;}
- renderExternal(results,q,token);
+ renderExternal(results,q,token,unavailable);
 }
 function syncCategoryButtons(){
  document.querySelectorAll(".filter").forEach(b=>b.classList.toggle("active",view==="home"&&b.dataset.cat===cat));
