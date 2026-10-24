@@ -1,14 +1,17 @@
-name: Validate OpenShelf UI
+name: Validate OpenShelf SPA
 
 on:
   push:
     branches: [main]
     paths:
       - "index.html"
+      - "styles.css"
+      - "app.js"
       - "read/index.html"
       - "sw.js"
       - "manifest.webmanifest"
       - "content/library-index.json"
+      - "catalog-registry.json"
       - ".github/workflows/apply-ui-layer.yml"
   workflow_dispatch:
 
@@ -19,10 +22,10 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate JavaScript, manifests and catalogue JSON
+      - name: Validate SPA, JavaScript, links and JSON
         run: |
           python - <<'PY'
           import json
@@ -41,21 +44,32 @@ jobs:
                   raise SystemExit(f"JavaScript syntax error in {label}:\n{result.stderr}")
               print(f"PASS JavaScript syntax: {label}")
 
-          for html_path in (Path("index.html"), Path("read/index.html")):
-              source = html_path.read_text(encoding="utf-8")
-              scripts = re.finditer(r"<script([^>]*)>([\s\S]*?)</script>", source, re.IGNORECASE)
-              count = 0
-              for match in scripts:
-                  attributes, body = match.groups()
-                  if "application/ld+json" in attributes.lower() or not body.strip():
-                      continue
-                  check_js(body, f"{html_path} inline script")
-                  count += 1
-              if count == 0:
-                  raise SystemExit(f"No executable inline scripts found in {html_path}")
+          app = Path("index.html").read_text(encoding="utf-8")
+          if '<link rel="stylesheet" href="./styles.css">' not in app:
+              raise SystemExit("index.html must load styles.css")
+          if '<script defer src="./app.js"></script>' not in app:
+              raise SystemExit("index.html must load app.js")
+          if re.search(r'href=["\\']\\./(books|sources)/["\\']', app):
+              raise SystemExit("Found a broken legacy books/ or sources/ relative link")
+          if re.search(r'<script[^>]*>\\s*\\[', app, re.IGNORECASE):
+              raise SystemExit("Found a raw array expression inside an inline script")
 
+          check_js(Path("app.js").read_text(encoding="utf-8"), "app.js")
           check_js(Path("sw.js").read_text(encoding="utf-8"), "sw.js")
+
+          reader = Path("read/index.html").read_text(encoding="utf-8")
+          for match in re.finditer(r"<script([^>]*)>([\\s\\S]*?)</script>", reader, re.IGNORECASE):
+              attributes, body = match.groups()
+              if "application/ld+json" not in attributes.lower() and body.strip():
+                  check_js(body, "read/index.html inline script")
+
           for json_path in (Path("manifest.webmanifest"), Path("content/library-index.json"), Path("catalog-registry.json")):
               json.loads(json_path.read_text(encoding="utf-8"))
               print(f"PASS JSON: {json_path}")
+
+          sw = Path("sw.js").read_text(encoding="utf-8")
+          for cached in ('"./index.html"', '"./styles.css"', '"./app.js"', '"./manifest.webmanifest"'):
+              if cached not in sw:
+                  raise SystemExit(f"Service-worker install shell does not cache {cached}")
+          print("PASS PWA shell includes the homepage, stylesheet, app script and manifest")
           PY
