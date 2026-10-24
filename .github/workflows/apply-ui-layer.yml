@@ -13,6 +13,7 @@ on:
       - "content/library-index.json"
       - "catalog-registry.json"
       - ".github/workflows/apply-ui-layer.yml"
+      - "tests/**"
   workflow_dispatch:
 
 permissions:
@@ -89,3 +90,31 @@ jobs:
                   raise SystemExit(f"Service-worker install shell does not cache {cached}")
           print("PASS PWA shell includes the homepage, stylesheet, app script and manifest")
           PY
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run desktop, offline and mobile browser smoke tests
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/openshelf-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          node tests/smoke.cjs
