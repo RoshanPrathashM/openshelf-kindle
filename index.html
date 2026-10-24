@@ -65,7 +65,7 @@ body.offline .offline-pill{display:inline-block}
 </aside>
 <main class="main">
 <section class="welcome"><div><h1>What will you read?</h1><p>Free and open books, brought together in one quiet reading space.</p></div></section>
-<section class="continue" id="continueCard"><img class="mini-cover" src="https://www.gutenberg.org/cache/epub/35/pg35.cover.medium.jpg" alt="The Time Machine cover"><div><h3>Continue reading</h3><p>The Time Machine · H. G. Wells · Your reading position is saved locally.</p></div><button onclick="location.href='./read/?book=the-time-machine'">Continue →</button></section>
+<section class="continue" id="continueCard"><img class="mini-cover" id="continue-cover" src="https://www.gutenberg.org/cache/epub/35/pg35.cover.medium.jpg" alt="The Time Machine cover"><div id="continue-copy"><h3 id="continue-heading">Continue reading</h3><p id="continue-description">The Time Machine · H. G. Wells · Your reading position is saved locally.</p></div><button id="continue-btn" type="button">Continue →</button></section>
 <div class="filters" aria-label="Book categories">
 <button class="filter active" data-cat="all">All books</button><button class="filter" data-cat="classics">Classics</button><button class="filter" data-cat="tamil">Tamil</button><button class="filter" data-cat="education">Education</button><button class="filter" data-cat="science">Science & Technology</button><button class="filter" data-cat="history">History</button>
 </div>
@@ -106,6 +106,7 @@ function renderShelf(){
  else {if(cat!=="all")list=list.filter(b=>b.category===cat);if(query)list=list.filter(b=>(b.title+" "+b.author).toLowerCase().includes(query));document.getElementById("sectionTitle").textContent=cat==="all"?(query?"Matches in your shelf":"Your reading shelf"):({classics:"Classics",tamil:"Tamil books",education:"Education",science:"Science & Technology",history:"History"}[cat]||"Your reading shelf");shelfCount.textContent=list.length+" locally readable book"+(list.length===1?"":"s");}
  grid.innerHTML=list.map(cardHtml).join("");empty.classList.toggle("hidden",list.length>0||!booksLoaded);savedEmpty.classList.toggle("hidden",!(view==="saved"&&list.length===0));grid.classList.toggle("hidden",view==="saved"&&list.length===0);
 }
+function renderContinue(){if(!books.length)return;let progress={};try{progress=JSON.parse(localStorage.getItem("openshelf.reader.progress.v1")||"{}")||{};}catch(e){}const latest=Object.keys(progress).filter(slug=>books.some(b=>b.slug===slug)).sort((a,b)=>(progress[b].at||0)-(progress[a].at||0))[0];const book=books.find(b=>b.slug===latest)||books.find(b=>b.slug==="the-time-machine")||books[0];const p=latest?progress[latest]:null;const cover=document.getElementById("continue-cover"),heading=document.getElementById("continue-heading"),desc=document.getElementById("continue-description"),btn=document.getElementById("continue-btn");cover.src=safeUrl(book.cover||"");cover.alt="Cover of "+book.title;heading.textContent=latest?"Pick up where you left off":"Start reading";desc.textContent=book.title+" · "+book.author+(book.year?" · "+book.year:"")+(p?" · Saved on this device":"");btn.onclick=function(){location.href=book.reader||("./read/?book="+encodeURIComponent(book.slug));};}
 function normalTitle(s){return String(s||"").toLowerCase().replace(/[^a-z0-9\u0B80-\u0BFF]+/g," ").trim();}
 function renderExternal(results,q,token){
  if(token!==searchRequest)return;
@@ -149,7 +150,7 @@ if(localStorage.getItem("openshelf-dark")==="1")document.body.classList.add("dar
 document.querySelectorAll("[data-mobile]").forEach(b=>b.addEventListener("click",()=>{const action=b.dataset.mobile;if(action==="home"){search.value="";goHome();}else if(action==="saved"){view="saved";renderShelf();syncCategoryButtons();}else if(action==="search"){search.focus();window.scrollTo({top:0,behavior:"smooth"});}else if(action==="dark"){document.getElementById("dark").click();}}));
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();search.focus();}});
 window.addEventListener("online",()=>document.body.classList.remove("offline"));window.addEventListener("offline",()=>document.body.classList.add("offline"));if(!navigator.onLine)document.body.classList.add("offline");
-fetch("./content/library-index.json").then(r=>{if(!r.ok)throw Error("Library index not found");return r.json();}).then(d=>{books=d.books||[];booksLoaded=true;renderShelf();syncCategoryButtons();}).catch(()=>{booksLoaded=true;shelfCount.textContent="The local shelf could not be loaded. Try refreshing when online.";empty.classList.remove("hidden");});
+fetch("./content/library-index.json").then(r=>{if(!r.ok)throw Error("Library index not found");return r.json();}).then(d=>{books=d.books||[];booksLoaded=true;renderShelf();renderContinue();syncCategoryButtons();}).catch(()=>{booksLoaded=true;shelfCount.textContent="The local shelf could not be loaded. Try refreshing when online.";empty.classList.remove("hidden");});
 if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("./sw.js").catch(()=>{});}
 renderShelf();syncCategoryButtons();
 })();
