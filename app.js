@@ -70,6 +70,8 @@
   let searchTimer = null;
   let searchToken = 0;
   let searchController = null;
+  let openTextbooksCachePromise = null;
+  let lastReaderSelection = null;
   let dbPromise = null;
   let drawerMode = "appearance";
   let touchStart = null;
@@ -470,9 +472,16 @@
     }));
   }
   async function searchOpenTextbooks(query) {
-    const data = await timeoutFetch("https://open.umn.edu/opentextbooks/textbooks.json");
-    const items = Array.isArray(data) ? data : data.textbooks || data.results || data.data || data.items || [];
-    if (!Array.isArray(items)) throw new Error("Unexpected Open Textbook Library response.");
+    if (!openTextbooksCachePromise) {
+      openTextbooksCachePromise = timeoutFetch("https://open.umn.edu/opentextbooks/textbooks.json")
+        .then((data) => {
+          const items = Array.isArray(data) ? data : data.textbooks || data.results || data.data || data.items || [];
+          if (!Array.isArray(items)) throw new Error("Unexpected Open Textbook Library response.");
+          return items;
+        })
+        .catch((error) => { openTextbooksCachePromise = null; throw error; });
+    }
+    const items = await openTextbooksCachePromise;
     const words = normalizeText(query).split(/\s+/).filter(Boolean);
     return items.map((item) => {
       const authorValue = item.authors || item.author || [];
@@ -995,6 +1004,14 @@
   function addBookmark(label) {
     if (!currentBook) return;
     const bookmarks = getBookBookmarks();
+    const samePosition = bookmarks.find((bookmark) => bookmark.chapter === currentChapterIndex &&
+      bookmark.mode === currentMode && (currentMode === "paginated" ? bookmark.page === pageIndex() :
+      Math.abs((bookmark.scrollRatio || 0) - readScrollRatio()) < 0.03));
+    if (samePosition) {
+      putBookBookmarks(bookmarks.filter((bookmark) => bookmark.id !== samePosition.id));
+      toast("Bookmark removed from this page.");
+      return;
+    }
     const position = {
       id: "bookmark:" + Date.now(),
       chapter: currentChapterIndex,
@@ -1049,12 +1066,28 @@
     $("note-input").value = "";
     toast("Private note saved.");
   }
+  function rememberReaderSelection() {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount || selection.isCollapsed) return;
+    const range = selection.getRangeAt(0);
+    if (!$("reader-content").contains(range.commonAncestorContainer)) return;
+    lastReaderSelection = { range: range.cloneRange(), text: String(selection).trim(), chapter: currentChapterIndex };
+  }
   function wrapSelection(kind) {
     if (!currentBook) return;
     const selection = window.getSelection();
-    const selectedText = selection ? String(selection).trim() : "";
-    if (!selectedText || !selection.rangeCount) { toast("Select text in the book first."); return; }
-    const range = selection.getRangeAt(0);
+    let range = selection && selection.rangeCount && !selection.isCollapsed ? selection.getRangeAt(0) : null;
+    let selectedText = range ? String(selection).trim() : "";
+    if ((!range || !selectedText) && lastReaderSelection && lastReaderSelection.chapter === currentChapterIndex) {
+      range = lastReaderSelection.range;
+      selectedText = lastReaderSelection.text;
+      try {
+        const restored = window.getSelection();
+        restored.removeAllRanges();
+        restored.addRange(range);
+      } catch (_) {}
+    }
+    if (!range || !selectedText) { toast("Select text in the book first."); return; }
     if (!$("reader-content").contains(range.commonAncestorContainer)) { toast("Select text inside the reader."); return; }
     const wrapper = document.createElement(kind === "highlight" ? "mark" : "span");
     wrapper.className = kind === "highlight" ? "os-highlight" : "os-underline";
@@ -1069,6 +1102,7 @@
     const notes = getBookNotes();
     notes.push({ id: kind + ":" + Date.now() + ":" + Math.random().toString(36).slice(2, 7), kind, text: selectedText.slice(0, 1200), body: "", chapter: currentChapterIndex, page: pageIndex(), createdAt: Date.now() });
     putBookNotes(notes);
+    lastReaderSelection = null;
     toast(kind === "highlight" ? "Selection highlighted and saved." : "Underline saved.");
   }
   function exportNotes() {
@@ -1421,11 +1455,21 @@
       updateReaderProgressUI();
       scheduleProgressSave();
     }, { passive: true });
+    $("reader-main").addEventListener("scroll", () => {
+      if (currentMode === "scroll") {
+        updateReaderProgressUI();
+        scheduleProgressSave();
+      }
+    }, { passive: true });
+    $("reader-content").addEventListener("mouseup", rememberReaderSelection);
+    $("reader-content").addEventListener("keyup", rememberReaderSelection);
     $("reader-content").addEventListener("touchstart", (event) => {
+      rememberReaderSelection();
       if (currentMode !== "paginated" || !event.touches.length) return;
       touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
     }, { passive: true });
     $("reader-content").addEventListener("touchend", (event) => {
+      rememberReaderSelection();
       if (currentMode !== "paginated" || !touchStart || !event.changedTouches.length) return;
       const dx = event.changedTouches[0].clientX - touchStart.x;
       const dy = event.changedTouches[0].clientY - touchStart.y;
@@ -1472,6 +1516,8 @@
       });
       $("external-return-banner").classList.add("hidden");
       if (localStorage.getItem("openshelf.spa.pending-external.v1")) localStorage.removeItem("openshelf.spa.pending-external.v1");
+      pendingExternal = null;
+      lastExternalOpened = null;
     });
     $("dismiss-external").addEventListener("click", () => {
       $("external-return-banner").classList.add("hidden");
@@ -1484,6 +1530,7 @@
       if (action === "home") { showDirectory("library"); setFilter("all"); }
       if (action === "sources") showDirectory("sources");
       if (action === "search") { showDirectory("library"); $("global-search").focus(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      if (action === "import") $("import-file").click();
     }));
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
