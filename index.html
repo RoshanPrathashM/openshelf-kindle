@@ -88,7 +88,7 @@ const shelfCount=document.getElementById("shelfCount"),savedEmpty=document.getEl
 const externalSection=document.getElementById("external-section"),externalGrid=document.getElementById("external-grid");
 const externalTitle=document.getElementById("external-title"),externalCount=document.getElementById("external-count"),externalState=document.getElementById("external-state");
 const savedKey="openshelf-saved-library-v1";
-let books=[],cat="all",view="home",searchTimer=null,searchRequest=0;
+let books=[],booksLoaded=false,cat="all",view="home",searchTimer=null,searchRequest=0;
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function safeUrl(s){try{const u=new URL(s,location.href);return ["http:","https:"].includes(u.protocol)?u.href:"#";}catch{return "#";}}
 function readSaved(){try{const v=JSON.parse(localStorage.getItem(savedKey)||"[]");return Array.isArray(v)?v:[];}catch{return [];}}
@@ -104,7 +104,7 @@ function renderShelf(){
  const query=search.value.trim().toLowerCase();
  if(view==="saved"){list=readSaved();document.getElementById("sectionTitle").textContent="My Library";shelfCount.textContent=list.length+" saved books on this device";}
  else {if(cat!=="all")list=list.filter(b=>b.category===cat);if(query)list=list.filter(b=>(b.title+" "+b.author).toLowerCase().includes(query));document.getElementById("sectionTitle").textContent=cat==="all"?(query?"Matches in your shelf":"Your reading shelf"):({classics:"Classics",tamil:"Tamil books",education:"Education",science:"Science & Technology",history:"History"}[cat]||"Your reading shelf");shelfCount.textContent=list.length+" locally readable book"+(list.length===1?"":"s");}
- grid.innerHTML=list.map(cardHtml).join("");empty.classList.toggle("hidden",list.length>0);savedEmpty.classList.toggle("hidden",!(view==="saved"&&list.length===0));grid.classList.toggle("hidden",view==="saved"&&list.length===0);
+ grid.innerHTML=list.map(cardHtml).join("");empty.classList.toggle("hidden",list.length>0||!booksLoaded);savedEmpty.classList.toggle("hidden",!(view==="saved"&&list.length===0));grid.classList.toggle("hidden",view==="saved"&&list.length===0);
 }
 function normalTitle(s){return String(s||"").toLowerCase().replace(/[^a-z0-9\u0B80-\u0BFF]+/g," ").trim();}
 function renderExternal(results,q,token){
@@ -148,7 +148,7 @@ if(localStorage.getItem("openshelf-dark")==="1")document.body.classList.add("dar
 document.querySelectorAll("[data-mobile]").forEach(b=>b.addEventListener("click",()=>{const action=b.dataset.mobile;if(action==="home"){search.value="";goHome();}else if(action==="saved"){view="saved";renderShelf();syncCategoryButtons();}else if(action==="search"){search.focus();window.scrollTo({top:0,behavior:"smooth"});}else if(action==="dark"){document.getElementById("dark").click();}}));
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();search.focus();}});
 window.addEventListener("online",()=>document.body.classList.remove("offline"));window.addEventListener("offline",()=>document.body.classList.add("offline"));if(!navigator.onLine)document.body.classList.add("offline");
-fetch("./content/library-index.json").then(r=>{if(!r.ok)throw Error("Library index not found");return r.json();}).then(d=>{books=d.books||[];renderShelf();syncCategoryButtons();}).catch(()=>{shelfCount.textContent="The local shelf could not be loaded. Try refreshing when online.";empty.classList.remove("hidden");});
+fetch("./content/library-index.json").then(r=>{if(!r.ok)throw Error("Library index not found");return r.json();}).then(d=>{books=d.books||[];booksLoaded=true;renderShelf();syncCategoryButtons();}).catch(()=>{booksLoaded=true;shelfCount.textContent="The local shelf could not be loaded. Try refreshing when online.";empty.classList.remove("hidden");});
 if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("./sw.js").catch(()=>{});}
 renderShelf();syncCategoryButtons();
 })();
