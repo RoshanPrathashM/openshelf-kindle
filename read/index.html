@@ -45,6 +45,7 @@ body.ink-active #ink-toggle{background:var(--green);color:#fff}
  .topmeta strong{max-width:100px;font-size:.82rem}
 }
 @media(prefers-reduced-motion:reduce){.reading.page-forward,.reading.page-back{animation:none}.reading.page-mode{scroll-behavior:auto}}
+.source-rights-notice{max-width:860px;margin:0 auto 20px;padding:14px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface,rgba(128,128,128,.07));font-size:.92rem;line-height:1.6}.source-rights-notice p{margin:.4rem 0 0}.source-rights-notice a{font-weight:650;text-underline-offset:3px}.wiki-live-content{overflow-wrap:anywhere}.wiki-live-content img{max-width:100%;height:auto}.wiki-live-content table{max-width:100%;display:block;overflow-x:auto;border-collapse:collapse}.wiki-live-content th,.wiki-live-content td{padding:.3rem .5rem;border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -110,13 +111,85 @@ body.ink-active #ink-toggle{background:var(--green);color:#fff}
 (function(){
 "use strict";
 var $=function(id){return document.getElementById(id);};
-var params=new URLSearchParams(location.search),slug=params.get("book")||"the-time-machine";
+var params=new URLSearchParams(location.search),isTamilWikisource=params.get("source")==="tamilwikisource",wikiTitle=(params.get("title")||"").trim(),slug=isTamilWikisource?"tawiki-"+wikiTitle:params.get("book")||"the-time-machine";
 var books={"the-time-machine":{path:"../content/the-time-machine.json",title:"The Time Machine",author:"H. G. Wells",year:"1895",source:"https://github.com/standardebooks/h-g-wells_the-time-machine",license:"CC0 1.0 for Standard Ebooks contributions; underlying literary text is public domain in India, subject to local rights review."},"the-call-of-the-wild":{path:"../content/the-call-of-the-wild.json",title:"The Call of the Wild",author:"Jack London",year:"1903",source:"https://github.com/standardebooks/jack-london_the-call-of-the-wild",license:"Underlying literary text is public domain in India; Standard Ebooks source contributions dedicated via CC0 1.0."},"the-jungle-book":{path:"../content/the-jungle-book.json",title:"The Jungle Book",author:"Rudyard Kipling",year:"1894",source:"https://github.com/standardebooks/rudyard-kipling_the-jungle-book",license:"Underlying literary text is public domain in India; Standard Ebooks source contributions dedicated via CC0 1.0."},"hamlet":{path:"../content/hamlet.json",title:"Hamlet",author:"William Shakespeare",year:"1603",source:"https://github.com/standardebooks/william-shakespeare_hamlet",license:"Public-domain play; source repository contributions are dedicated via CC0 1.0."},"adventures-of-sherlock-holmes":{path:"../content/adventures-of-sherlock-holmes.json",title:"The Adventures of Sherlock Holmes",author:"Arthur Conan Doyle",year:"1892",source:"https://github.com/standardebooks/arthur-conan-doyle_the-adventures-of-sherlock-holmes",license:"The underlying stories are public domain in India; Standard Ebooks source contributions are dedicated via CC0 1.0."},"frankenstein":{paths:["../content/frankenstein-part-01.json","../content/frankenstein-part-02.json"],title:"Frankenstein; or, The Modern Prometheus",author:"Mary Shelley",year:"1818",source:"https://github.com/standardebooks/mary-shelley_frankenstein",license:"Underlying novel is public domain in India; Standard Ebooks source contributions are dedicated via CC0 1.0."},"picture-of-dorian-gray":{paths:["../content/the-picture-of-dorian-gray-part-01.json","../content/the-picture-of-dorian-gray-part-02.json"],title:"The Picture of Dorian Gray",author:"Oscar Wilde",year:"1890",source:"https://github.com/standardebooks/oscar-wilde_the-picture-of-dorian-gray",license:"Underlying literary work is public domain in India; Standard Ebooks source contributions are dedicated via CC0 1.0."},"dracula":{paths:["../content/dracula-part-01.json","../content/dracula-part-02.json"],title:"Dracula",author:"Bram Stoker",year:"1897",source:"https://github.com/standardebooks/bram-stoker_dracula",license:"Underlying literary work is public domain in India; Standard Ebooks source contributions are dedicated via CC0 1.0."},"alice-adventures-in-wonderland":{path:"../content/alice-adventures-in-wonderland.json",title:"Alice’s Adventures in Wonderland",author:"Lewis Carroll",year:"1865",source:"https://github.com/standardebooks/lewis-carroll_alices-adventures-in-wonderland_john-tenniel",license:"Underlying novel is public domain in India; Standard Ebooks source contributions are dedicated via CC0 1.0. Tenniel illustration files are not included."},"the-secret-garden":{paths:["../content/the-secret-garden-part-01.json","../content/the-secret-garden-part-02.json"],title:"The Secret Garden",author:"Frances Hodgson Burnett",year:"1911",source:"https://github.com/standardebooks/frances-hodgson-burnett_the-secret-garden",license:"Underlying novel is public domain in India; Standard Ebooks source contributions are dedicated via CC0 1.0."}};
 var book=books[slug]||null,chapters=[],chapterIndex=0;
+if(isTamilWikisource){book={title:wikiTitle||"Tamil Wikisource text",author:"Tamil Wikisource",year:"",source:"https://ta.wikisource.org/wiki/"+encodeURIComponent(wikiTitle.replace(/ /g,"_")),license:"Check the individual source page for its licence and rights notice."};}
 var settingsKey="openshelf.reader.settings.v1",progressKey="openshelf.reader.progress.v1",notesKey="openshelf.reader.notes.v1";
 function getStore(key,fallback){try{var x=localStorage.getItem(key);return x?JSON.parse(x):fallback;}catch(e){return fallback;}}
 function setStore(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(e){return false;}}
 function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+
+function sanitizeWikiHTML(html,baseURL){
+ var parsed=new DOMParser().parseFromString(html||"","text/html");
+ var root=parsed.querySelector(".mw-parser-output")||parsed.body;
+ root.querySelectorAll(".mw-editsection,.noprint,.ws-noexport,.metadata,.catlinks,.navbox,.mw-jump-link,.reference,.mw-cite-backlink,.printfooter").forEach(function(n){n.remove();});
+ var allowed=new Set(["P","BR","H1","H2","H3","H4","H5","H6","UL","OL","LI","BLOCKQUOTE","PRE","CODE","TABLE","THEAD","TBODY","TFOOT","TR","TH","TD","DL","DT","DD","HR","DIV","SPAN","EM","STRONG","I","B","SUP","SUB","SMALL","ABBR","CITE","A","IMG","FIGURE","FIGCAPTION"]);
+ var blocked=new Set(["SCRIPT","STYLE","IFRAME","OBJECT","EMBED","FORM","INPUT","BUTTON","TEXTAREA","SELECT","LINK","META","SVG","MATH","VIDEO","AUDIO"]);
+ function copy(node){
+  if(node.nodeType===Node.TEXT_NODE)return document.createTextNode(node.nodeValue||"");
+  if(node.nodeType!==Node.ELEMENT_NODE)return null;
+  var tag=node.tagName.toUpperCase();
+  if(blocked.has(tag))return null;
+  var result=allowed.has(tag)?document.createElement(tag.toLowerCase()):document.createDocumentFragment();
+  if(tag==="A"&&allowed.has(tag)){
+   var href=node.getAttribute("href")||"";
+   try{var resolved=new URL(href,baseURL);if(resolved.protocol==="https:"){result.href=resolved.href;result.target="_blank";result.rel="noopener noreferrer";}}catch(e){}
+   var title=node.getAttribute("title");if(title)result.title=title.slice(0,200);
+  }
+  if(tag==="IMG"&&allowed.has(tag)){
+   var src=node.getAttribute("src")||"";
+   try{var imageURL=new URL(src,baseURL);if(imageURL.protocol==="https:"&&(imageURL.hostname==="upload.wikimedia.org"||imageURL.hostname==="ta.wikisource.org")){result.src=imageURL.href;result.loading="lazy";result.alt=(node.getAttribute("alt")||"").slice(0,300);result.style.maxWidth="100%";result.style.height="auto";}else return null;}catch(e){return null;}
+  }
+  if(tag==="TH"||tag==="TD"){var span=node.getAttribute("colspan");if(span&&/^\d{1,2}$/.test(span))result.colSpan=Number(span);}
+  Array.from(node.childNodes).forEach(function(child){var clean=copy(child);if(clean)result.appendChild(clean);});
+  return result;
+ }
+ var fragment=document.createDocumentFragment();
+ Array.from(root.childNodes).forEach(function(child){var clean=copy(child);if(clean)fragment.appendChild(clean);});
+ return fragment;
+}
+function loadTamilWikisource(){
+ var sourceURL=book.source;
+ $("top-title").textContent=book.title;
+ $("top-author").textContent="Tamil Wikisource · live source";
+ $("book-title").textContent=book.title;
+ $("book-byline").textContent="Tamil Wikisource · live reading view";
+ $("book-status").textContent="Loading text from the original source…";
+ $("download-toggle").disabled=true;
+ $("download-toggle").title="Text export is disabled for live source pages until page-level rights are reviewed.";
+ var notice=document.createElement("aside");
+ notice.className="source-rights-notice";
+ notice.innerHTML='<strong>Live source · rights-aware reading</strong><p>This text is requested from Tamil Wikisource and is not stored as a hosted OpenShelf edition. Check the licence and copyright notice on the original page before copying, exporting or reusing text. Rights can vary by work and jurisdiction. <a href="'+escapeHtml(sourceURL)+'" target="_blank" rel="noopener noreferrer">Open original source and rights notice ↗</a></p>';
+ $("bookintro").after(notice);
+ if(!wikiTitle){
+  $("book-status").textContent="No Tamil Wikisource page was specified.";
+  $("reading").innerHTML='<div class="loading"><p>Choose a Tamil Wikisource title from the OpenShelf search results.</p><p><a class="btn" href="../index.html">Back to library</a></p></div>';
+  return;
+ }
+ var apiURL="https://ta.wikisource.org/w/api.php?"+new URLSearchParams({action:"parse",page:wikiTitle,prop:"text|displaytitle",format:"json",formatversion:"2",origin:"*"}).toString();
+ var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},15000);
+ fetch(apiURL,{signal:controller.signal}).then(function(response){
+  if(!response.ok)throw new Error("Tamil Wikisource returned HTTP "+response.status+".");
+  return response.json();
+ }).then(function(data){
+  if(data.error)throw new Error(data.error.info||"This page could not be loaded from Tamil Wikisource.");
+  if(!data.parse||typeof data.parse.text!=="string")throw new Error("The source did not return readable page text.");
+  if(data.parse.title){book.title=data.parse.title;$("book-title").textContent=book.title;$("top-title").textContent=book.title;}
+  var fragment=sanitizeWikiHTML(data.parse.text,sourceURL);
+  var body=document.createElement("div");body.className="wiki-live-content";body.appendChild(fragment);
+  if(!(body.textContent||"").trim())throw new Error("This page has no readable text in the current source response.");
+  chapters=[{title:book.title,html:body.innerHTML}];
+  chapterIndex=0;renderToc();renderChapter();renderNotes();
+  var wordCount=(body.textContent.match(/\S+/g)||[]).length;
+  $("book-status").textContent=wordCount.toLocaleString()+" words · live from Tamil Wikisource · not available offline";
+  $("download-toggle").disabled=true;
+ }).catch(function(error){
+  $("book-status").textContent="Could not load the live source.";
+  $("reading").innerHTML='<div class="loading"><p>'+escapeHtml(error&&error.name==="AbortError"?"Tamil Wikisource took too long to respond.":(error&&error.message||"The live text is unavailable."))+'</p><p><a class="btn" href="'+escapeHtml(sourceURL)+'" target="_blank" rel="noopener noreferrer">Open Tamil Wikisource directly ↗</a></p><p><a href="../index.html">Back to OpenShelf</a></p></div>';
+ }).finally(function(){clearTimeout(timer);});
+}
+
 function toast(message){$("toast").textContent=message;$("toast").classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(function(){$("toast").classList.remove("show");},2400);}
 function togglePop(id){var el=$(id),willOpen=!el.classList.contains("open");document.querySelectorAll(".pop").forEach(function(p){p.classList.remove("open");});el.classList.toggle("open",willOpen);document.querySelectorAll(".topactions .iconbtn").forEach(function(b){b.classList.remove("active");});if(willOpen){var map={"settings-pop":"settings-toggle","notes-pop":"notes-toggle","toc-pop":"toc-toggle","dict-pop":"dict-toggle"};$((map[id]||"")).classList.add("active");}}
 function applySettings(){var st=getStore(settingsKey,{});if($("theme-toggle"))$("theme-toggle").textContent=st.theme==="dark"?"☀":"☾";document.body.classList.remove("theme-paper","theme-sepia","theme-dark","font-book","font-sans");document.body.classList.add("theme-"+(st.theme||"paper"),"font-"+(st.font||"book"));$("reading").style.fontSize=(st.size||21)+"px";$("reading").style.lineHeight=(Number(st.spacing||18.5)/10).toFixed(2);$("font-size").value=st.size||21;$("font-size-label").textContent=(st.size||21)+" px";$("line-height").value=st.spacing||18.5;$("line-height-label").textContent=(Number(st.spacing||18.5)/10).toFixed(2);$("font-family").value=st.font||"book";$("theme").value=st.theme||"paper";}
@@ -183,6 +256,7 @@ window.addEventListener("beforeunload",saveProgress);
 document.addEventListener("keydown",function(e){if(e.key==="Escape")document.querySelectorAll(".pop").forEach(function(p){p.classList.remove("open");});if(e.key==="ArrowRight"&&!/input|textarea|select/i.test(e.target.tagName))turnPage(1);if(e.key==="ArrowLeft"&&!/input|textarea|select/i.test(e.target.tagName))turnPage(-1);});
 applySettings();
 setPageMode(pageMode,true);
+if(isTamilWikisource){loadTamilWikisource();return;}
 if(!book){$("book-title").textContent="This book is not hosted in the local reader yet";$("book-byline").textContent="You can return to the catalogue and choose another locally readable title."; $("book-status").textContent="External-source reading is still available from the book details."; $("reading").innerHTML='<div class="loading"><p>OpenShelf is adding local reading editions in small, rights-checked batches.</p><p><a class="btn" href="../index.html">Back to library</a></p></div>';$("toc-list").innerHTML="";$("toc-list-small").innerHTML="";return;}
 $("top-title").textContent=book.title;$("top-author").textContent=book.author;$("book-title").textContent=book.title;$("book-byline").textContent=book.author+" · "+book.year;$("book-status").textContent="Local reading edition · "+book.license;
 var contentPaths=book.paths||[book.path];Promise.all(contentPaths.map(function(path){return fetch(path).then(function(res){if(!res.ok)throw new Error("Local book content could not be loaded ("+res.status+").");return res.json();});})).then(function(parts){chapters=parts.reduce(function(all,part){return all.concat(part.chapters||[]);},[]);if(!chapters.length)throw new Error("This book has no chapter text.");var progress=progressMap()[slug];chapterIndex=progress?Math.max(0,Math.min(progress.chapter||0,chapters.length-1)):0;renderToc();renderChapter();renderNotes();if(progress)setTimeout(function(){if(pageMode&&progress.page){var el=$("reading"),gap=parseFloat(getComputedStyle(el).columnGap)||0;el.scrollLeft=progress.page*(el.clientWidth+gap);updatePageLabel();}else if(progress.scroll){window.scrollTo(0,progress.scroll);}saveProgress();},120);$("book-status").textContent=chapters.length+" chapters · local full text · saved on this device";}).catch(function(e){$("book-title").textContent="Could not load the reading edition";$("book-status").textContent="Please retry or use the source link";$("reading").innerHTML='<div class="loading">'+escapeHtml(e.message)+'<p><a class="btn" href="'+escapeHtml(book.source||"https://www.gutenberg.org/ebooks/35")+'" target="_blank" rel="noopener noreferrer">Open edition source ↗</a></p><a href="../index.html">Back to OpenShelf</a></div>';});
