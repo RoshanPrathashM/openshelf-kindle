@@ -134,7 +134,7 @@ function sanitizeWikiHTML(html,baseURL){
   var result=allowed.has(tag)?document.createElement(tag.toLowerCase()):document.createDocumentFragment();
   if(tag==="A"&&allowed.has(tag)){
    var href=node.getAttribute("href")||"";
-   try{var resolved=new URL(href,baseURL);if(resolved.protocol==="https:"){result.href=resolved.href;result.target="_blank";result.rel="noopener noreferrer";}}catch(e){}
+   try{if(href.charAt(0)==="#"){result.setAttribute("href",href);}else{var resolved=new URL(href,baseURL);if(resolved.protocol==="https:"){result.href=resolved.href;result.target="_blank";result.rel="noopener noreferrer";}}}catch(e){}
    var title=node.getAttribute("title");if(title)result.title=title.slice(0,200);
   }
   if(tag==="IMG"&&allowed.has(tag)){
@@ -151,6 +151,7 @@ function sanitizeWikiHTML(html,baseURL){
 }
 function loadTamilWikisource(){
  var sourceURL=book.source;
+ document.documentElement.lang="ta";document.title=book.title+" — OpenShelf Reader";
  $("top-title").textContent=book.title;
  $("top-author").textContent="Tamil Wikisource · live source";
  $("book-title").textContent=book.title;
@@ -185,7 +186,7 @@ function loadTamilWikisource(){
   $("book-status").textContent=wordCount.toLocaleString()+" words · live from Tamil Wikisource · not available offline";
   $("download-toggle").disabled=true;
  }).catch(function(error){
-  $("book-status").textContent="Could not load the live source.";
+  $("book-status").textContent="Could not load the live source: "+(error&&error.message?error.message:"unknown error");
   $("reading").innerHTML='<div class="loading"><p>'+escapeHtml(error&&error.name==="AbortError"?"Tamil Wikisource took too long to respond.":(error&&error.message||"The live text is unavailable."))+'</p><p><a class="btn" href="'+escapeHtml(sourceURL)+'" target="_blank" rel="noopener noreferrer">Open Tamil Wikisource directly ↗</a></p><p><a href="../index.html">Back to OpenShelf</a></p></div>';
  }).finally(function(){clearTimeout(timer);});
 }
