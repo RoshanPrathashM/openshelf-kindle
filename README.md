@@ -13,7 +13,7 @@ OpenShelf is a static progressive web app built for phone, tablet and laptop bro
 
 **OpenShelf Unlimited** contains the curated local full-text editions with source and rights notes recorded in this repository. They open in the built-in reader and can be saved to browser storage for offline reading.
 
-**External Free** contains live catalogue records that have not been verified for local redistribution. Those cards open their official/source page in a new tab and explicitly state that OpenShelf's internal reader tools are unavailable for that source edition. Users can save the source record to My Library and manually record a completion percentage plus a page/reading note when they return.
+**External Free** contains live catalogue records that have not been verified for local redistribution. Most cards open their official/source page in a new tab. Tamil Wikisource results are a limited exception: OpenShelf requests the rendered page live from Tamil Wikisource and displays it in a source-attributed reading view; those texts are not added to the repository, cached offline or enabled for text export. Users should check the original page's rights notice before copying or reusing the text. Users can save external records to My Library and manually record reading progress.
 
 A free-to-read source is not automatically a licence to copy or redistribute. Project Gutenberg and other providers may have different territorial copyright status, edition licences or access conditions. The word “Unlimited” describes the curated in-app shelf, not a promise that every book in every country is rights-free.
 
@@ -37,7 +37,7 @@ The local library manifest is at [content/library-index.json](content/library-in
 
 OpenShelf now features 10 additional source-linked classics: *Pride and Prejudice*, *Moby-Dick*, *The Adventures of Tom Sawyer*, *Treasure Island*, *Jane Eyre*, *The Wonderful Wizard of Oz*, *A Christmas Carol*, *The Strange Case of Dr. Jekyll and Mr. Hyde*, *The Scarlet Letter*, and *A Tale of Two Cities*. The **Browse 100 free books** button fetches popular English-language listings through Gutendex/Project Gutenberg and combines up to 80 more unique source links with the 10 local editions and 10 featured external titles.
 
-These 20 featured source-linked titles and the larger popular list are **external**: they open at the source's official eBook page; OpenShelf does not host their full text and does not enable in-app notes or offline copies for them. The locally readable shelf remains the 10 curated full-text books plus files a person imports. Project Gutenberg says its public-domain determination is US-based and that copyright status can differ outside the US; therefore the app labels these as free at source, not as universally public-domain or licensed for redistribution. See [Project Gutenberg's permission guidance](https://www.gutenberg.org/policy/permission.html).
+These 20 featured source-linked titles and the larger popular list are **external**: they open at the source's official eBook page; OpenShelf does not host their full text or enable offline copies for them. Tamil Wikisource search results are handled separately as a live, source-attributed view with text export disabled until rights are checked. The locally readable shelf remains the 10 curated full-text books plus files a person imports. Project Gutenberg says its public-domain determination is US-based and that copyright status can differ outside the US; therefore the app labels these as free at source, not as universally public-domain or licensed for redistribution. See [Project Gutenberg's permission guidance](https://www.gutenberg.org/policy/permission.html).
 
 
 ### 3. Full-text Kindle reader
@@ -62,7 +62,7 @@ After two or more characters, search runs with a 400 ms debounce against:
 - Open Textbook Library
 - Directory of Open Access Books (DOAB)
 
-The app filters the local shelf immediately while showing loading skeletons for external results. “Browse 100 free books” loads a starter catalogue, and “Load More Free Books” advances through Gutendex pages and publicly readable Open Library records. Gutendex records with a listed plain-text format can open in the in-app full-text reader; other entries remain source links. Requests time out; stale searches are cancelled where supported; source failures are shown without hiding successful results. Provider APIs and CORS policies can change, so source discovery and proxy availability are best-effort.
+The app filters the local shelf immediately while showing loading skeletons for external results. “Browse 100 free books” loads a starter catalogue, and “Load More Free Books” advances through Gutendex pages and publicly readable Open Library records. Gutendex records with a listed plain-text format can open in the in-app full-text reader; other entries remain source links, except Tamil Wikisource results, which can be displayed through its live MediaWiki API with a prominent source link and page-level rights reminder. That Tamil view is not cached or exported by OpenShelf. Requests time out; stale searches are cancelled where supported; source failures are shown without hiding successful results. Provider APIs and CORS policies can change, so source discovery and proxy availability are best-effort.
 
 ### 5. Offline and device storage
 
