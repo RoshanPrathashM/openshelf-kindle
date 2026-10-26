@@ -429,19 +429,30 @@ async function waitForCards(page, minimum = 1) {
 
     // Tamil Wikisource should render through the OpenShelf reader without
     // storing or exporting text, and untrusted markup from a source must be stripped.
-    await page.route("https://ta.wikisource.org/**", async route => {
-      const wikiText = '<div class="mw-parser-output"><p>வணக்கம் Tamil reader smoke check.</p><script>window.openshelfInjected = true;</script><p>Second paragraph from the live-source API.</p><p><a href="/wiki/Test_Link">Source link</a></p></div>';
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ parse: { title: "Test Tamil Text", displaytitle: "Test Tamil Text", text: wikiText } })
-      });
+    await page.unroute("https://**/*");
+    await page.unroute("https://ta.wikisource.org/**");
+    await page.route("https://**/*", async route => {
+      if (route.request().url().startsWith("https://ta.wikisource.org/w/api.php")) {
+        const wikiText = '<div class="mw-parser-output"><p>வணக்கம் Tamil reader smoke check.</p><script>window.openshelfInjected = true;</script><p>Second paragraph from the live-source API.</p><p><a href="/wiki/Test_Link">Source link</a></p></div>';
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ parse: { title: "Test Tamil Text", displaytitle: "Test Tamil Text", text: wikiText } })
+        });
+      } else {
+        await route.abort();
+      }
     });
     await page.goto(BASE_URL + "read/?source=tamilwikisource&title=Test%20Tamil%20Text", { waitUntil: "domcontentloaded" });
     await page.waitForFunction(
-      () => document.getElementById("book-status").innerText.includes("live from Tamil Wikisource"),
+      () => {
+        const status = document.getElementById("book-status").innerText;
+        return status.includes("live from Tamil Wikisource") || status.includes("Could not load the live source");
+      },
       null, { timeout: 15000 }
     );
+    const tamilStatus = await page.locator("#book-status").innerText();
+    assert.match(tamilStatus, /live from Tamil Wikisource/, "Tamil live reader should load successfully: " + tamilStatus);
     const tamilReaderContent = await page.locator("#reading").innerText();
     assert(tamilReaderContent.includes("வணக்கம் Tamil reader smoke check."));
     assert(tamilReaderContent.includes("Second paragraph from the live-source API."));
