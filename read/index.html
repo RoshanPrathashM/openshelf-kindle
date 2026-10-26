@@ -162,7 +162,7 @@ function loadTamilWikisource(){
  var notice=document.createElement("aside");
  notice.className="source-rights-notice";
  notice.innerHTML='<strong>Live source · rights-aware reading</strong><p>This text is requested from Tamil Wikisource and is not stored as a hosted OpenShelf edition. Check the licence and copyright notice on the original page before copying, exporting or reusing text. Rights can vary by work and jurisdiction. <a href="'+escapeHtml(sourceURL)+'" target="_blank" rel="noopener noreferrer">Open original source and rights notice ↗</a></p>';
- $("bookintro").after(notice);
+ document.querySelector(".bookintro").after(notice);
  if(!wikiTitle){
   $("book-status").textContent="No Tamil Wikisource page was specified.";
   $("reading").innerHTML='<div class="loading"><p>Choose a Tamil Wikisource title from the OpenShelf search results.</p><p><a class="btn" href="../index.html">Back to library</a></p></div>';
