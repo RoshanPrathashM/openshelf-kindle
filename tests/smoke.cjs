@@ -426,6 +426,30 @@ async function waitForCards(page, minimum = 1) {
     await page.waitForFunction(() => document.getElementById("toast").innerText.includes("Quote copied"), null, { timeout: 5000 });
     pass("selection toolbar supports dictionary definitions, selected-text notes, colored highlights and quote copying");
     await page.locator("#exit-reader").click();
+
+    // Tamil Wikisource should render through the OpenShelf reader without
+    // storing or exporting text, and untrusted markup from a source must be stripped.
+    await page.route("https://ta.wikisource.org/**", async route => {
+      const wikiText = '<div class="mw-parser-output"><p>வணக்கம் Tamil reader smoke check.</p><script>window.openshelfInjected = true;</script><p>Second paragraph from the live-source API.</p><p><a href="/wiki/Test_Link">Source link</a></p></div>';
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ parse: { title: "Test Tamil Text", displaytitle: "Test Tamil Text", text: wikiText } })
+      });
+    });
+    await page.goto(BASE_URL + "read/?source=tamilwikisource&title=Test%20Tamil%20Text", { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(
+      () => document.getElementById("book-status").innerText.includes("live from Tamil Wikisource"),
+      null, { timeout: 15000 }
+    );
+    const tamilReaderContent = await page.locator("#reading").innerText();
+    assert(tamilReaderContent.includes("வணக்கம் Tamil reader smoke check."));
+    assert(tamilReaderContent.includes("Second paragraph from the live-source API."));
+    assert.equal(await page.locator("#download-toggle").isDisabled(), true, "live-source text export must remain disabled until rights review");
+    assert.equal(await page.locator(".source-rights-notice a").getAttribute("href"), "https://ta.wikisource.org/wiki/Test_Tamil_Text");
+    assert.equal(await page.evaluate(() => Boolean(window.openshelfInjected)), false, "untrusted source HTML must not execute");
+    pass("Tamil Wikisource renders inside the OpenShelf reader with attribution, no text export and sanitized markup");
+
     await desktop.close();
 
     // Verify the actual narrow-screen layout and the mobile bottom navigation.
