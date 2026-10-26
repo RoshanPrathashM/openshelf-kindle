@@ -427,23 +427,44 @@ async function waitForCards(page, minimum = 1) {
     pass("selection toolbar supports dictionary definitions, selected-text notes, colored highlights and quote copying");
     await page.locator("#exit-reader").click();
 
-    // Tamil Wikisource should render through the OpenShelf reader without
-    // storing or exporting text, and untrusted markup from a source must be stripped.
+    // Tamil Wikisource results should route into OpenShelf's reader, with source
+    // attribution, disabled export and no execution of markup returned by the source.
     await page.unroute("https://**/*");
     await page.unroute("https://ta.wikisource.org/**");
     await page.route("https://**/*", async route => {
-      if (route.request().url().startsWith("https://ta.wikisource.org/w/api.php")) {
-        const wikiText = '<div class="mw-parser-output"><p>வணக்கம் Tamil reader smoke check.</p><script>window.openshelfInjected = true;</script><p>Second paragraph from the live-source API.</p><p><a href="/wiki/Test_Link">Source link</a></p></div>';
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ parse: { title: "Test Tamil Text", displaytitle: "Test Tamil Text", text: wikiText } })
-        });
+      const requestedURL = new URL(route.request().url());
+      if (requestedURL.hostname === "ta.wikisource.org" && requestedURL.pathname === "/w/api.php") {
+        if (requestedURL.searchParams.get("action") === "query") {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ query: { pages: {
+              "99": { pageid: 99, title: "Test Tamil Text", fullurl: "https://ta.wikisource.org/wiki/Test_Tamil_Text" }
+            } } })
+          });
+        } else {
+          const wikiText = '<div class="mw-parser-output"><p>வணக்கம் Tamil reader smoke check.</p><script>window.openshelfInjected = true;</script><p>Second paragraph from the live-source API.</p><p><a href="/wiki/Test_Link">Source link</a></p></div>';
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ parse: { title: "Test Tamil Text", displaytitle: "Test Tamil Text", text: wikiText } })
+          });
+        }
       } else {
         await route.abort();
       }
     });
-    await page.goto(BASE_URL + "read/?source=tamilwikisource&title=Test%20Tamil%20Text", { waitUntil: "domcontentloaded" });
+    await page.locator("#global-search").fill("Tamil");
+    await page.waitForFunction(
+      () => Boolean(document.querySelector('#book-grid .book-card[data-book-id="external:tawikisource:99"]')),
+      null, { timeout: 15000 }
+    );
+    const tamilCard = page.locator('#book-grid .book-card[data-book-id="external:tawikisource:99"]');
+    const tamilOpenLink = tamilCard.locator(".book-cover-button");
+    assert.equal(await tamilOpenLink.getAttribute("target"), null, "Tamil Wikisource should remain inside OpenShelf, not open a new tab");
+    assert.equal(await tamilOpenLink.getAttribute("href"), "./read/?source=tamilwikisource&title=Test%20Tamil%20Text");
+    await tamilCard.locator(".book-actions .button").click();
+    await page.waitForURL(url => url.pathname.endsWith("/read/") && url.searchParams.get("source") === "tamilwikisource", { timeout: 10000 });
     await page.waitForFunction(
       () => {
         const status = document.getElementById("book-status").innerText;
@@ -459,7 +480,7 @@ async function waitForCards(page, minimum = 1) {
     assert.equal(await page.locator("#download-toggle").isDisabled(), true, "live-source text export must remain disabled until rights review");
     assert.equal(await page.locator(".source-rights-notice a").getAttribute("href"), "https://ta.wikisource.org/wiki/Test_Tamil_Text");
     assert.equal(await page.evaluate(() => Boolean(window.openshelfInjected)), false, "untrusted source HTML must not execute");
-    pass("Tamil Wikisource renders inside the OpenShelf reader with attribution, no text export and sanitized markup");
+    pass("Tamil Wikisource search routes into the in-app live reader with source attribution, no export and sanitized markup");
 
     await desktop.close();
 
