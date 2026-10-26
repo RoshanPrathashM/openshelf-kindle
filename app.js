@@ -596,11 +596,16 @@
     const isOffline = offlineIds.has(book.id);
     const external = book.tier === "external";
     const externalLink = safeHTTPURL(book.url || book.sourceUrl || "");
+    const internalTamil = external && book.sourceName === "Tamil Wikisource";
+    const internalTamilURL = internalTamil ? ROOT + "read/?source=tamilwikisource&title=" + encodeURIComponent(book.title) : "";
     const badge = external ? "↗ EXTERNAL FREE" : isImport ? "YOUR IMPORT" : "∞ UNLIMITED";
     let openControl;
     if (external) {
-      openControl = externalLink
-        ? '<a class="book-cover-button" href="' + escapeHTML(externalLink) + '" target="_blank" rel="noopener noreferrer" data-external-id="' + escapeHTML(book.id) + '" aria-label="Open ' + escapeHTML(book.title) + ' at ' + escapeHTML(book.sourceName || "the source") + '">' + coverMarkup(book) + '<span class="tier-badge external">' + badge + '</span></a>'
+      const linkURL = internalTamil ? internalTamilURL : externalLink;
+      const linkAttributes = internalTamil ? "" : ' target="_blank" rel="noopener noreferrer" data-external-id="' + escapeHTML(book.id) + '"';
+      const linkLabel = internalTamil ? "Read " + book.title + " inside OpenShelf" : "Open " + book.title + " at " + (book.sourceName || "the source");
+      openControl = linkURL
+        ? '<a class="book-cover-button" href="' + escapeHTML(linkURL) + '"' + linkAttributes + ' aria-label="' + escapeHTML(linkLabel) + '">' + coverMarkup(book) + '<span class="tier-badge external">' + badge + '</span></a>'
         : '<button class="book-cover-button" type="button" disabled aria-label="Source link unavailable">' + coverMarkup(book) + '<span class="tier-badge external">' + badge + '</span></button>';
     } else {
       openControl = '<button class="book-cover-button" type="button" data-open-book="' + escapeHTML(book.id) + '" aria-label="Read ' + escapeHTML(book.title) + '">' + coverMarkup(book) + '<span class="tier-badge">' + badge + '</span></button>';
@@ -608,10 +613,14 @@
     const genreText = (book.genres || []).map((genre) => genreLabels[genre] || genre).join(" · ");
     const externalProgress = external ? getExternalProgressMap()[book.id] : null;
     const externalLabel = external
-      ? '<p class="book-open-label">Opens on ' + escapeHTML(book.sourceName || "source website") + ' ↗ · Internal Kindle features unavailable' + (externalProgress ? ' · ' + Math.round(externalProgress.percent || 0) + '% logged' : '') + '</p>'
+      ? (internalTamil
+        ? '<p class="book-open-label">Read in OpenShelf · live Tamil text · check the original page for rights</p>'
+        : '<p class="book-open-label">Opens on ' + escapeHTML(book.sourceName || "source website") + ' ↗ · Internal Kindle features unavailable' + (externalProgress ? ' · ' + Math.round(externalProgress.percent || 0) + '% logged' : '') + '</p>')
       : '<p class="book-open-label">' + (isImport ? "Private file · stored on this device" : "Read in the OpenShelf Kindle Reader") + '</p>';
     const readButton = external
-      ? (externalLink ? '<a class="button" href="' + escapeHTML(externalLink) + '" target="_blank" rel="noopener noreferrer" data-external-id="' + escapeHTML(book.id) + '">Open source ↗</a>' : '<button class="button" disabled>Source unavailable</button>')
+      ? (internalTamil
+        ? '<a class="button primary" href="' + escapeHTML(internalTamilURL) + '">Read here →</a>'
+        : (externalLink ? '<a class="button" href="' + escapeHTML(externalLink) + '" target="_blank" rel="noopener noreferrer" data-external-id="' + escapeHTML(book.id) + '">Open source ↗</a>' : '<button class="button" disabled>Source unavailable</button>'))
       : '<button class="button primary" type="button" data-open-book="' + escapeHTML(book.id) + '">' + (isImport ? "Open import" : "Read here") + '</button>';
     const offlineButton = (isUnlimited || isImport)
       ? '<button class="button" type="button" data-offline-book="' + escapeHTML(book.id) + '">' + (isOffline ? "✓ Saved offline" : "⬇ Save offline") + '</button>'
